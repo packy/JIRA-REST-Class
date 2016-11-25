@@ -1,41 +1,57 @@
 package JIRA::REST::Class::Sprint;
-use base qw( Class::Accessor );
+use base qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
 use v5.10;
 
-sub new {
-    my $class = shift;
-    my $jira  = shift;
-    my $data  = shift;
-    my $self  = { jira => $jira };
+our $VERSION = '0.01';
 
+# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the sprint of a JIRA issue as an object.
+
+__PACKAGE__->mk_ro_accessors(qw/ id rapidViewId state name startDate endDate
+                                 completeDate sequence /);
+
+sub init {
+    my $self = shift;
+    $self->SUPER::init(@_);
+
+    my $data = $self->data;
     $data =~ s{com\.atlassian\.greenhopper\.service\.sprint\.Sprint[^\[]+\[}{};
     $data =~ s{\]$}{};
     my @fields = split /,/, $data;
     foreach my $field (@fields) {
         my ($k, $v) = split /=/, $field;
+        if ($v && $v eq '<null>') {
+            undef $v;
+        }
         $self->{$k} = $v;
     }
-    $class->mk_ro_accessors(keys %$self);
-    return $class->SUPER::new($self);
 }
 
-sub sprintlist {
-    my $invocant = shift;
+1;
 
-    my $class  = ref( $invocant ) ? __PACKAGE__ : $invocant;
-    my $jira   = ref( $invocant ) ? $invocant   : shift;
-    my $fields = shift;
+=accessor B<id>
 
-    my $sprint_field = $jira->field_name('Sprint');
+=accessor B<rapidViewId>
 
-    my @sprints;
-    foreach my $sprint ( @{ $fields->{$sprint_field} } ) {
-        push @sprints, $class->new($jira, $sprint);
-    }
-    return @sprints;
-}
+=accessor B<state>
+
+=accessor B<name>
+
+=accessor B<startDate>
+
+=accessor B<endDate>
+
+=accessor B<completeDate>
+
+=accessor B<sequence>
+
+=cut
+
+__END__
+
+# These methods don't work, probably because JIRA doesn't have a well-defined
+# interface for adding/removing issues from a sprint.
 
 sub greenhopper_api_url {
     my $self = shift;
@@ -70,5 +86,3 @@ sub remove_issues {
     $self->jira->_content;
     $self->jira->{rest}->setHost($host);
 }
-
-1;

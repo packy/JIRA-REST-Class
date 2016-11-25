@@ -1,15 +1,11 @@
 package JIRA::REST::Class;
-use base qw( JIRA::REST );
 use strict;
 use warnings;
 use v5.10;
 
 our $VERSION = '0.01';
 
-=head1 NAME
-
-JIRA::REST::Class - An OO Class module built atop JIRA::REST for dealing with
-                    JIRA issues and their data as objects.
+# ABSTRACT: An OO Class module built atop C<JIRA::REST> for dealing with JIRA issues and their data as objects.
 
 =head1 SYNOPSIS
 
@@ -48,78 +44,81 @@ JIRA::REST::Class - An OO Class module built atop JIRA::REST for dealing with
       print "No open issues in MYPROJECT.\n";
   }
 
-
 =head1 DESCRIPTION
 
-An OO Class module built atop JIRA::REST for dealing with JIRA issues and their
+An OO Class module built atop C<JIRA::REST> for dealing with JIRA issues and their
 data as objects.
 
 This code is a work in progress, so it's bound to be incomplete.  I add methods
-to it as I discover I need them.
+to it as I discover I need them.  I also code for fields that might exist in my JIRA server's configuration but not in yours.  It is my intent to make things more generic as I go on so they will "just work" no matter how your server is configured.
 
-=head1 CONSTRUCTOR
+=constructor new(URL, USERNAME, PASSWORD [, REST_CLIENT_CONFIG])
 
-=head2 new(URL, USERNAME, PASSWORD [, REST_CLIENT_CONFIG])
-
-The constructor is entirely inherited from JIRA::REST,
-and accepts up to four arguments:
+The constructor C<new()> mimics the constructor for C<JIRA::REST>, and accepts up to four arguments (this documentation is lifted directly from  C<JIRA::REST>'s documentation):
 
 =over
 
 =item * URL
 
-A string or a URI object denoting the base URL of the JIRA
-server. This is a required argument.
+A string or a URI object denoting the base URL of the JIRA server. This is a required argument.
 
-You may choose a specific API version by appending the
-C</rest/api/VERSION> string to the URL's path. It's more common to
-left it unspecified, in which case the C</rest/api/latest> string is
-appended automatically to the URL.
+You may choose a specific API version by appending the C</rest/api/VERSION> string to the URL's path. It's more common to left it unspecified, in which case the C</rest/api/latest> string is appended automatically to the URL.
 
 =item * USERNAME
 
 The username of a JIRA user.
 
-It can be undefined if PASSWORD is also undefined. In such a case the
-user credentials are looked up in the C<.netrc> file.
+It can be undefined if PASSWORD is also undefined. In such a case the user credentials are looked up in the C<.netrc> file.
 
 =item * PASSWORD
 
-The HTTP password of the user. (This is the password the user uses to
-log in to JIRA's web interface.)
+The HTTP password of the user. (This is the password the user uses to log in to JIRA's web interface.)
 
-It can be undefined, in which case the user credentials are looked up
-in the C<.netrc> file.
+It can be undefined, in which case the user credentials are looked up in the C<.netrc> file.
 
 =item * REST_CLIENT_CONFIG
 
-A JIRA::REST object uses a REST::Client object to make the REST
-invocations. This optional argument must be a hash-ref that can be fed
-to the REST::Client constructor. Note that the C<URL> argument
-overwrites any value associated with the C<host> key in this hash.
+A C<JIRA::REST> object uses a C<REST::Client> object to make the REST invocations. This optional argument must be a hash-ref that can be fed to the C<REST::Client> constructor. Note that the C<URL> argument overwrites any value associated with the C<host> key in this hash.
 
-To use a network proxy please set the 'proxy' argument to the string or URI
-object describing the fully qualified (including port) URL to your network
-proxy. This is an extension to the REST::Client configuration and will be
-removed from the hash before passing it on to the REST::Client constructor.
+To use a network proxy please set the 'proxy' argument to the string or URI object describing the fully qualified (including port) URL to your network proxy. This is an extension to the C<REST::Client> configuration and will be removed from the hash before passing it on to the C<REST::Client> constructor.
 
 =back
 
 =cut
 
-use JIRA::REST::Class::Iterator;
-use JIRA::REST::Class::Query;
+use Scalar::Util qw( weaken blessed );
 
-=head1 METHODS
+use JIRA::REST;
+use JIRA::REST::Class::Factory;
 
-=head2 B<issues> QUERY
+sub new {
+    my $class = shift;
+    my @args  = @_;
+    my ($url, $username, $password, $rest_client_config) = @args;
 
-=head2 B<issues> KEY [, KEY...]
+    my $self = bless {
+        jira_rest => JIRA::REST->new(@args),
+        factory   => JIRA::REST::Class::Factory->new('factory'),
+        url       => $url,
+        username  => $username,
+        password  => $password,
+        rest_client_config => $rest_client_config
+    }, $class;
 
-The C<issues> method can be called two ways: either by providing a list of
-issue keys, or by proving a single hash reference which describes a JIRA query
-in the same format used by C<JIRA::REST> (essentially, jql => "JQL query
-string").
+    # so every other object can get to it easily,
+    # let's put a reference to ourself in the factory
+    $self->{factory}->{jira} = $self;
+    weaken $self->{factory}->{jira};
+
+    return $self;
+}
+
+
+=method B<issues> QUERY
+
+=method B<issues> KEY [, KEY...]
+
+The C<issues> method can be called two ways: either by providing a list of issue keys, or by proving a single hash reference which describes a JIRA query in the same format used by C<JIRA::REST> (essentially, jql => "JQL query string").
 
 The return value is an array of C<JIRA::REST::Class::Issue> objects.
 
@@ -137,11 +136,9 @@ sub issues {
     }
 }
 
-=head2 B<query> QUERY
+=method B<query> QUERY
 
-The C<query> method takes a single parameter: a hash reference which describes a
-JIRA query in the same format used by C<JIRA::REST> (essentially, jql => "JQL
-query string").
+The C<query> method takes a single parameter: a hash reference which describes a JIRA query in the same format used by C<JIRA::REST> (essentially, jql => "JQL query string").
 
 The return value is a single C<JIRA::REST::Class::Query> object.
 
@@ -151,27 +148,25 @@ sub query {
     my $self = shift;
     my $args = shift;
 
-    my $query = $self->POST('/search', undef, $args);
-    return JIRA::REST::Class::Query->new($self, $query);
+    my $query = $self->JIRA_REST->POST('/search', undef, $args);
+    return $self->factory->make_object('query', { data => $query });
 }
 
-=head2 B<query> QUERY
+=method B<iterator> QUERY
 
-The C<query> method takes a single parameter: a hash reference which describes a
-JIRA query in the same format used by C<JIRA::REST> (essentially, jql => "JQL
-query string").
+The C<query> method takes a single parameter: a hash reference which describes a JIRA query in the same format used by C<JIRA::REST> (essentially, jql => "JQL query string").  It accepts an additional field, however: restart_if_lt_total.  If this field is set to a true value, the iterator will keep track of the number of results fetched and, if when the results run out this number doesn't match the number of results predicted by the query, it will restart the query.  This is particularly useful if you are transforming a number of issues through an iterator, and the transformation causes the issues to no longer match the query.
 
-The return value is a single C<JIRA::REST::Class::Query> object.
+The return value is a single C<JIRA::REST::Class::Iterator> object.  The issues returned by the query can be obtained in serial by repeatedly calling B<next> on this object, which returns a series of C<JIRA::REST::Class::Issue> objects.
 
 =cut
 
 sub iterator {
     my $self = shift;
     my $args = shift;
-    return JIRA::REST::Class::Iterator->new($self, $args);
+    return $self->factory->make_object('iterator', { iterator_args => $args });
 }
 
-=head2 B<get> URL [, QUERY]
+=method B<get> URL [, QUERY]
 
 A wrapper for C<JIRA::REST>'s GET method.
 
@@ -180,114 +175,130 @@ A wrapper for C<JIRA::REST>'s GET method.
 sub get {
     my $self = shift;
     my $url  = shift;
-    my $args = shift;
-    return $self->GET($url, undef, $args);
+    return $self->JIRA_REST->GET($url, undef, @_);
 }
 
-=head2 B<maxResults>
+=internal_method B<post>
+
+Wrapper around C<JIRA::REST>'s POST method.
+
+=cut
+
+sub post {
+    my $self = shift;
+    my $url  = shift;
+    $self->JIRA_REST->POST($url, undef, @_);
+}
+
+=internal_method B<put>
+
+Wrapper around C<JIRA::REST>'s PUT method.
+
+=cut
+
+sub put {
+    my $self = shift;
+    my $url  = shift;
+    $self->JIRA_REST->PUT($url, undef, @_);
+}
+
+=internal_method B<delete>
+
+Wrapper around C<JIRA::REST>'s DELETE method.
+
+=cut
+
+sub delete {
+    my $self = shift;
+    my $url  = shift;
+    $self->JIRA_REST->DELETE($url, @_);
+}
+
+=method B<maxResults>
 
 An accessor that allows setting a global default for maxResults. Defaults to 50.
 
 =cut
 
 sub maxResults {
-    return shift->_accessor('CLASS_maxResults', sub { 50 }, @_);
+    my $self = shift;
+    if (@_) {
+        $self->{maxResults} = shift;
+    }
+    unless (exists $self->{maxResults} && defined $self->{maxResults}) {
+        $self->{maxResults} = 50;
+    }
+    return $self->{maxResults};
 }
 
-=head2 B<project>
+=method B<issue_types>
 
-An accessor that sets the project you want to fetch metadata (allowed
-components, versions, fix versions, issue types) for.
-
-=cut
-
-sub project {
-    return shift->_accessor('CLASS_project', sub {
-                                die "You must define a project!\n"
-                            }, @_);
-}
-
-=head2 B<issue_types>
-
-Returns a list of defined issue types for this server.
+Returns a list of defined issue types (as C<JIRA::REST::Class::Issue::Type> objects) for this server.
 
 =cut
 
 sub issue_types {
     my $self = shift;
-    unless (defined $self->{CLASS_issue_types}) {
+    unless ($self->{issue_types}) {
         my $types = $self->get('/issuetype');
-        $self->{CLASS_issue_types} = [ map { $_->{name} } @$types ];
+        $self->{issue_types} = [ map {
+            $self->factory->make_object('issuetype', { data => $_ });
+        } @$types ];
     }
-    return @{ $self->{CLASS_issue_types} };
+
+    return @{ $self->{issue_types} } if wantarray;
+    return $self->{issue_types};
 }
 
-=head2 B<metadata>
+=method B<projects>
 
-Returns the metadata associated with the first issue in the project indicated by
-the C<project> accessor.
+Returns a list of projects (as C<JIRA::REST::Class::Project> objects) for this server.
 
 =cut
 
-sub metadata {
+sub projects {
     my $self = shift;
-    unless (defined $self->{CLASS_metadata}) {
-        my $results = $self->POST('/search', undef, {
-            jql => "project = ".$self->project,
-            maxResults => 1,
-        });
-        my $key = $results->{issues}->[0]->{key};
-        $self->{CLASS_metadata} = $self->get("/issue/$key/editmeta");
+
+    unless ($self->{project_list}) {
+        # get the project list from JIRA
+        my $projects = $self->get('/project');
+
+        # build a list, and make a hash so we can
+        # grab projects later by id, key, or name.
+
+        my $list = $self->{project_list} = [];
+        $self->{project_hash} = { map {
+            my $p = $self->factory->make_object('project', { data => $_ });
+            push @$list, $p;
+            $p->id => $p, $p->key => $p, $p->name => $p
+        } @$projects };
     }
-    return $self->{CLASS_metadata};
+
+    return @{ $self->{project_list} };
 }
 
-=head2 B<allowed_components>
+=method B<project> PROJECT_ID || PROJECT_KEY || PROJECT_NAME
 
-Returns a list of the allowed values for the 'components' field in the project
-indicated by the C<project> accessor.
-
-=cut
-
-sub allowed_components   { shift->allowed_field_values('components');  }
-
-=head2 B<allowed_versions>
-
-Returns a list of the allowed values for the 'versions' field in the project
-indicated by the C<project> accessor.
+Returns a C<JIRA::REST::Class::Project> object for the project specified. Returns undef if the project doesn't exist.
 
 =cut
 
-sub allowed_versions     { shift->allowed_field_values('versions'); }
+sub project {
+    my $self = shift;
+    my $proj = shift || return; # if nothing was passed, we return nothing
 
-=head2 B<allowed_fix_versions>
+    # if we were passed a project object, just return it
+    return $proj
+        if blessed $proj
+        && $proj->isa($self->factory->get_factory_class('project'));
 
-Returns a list of the allowed values for the 'fixVersions' field in the project
-indicated by the C<project> accessor.
+    $self->projects; # load the project hash if it hasn't been loaded
 
-=cut
+    return unless exists $self->{project_hash}->{$proj};
+    return $self->{project_hash}->{$proj};
+}
 
-sub allowed_fix_versions { shift->allowed_field_values('fixVersions'); }
-
-=head2 B<allowed_issue_types>
-
-Returns a list of the allowed values for the 'issuetype' field in the project
-indicated by the C<project> accessor.
-
-=cut
-
-sub allowed_issue_types  { shift->allowed_field_values('issuetype');   }
-
-=head2 B<allowed_priorities>
-
-Returns a list of the allowed values for the 'priority' field in the project
-indicated by the C<project> accessor.
-
-=cut
-
-sub allowed_priorities   { shift->allowed_field_values('priority');    }
-
-=head2 B<SSL_verify_none>
+=method B<SSL_verify_none>
 
 Disables the SSL options SSL_verify_mode and verify_hostname on the user agent
 used by this class' C<REST::Client> object.
@@ -296,85 +307,11 @@ used by this class' C<REST::Client> object.
 
 sub SSL_verify_none {
     my $self = shift;
-    $self->rest->getUseragent()->ssl_opts( SSL_verify_mode => 0,
-                                           verify_hostname => 0 );
+    $self->REST_CLIENT->getUseragent()->ssl_opts( SSL_verify_mode => 0,
+                                                  verify_hostname => 0 );
 }
 
-=head1 INTERNAL METHODS
-
-=head2 B<allowed_field_values> FIELD_NAME
-
-Returns a list of allowable values for the specified field.
-
-=cut
-
-sub allowed_field_values {
-    my $self = shift;
-    my $name = shift;
-
-    my @list =
-      map { $_->{name} } @{ $self->field_metadata($name)->{allowedValues} };
-
-    return @list;
-}
-
-=head2 B<field_metadata_exists> FIELD_NAME
-
-Boolean indicating whether there is metadata for a given field.
-
-=cut
-
-sub field_metadata_exists {
-    my $self = shift;
-    my $name = shift;
-    my $fields = $self->metadata->{fields};
-    return 1 if exists $fields->{$name};
-    my $name2 = $self->field_name($name);
-    return (exists $fields->{$name2} ? 1 : 0);
-}
-
-
-=head2 B<field_metadata> FIELD_NAME
-
-Looks for metadata under either a field's key or name.
-
-=cut
-
-sub field_metadata {
-    my $self = shift;
-    my $name = shift;
-    my $fields = $self->metadata->{fields};
-    if (exists $fields->{$name}) {
-        return $fields->{$name};
-    }
-    my $name2 = $self->field_name($name);
-    if (exists $fields->{$name2}) {
-        return $fields->{$name2};
-    }
-    return;
-}
-
-=head2 B<field_name> FIELD_KEY
-
-Looks up field names in the project metadata.
-
-=cut
-
-sub field_name {
-    my $self = shift;
-    my $name = shift;
-
-    unless (defined $self->{CLASS_field_names}) {
-        my $data = $self->metadata->{fields};
-
-        $self->{CLASS_field_names} =
-          { map { $data->{$_}->{name} => $_ } keys %$data };
-    }
-
-    return $self->{CLASS_field_names}->{$name};
-}
-
-=head2 B<rest_api_url_base>
+=internal_method B<rest_api_url_base>
 
 Returns the base URL for this JIRA server's REST API.
 
@@ -382,39 +319,79 @@ Returns the base URL for this JIRA server's REST API.
 
 sub rest_api_url_base {
     my $self = shift;
-    my $url  = $self->field_metadata('assignee')->{autoCompleteUrl};
-    my ($base) = $url =~ m{^(.+?rest/api/[^/]+)/};
+    my ($type) = $self->issue_types;  # grab the first issue type
+    (my $base = $type->self) =~ m{^(.+?rest/api/[^/]+)/};
     return $base;
 }
 
-=head2 B<rest>
+=internal_method B<strip_protocol_and_host>
 
-An accessor that returns the C<REST::Client> object being used.
-
-=cut
-
-sub rest { shift->{rest} }
-
-=head2 B<_accessor> FIELD, SUB_RETURNING_DEFAULT_VALUE [, VALUE_TO_SET]
-
-A utility method for creating a setter/accessor that has a default value.
+A method to take the provided URL and strip the protocol and host from it.
 
 =cut
 
-sub _accessor {
-    my $self    = shift;
-    my $field   = shift;
-    my $default = shift;
-    unless (defined $self->{$field}) {
-        if (@_) {
-            $self->{$field} = shift;
-        }
-        else {
-            $self->{$field} = $default->();
-        }
-    }
-    return $self->{$field};
+sub strip_protocol_and_host {
+    my $self = shift;
+    my $host = $self->REST_CLIENT->getHost;
+    (my $url = shift) =~ s{^$host}{};
+    return $url;
 }
+
+=internal_method B<url>
+
+An accessor for the URL passed to the C<JIRA::REST> object.
+
+=cut
+
+sub url { shift->{url} }
+
+=internal_method B<username>
+
+An accessor for the username passed to the C<JIRA::REST> object.
+
+=cut
+
+sub username { shift->{username} }
+
+=internal_method B<password>
+
+An accessor for the password passed to the C<JIRA::REST> object.
+
+=cut
+
+sub password { shift->{password} }
+
+=internal_method B<rest_client_config>
+
+An accessor for the REST client config passed to the C<JIRA::REST> object.
+
+=cut
+
+sub rest_client_config { shift->{rest_client_config} }
+
+=internal_method B<factory>
+
+An accessor for the C<JIRA::REST::Class::Factory>.
+
+=cut
+
+sub factory { shift->{factory} }
+
+=internal_method B<JIRA_REST>
+
+An accessor that returns the C<JIRA::REST> object being used.
+
+=cut
+
+sub JIRA_REST { shift->{jira_rest} }
+
+=internal_method B<REST_CLIENT>
+
+An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
+
+=cut
+
+sub REST_CLIENT { shift->JIRA_REST->{rest} }
 
 1;
 
@@ -424,12 +401,11 @@ sub _accessor {
 
 =item * C<JIRA::REST>
 
-JIRA::REST::Class is a subclass of JIRA::REST, and uses it to perform
-all this module's mid-level interaction with JIRA.
+C<JIRA::REST::Class> uses C<JIRA::REST> to perform all its interaction with JIRA.
 
 =item * C<REST::Client>
 
-JIRA::REST uses a REST::Client object to perform the low-level interactions.
+C<JIRA::REST> uses a C<REST::Client> object to perform its low-level interactions.
 
 =item * L<JIRA REST API Reference|https://docs.atlassian.com/jira/REST/latest/>
 
@@ -440,13 +416,3 @@ Atlassian's official JIRA REST API Reference.
 =head1 REPOSITORY
 
 L<https://github.com/packy/JIRA-REST-Class>
-
-=head1 AUTHOR
-
-Packy Anderson, E<lt>packy@cpan.orgE<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2016 by Packy Anderson
-
-This is free software; you can redistribute it and/or modify it under the same terms as the Perl 5 programming language system itself.
