@@ -60,7 +60,7 @@ Returns the C<JIRA::REST::Class> object that created this object.
 
 =cut
 
-__PACKAGE__->mk_deep_ro_accessor(qw( factory jira ));
+sub jira { shift->factory->jira }
 
 =internal_method B<JIRA_REST>
 
