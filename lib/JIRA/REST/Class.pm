@@ -274,7 +274,8 @@ sub projects {
         } @$projects };
     }
 
-    return @{ $self->{project_list} };
+    return @{ $self->{project_list} } if wantarray;
+    return $self->{project_list};
 }
 
 =method B<project> PROJECT_ID || PROJECT_KEY || PROJECT_NAME
