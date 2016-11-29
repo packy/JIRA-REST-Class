@@ -84,21 +84,9 @@ sub set_remainingEstimate {
     $self->update( { remainingEstimate => $est } );
 }
 
-=method B<set_timeSpent>
-
-Sets the time spent to the amount of time given.  Accepts any time format that JIRA uses.
-
-=cut
-
-sub set_timeSpent {
-    my $self = shift;
-    my $est  = shift;
-    $self->update( { timeSpent => $est } );
-}
-
 =method B<update>
 
-Accepts a hashref of timetracking fields to update. The acceptable fields are determined by JIRA, but I think they're originalEstimate, remainingEstimate, and timeSpent.
+Accepts a hashref of timetracking fields to update. The acceptable fields are determined by JIRA, but I think they're originalEstimate and remainingEstimate.
 
 =cut
 
@@ -106,7 +94,7 @@ sub update {
     my $self   = shift;
     my $update = shift;
 
-    foreach my $key (qw/ originalEstimate remainingEstimate timeSpent /) {
+    foreach my $key (qw/ originalEstimate remainingEstimate /) {
         # if we're updating the key, don't change it
         next if exists $update->{$key};
 
