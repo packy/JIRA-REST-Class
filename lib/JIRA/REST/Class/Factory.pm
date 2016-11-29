@@ -18,8 +18,8 @@ JIRA::REST::Class::Factory->add_factory_type(
     status       => 'JIRA::REST::Class::Issue::Status',
     statuscat    => 'JIRA::REST::Class::Issue::Status::Category',
     timetracking => 'JIRA::REST::Class::Issue::TimeTracking',
-    transistions => 'JIRA::REST::Class::Issue::Transitions',
-    transistion  => 'JIRA::REST::Class::Issue::Transitions::Transition',
+    transitions  => 'JIRA::REST::Class::Issue::Transitions',
+    transition   => 'JIRA::REST::Class::Issue::Transitions::Transition',
     issuetype    => 'JIRA::REST::Class::Issue::Type',
     worklog      => 'JIRA::REST::Class::Issue::Worklog',
     workitem     => 'JIRA::REST::Class::Issue::Worklog::Item',
@@ -33,6 +33,7 @@ JIRA::REST::Class::Factory->add_factory_type(
     user         => 'JIRA::REST::Class::User',
 );
 
+use Carp;
 use DateTime::Format::Strptime;
 
 =internal_method B<jira>
@@ -68,6 +69,20 @@ sub make_date {
     return unless $date;
     state $parser = DateTime::Format::Strptime->new( pattern => '%FT%T.%N%Z' );
     return $parser->parse_datetime($date);
+}
+
+=internal_method B<factory_error>
+
+Throws errors from the factory with stack traces
+
+=cut
+
+sub factory_error {
+    my $class = shift;
+    my $err   = shift;
+    # start the stacktrace where we called make_object()
+    local $Carp::CarpLevel = $Carp::CarpLevel+2;
+    confess "$err\n", @_;
 }
 
 1;
