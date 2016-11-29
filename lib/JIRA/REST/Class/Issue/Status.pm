@@ -9,6 +9,7 @@ our $VERSION = '0.01';
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the status of a JIRA issue as an object.
 
 __PACKAGE__->mk_ro_accessors(qw/ category /);
+__PACKAGE__->mk_data_ro_accessors(qw/ description iconUrl id name self /);
 __PACKAGE__->mk_contextual_ro_accessors(qw/ transitions /);
 
 sub init {
