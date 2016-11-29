@@ -8,6 +8,7 @@ our $VERSION = '0.01';
 
 # ABSTRACT: An abstract class for C<JIRA::REST::Class> that most of the other objects are based on.
 
+use Carp;
 use Scalar::Util qw( weaken blessed );
 
 __PACKAGE__->mk_ro_accessors(qw( data factory issue lazy_loaded ));
@@ -23,9 +24,16 @@ Method to perform post-instantiation initialization of the object. The first arg
 sub init {
     my $self    = shift;
     my $factory = shift;
-    if ($factory) {
+
+    # if the first thing we're passed is supposed to be the factory object
+    if (blessed $factory && blessed $factory eq 'JIRA::REST::Class::Factory') {
         $self->{factory} = $factory;
         weaken $self->{factory};
+    }
+    else {
+        # if we're not passed a factory, let's complain about it
+        local $Carp::CarpLevel = $Carp::CarpLevel+1;
+        confess "factory not passed to init!";
     }
 
     $self->unload_lazy;

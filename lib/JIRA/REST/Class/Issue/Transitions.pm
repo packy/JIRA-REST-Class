@@ -158,7 +158,7 @@ sub transition_walk {
 
         # refresh the data for this issue
         $self->issue->reload;
-        $self->init;
+        $self->init($self->factory);
         $name = $self->issue->status->name;
     }
 

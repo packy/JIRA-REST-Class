@@ -156,7 +156,7 @@ sub make_object {
         weaken $obj->{issue}; # make the link to ourselves weak
     }
 
-    $obj->init($self);    # NOW we call init
+    $obj->init($self->factory);    # NOW we call init
 
     return $obj;
 }
@@ -350,7 +350,7 @@ Reload the issue from the JIRA server.
 sub reload {
     my $self = shift;
     $self->{data} = $self->get;
-    $self->init;
+    $self->init($self->factory);
 }
 
 ###########################################################################
@@ -430,7 +430,7 @@ Returns a list of issue objects that are children of the issue. Requires the Scr
 sub children {
     my $self = shift;
     my $key  = $self->key;
-    my $children = $self->{jira}->query({
+    my $children = $self->jira->query({
         jql => qq{issueFunction in subtasksOf("key = $key")}
     });
 
