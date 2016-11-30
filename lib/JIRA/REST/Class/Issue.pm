@@ -283,7 +283,7 @@ sub add_subtask {
 
     my $data = {
         fields => {
-            project     => { key => $self->project->{key} },
+            project     => { key => $self->project->key },
             parent      => { key => $self->key },
             summary     => $summary,
             description => $desc,
@@ -297,8 +297,8 @@ sub add_subtask {
         }
     }
 
-    my $result  = $self->jira->post('issue', $data);
-    my $url = 'issue/' . $result->{id};
+    my $result  = $self->jira->post('/issue', $data);
+    my $url = '/issue/' . $result->{id};
 
     return $self->factory->make_object('issue', {
         data => $self->jira->get($url)
