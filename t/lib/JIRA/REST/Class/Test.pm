@@ -21,7 +21,6 @@ my $tmpdir  = '/tmp';
 my $pidfile = 'jira_rest_class_test.pid';
 my $pidpath;
 my $log;
-my $run;
 my $pid;
 
 sub process_commandline {
@@ -47,26 +46,6 @@ sub process_commandline {
     }
 }
 
-sub check_prereqs {
-    server_log();
-
-    state $already_checked;
-
-    unless ( $already_checked++ ) {
-        $log->info('checking test server prerequisites');
-        $run = 1;
-        try {
-            die "HTTP::Server::Simple misbehaves on Windows" if $^O =~ /MSWin/;
-            require HTTP::Server::Simple;
-        }
-        catch {
-            my $error = $_;  # Try::Tiny puts the error in $_
-            diag("Won't run tests because: $error");
-            $run = 0;
-        };
-    }
-}
-
 sub get_pid {
     $pidpath = catfile $tmpdir, $pidfile
         unless defined $pidpath;
@@ -78,7 +57,7 @@ sub get_pid {
 }
 
 sub setup_server {
-    check_prereqs();
+    process_commandline();
     get_pid();
 
     # if the server is already running, return
@@ -90,12 +69,11 @@ sub setup_server {
     try {
         # start the server
         server_log()->info('starting server and sending to background');
-        JIRA::REST::Class::TestServer->new($port)->background(sub {
-            my $server_pid = shift;
-            write_file($pidpath, "$server_pid\n");
-            $log->info('started server on PID '.$server_pid);
-        });
+        $pid = JIRA::REST::Class::TestServer->new($port)->background();
+        write_file($pidpath, "$pid\n") if $pid;
     };
+    if ((! defined $pid) || $$ == $pid) { exit }
+    $log->info("[$$] started server on PID ".$pid);
 }
 
 sub server_log {
@@ -106,6 +84,7 @@ sub server_log {
 }
 
 sub server_pid {
+    get_pid();
     return $pid;
 }
 
@@ -115,6 +94,7 @@ sub server_is_running {
 }
 
 sub stop_server {
+    get_pid();
     server_log()->info('stopping server on PID '.$pid);
     kill 15, $pid;  # tell the server to stop
 
@@ -129,10 +109,6 @@ sub stop_server {
 
 sub server_url {
     return "http://localhost:$port";
-}
-
-sub run_tests {
-    return $run;
 }
 
 sub chomper {

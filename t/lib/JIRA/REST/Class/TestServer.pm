@@ -35,28 +35,6 @@ sub print_banner {
                       $self->port );
 }
 
-sub background {
-    my $self  = shift;
-    my $call  = shift;
-    my $child = fork;
-    croak "Can't fork: $!" unless defined($child);
-    return if $child;
-
-    exit if fork; # double-forking to avoid zombies
-
-    srand(); # after a fork, we need to reset the random seed
-             # or we'll get the same numbers in both branches
-    if ( $^O !~ /MSWin32/ ) {
-        require POSIX;
-        POSIX::setsid()
-              or croak "Can't start a new session: $!";
-    }
-    $call->($$) if defined $call;
-
-    $self->run(@_); # should never return
-    exit;           # just to be sure
-}
-
 sub valid_http_method {
     my $self = shift;
     my $method = shift or return 0;
