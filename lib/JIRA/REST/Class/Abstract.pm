@@ -9,7 +9,7 @@ our $VERSION = '0.01';
 # ABSTRACT: An abstract class for C<JIRA::REST::Class> that most of the other objects are based on.
 
 use Carp;
-use Scalar::Util qw( weaken blessed );
+use Scalar::Util qw( weaken blessed reftype );
 
 __PACKAGE__->mk_ro_accessors(qw( data factory issue lazy_loaded ));
 
