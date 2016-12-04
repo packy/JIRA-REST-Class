@@ -14,7 +14,12 @@ use Try::Tiny;
 
 use JIRA::REST::Class::TestServer;
 
-our @EXPORT = qw( chomper ref_is_array ref_is_sub ref_is_class report );
+our @EXPORT = qw( chomper can_ok_abstract dump_got_expected get_class );
+
+###########################################################################
+#
+# support for starting the test server
+#
 
 my $port    = 7657;
 my $tmpdir  = '/tmp';
@@ -59,6 +64,7 @@ sub get_pid {
 sub setup_server {
     process_commandline();
     get_pid();
+    server_log();
 
     # if the server is already running, return
     if ( server_is_running() ) {
@@ -68,7 +74,7 @@ sub setup_server {
 
     try {
         # start the server
-        server_log()->info('starting server and sending to background');
+        $log->info('starting server and sending to background');
         $pid = JIRA::REST::Class::TestServer->new($port)->background();
         write_file($pidpath, "$pid\n") if $pid;
     };
@@ -111,31 +117,68 @@ sub server_url {
     return "http://localhost:$port";
 }
 
+###########################################################################
+#
+# functions to make the testing easier
+#
+
 sub chomper {
     my $thing = Dumper( @_ );
     chomp $thing;
     return $thing;
 }
 
-sub ref_is_array { ref_is(shift, 'ARRAY') }
-sub ref_is_sub   { ref_is(shift, 'CODE') }
-
-sub ref_is { return ref $_[0] && ref $_[0] eq $_[1] }
-
-sub ref_is_class {
-    my $thing = shift;
-    my $class = shift;
-    return blessed $thing && blessed $thing eq $class;
+sub dump_got_expected {
+    my $out = '# got = ' . Dumper( $_[0] );
+    $out .= 'expected = ' . Dumper( $_[1] );
+    $out =~ s/\n/\n# /gsx;
+    print $out;
 }
 
-sub report {
-    my %args = @_;
-    if ($args{expr}) {
-        ok(1, ref_is_sub( $args{ok} ) ? $args{ok}->() : $args{ok} );
-    }
-    else {
-        ok(0, ref_is_sub( $args{nok} ) ? $args{nok}->() : $args{nok} );
-    }
+sub can_ok_abstract {
+    my $thing = shift;
+    can_ok( $thing, @_, qw/ data factory issue lazy_loaded init unload_lazy
+                            jira JIRA_REST REST_CLIENT make_object make_date
+                            class_for obj_isa name_for_user key_for_issue
+                            find_link_name_and_direction populate_scalar_data
+                            populate_date_data populate_list_data
+                            populate_scalar_field populate_list_field
+                            mk_contextual_ro_accessors mk_deep_ro_accessor
+                            mk_lazy_ro_accessor mk_data_ro_accessors
+                            mk_field_ro_accessors make_subroutine
+                            dump shallow_dump / );
+
+}
+
+my %types = (
+    class        => 'JIRA::REST::Class',
+    factory      => 'JIRA::REST::Class::Factory',
+    issue        => 'JIRA::REST::Class::Issue',
+    changelog    => 'JIRA::REST::Class::Issue::Changelog',
+    change       => 'JIRA::REST::Class::Issue::Changelog::Change',
+    changeitem   => 'JIRA::REST::Class::Issue::Changelog::Change::Item',
+    linktype     => 'JIRA::REST::Class::Issue::LinkType',
+    status       => 'JIRA::REST::Class::Issue::Status',
+    statuscat    => 'JIRA::REST::Class::Issue::Status::Category',
+    timetracking => 'JIRA::REST::Class::Issue::TimeTracking',
+    transitions  => 'JIRA::REST::Class::Issue::Transitions',
+    transition   => 'JIRA::REST::Class::Issue::Transitions::Transition',
+    issuetype    => 'JIRA::REST::Class::Issue::Type',
+    worklog      => 'JIRA::REST::Class::Issue::Worklog',
+    workitem     => 'JIRA::REST::Class::Issue::Worklog::Item',
+    project      => 'JIRA::REST::Class::Project',
+    projectcat   => 'JIRA::REST::Class::Project::Category',
+    projectcomp  => 'JIRA::REST::Class::Project::Component',
+    projectvers  => 'JIRA::REST::Class::Project::Version',
+    iterator     => 'JIRA::REST::Class::Iterator',
+    sprint       => 'JIRA::REST::Class::Sprint',
+    query        => 'JIRA::REST::Class::Query',
+    user         => 'JIRA::REST::Class::User',
+);
+
+sub get_class {
+    my $type = shift;
+    return $types{$type};
 }
 
 1;

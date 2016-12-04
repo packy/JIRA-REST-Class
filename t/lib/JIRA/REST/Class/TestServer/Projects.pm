@@ -16,6 +16,8 @@ sub import {
             sub { $class->project_response(@_) },
         '/rest/api/latest/project/SCRUM' =>
             sub { $class->project_SCRUM_response(@_) },
+        '/rest/api/latest/project/10002' =>
+            sub { $class->project_SCRUM_response(@_) },
     );
 }
 

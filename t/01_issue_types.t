@@ -20,70 +20,43 @@ try {
     my $pass   = 'password';
     my $client = JIRA::REST::Class->new($host, $user, $pass);
 
+    #
     # comparison data
-    my @types = sort qw/ Bug Epic Improvement Sub-task Story Task /,
+    #
+    my @data = sort qw/ Bug Epic Improvement Sub-task Story Task /,
         'New Feature';
 
-    my $type_count = scalar @types;
+    my $class = 'JIRA::REST::Class::Issue::Type';
+    my $method = 'JIRA::REST::Class->issue_types';
 
-    my $type_class = 'JIRA::REST::Class::Issue::Type';
+    #
+    # run some tests
+    #
+    my $scalar = $client->issue_types;
 
-    # make the calls and get results
-    my $scalar_types = $client->issue_types;
+    is( ref $scalar, 'ARRAY',
+        "$method in scalar context returns arrayref" );
 
-    my $scalar_types_is_arrayref = ref_is_array($scalar_types);
+    cmp_ok( @$scalar, '==', @data,
+            "$method arrayref has correct number of items" );
 
-    my $scalar_types_has_correct_count =
-        $scalar_types_is_arrayref && @$scalar_types == $type_count;
+    my @list = $client->issue_types;
 
-    my @list_types = $client->issue_types;
+    cmp_ok( @list, '==', @data, "$method returns a list of ".
+            "correct size in list context");
 
-    my $list_types_is_array = @list_types > 1;
-
-    my $list_types_has_correct_count = @list_types == $type_count;
-
-    my $all_blessed = all { ref_is_class($_, $type_class) } @list_types;
-
-    my @list_type_names = sort map {
-        ref_is_class($_, $type_class) ? $_->name : $_
-    } @list_types;
-
-    # report the results
-    report(
-        expr => $scalar_types_is_arrayref,
-        ok   => "issue_types returns arrayref in scalar context",
-        nok  => "issue_types returns $scalar_types in scalar context",
-    );
-
-    report(
-        expr => $scalar_types_has_correct_count,
-        ok   => "issue_types arrayref has $type_count items",
-        nok  => "in scalar context, issue_types returns:"
-             .  chomper($scalar_types),
-    );
-
-    report(
-        expr => $list_types_is_array,
-        ok   => "issue_types returns a list of correct size "
-             .  "in list context",
-        nok  => "in list context, issue_types returns: "
-             .  chomper(\@list_types),
-    );
-
-    report(
-        expr => $all_blessed,
-        ok => "all issues blessed into ".$type_class,
-        nok => sub {
-            my @bad = grep {
-                blessed $_ && blessed $_ eq $type_class
-            } @list_types;
-
-            "some issues not blessed as $type_class: " . chomper(\@bad)
+    subtest "Checking object types returned by $method", sub {
+        foreach my $type ( sort @list ) {
+            isa_ok( $type, $class, "$type" );
         }
-    );
+    };
 
-    is_deeply( \@list_type_names, \@types,
-               "issue_types returns the expected issue types");
+    my $list = [ map { "$_" } sort @list ];
+    is_deeply( $list, \@data,
+               "$method returns the expected issue types")
+        or dump_got_expected($list, \@data);
+
+    can_ok_abstract( $list[0], qw/ description iconUrl id name self subtask / );
 
 }
 catch {
