@@ -8,11 +8,26 @@ our $VERSION = '0.01';
 
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a JIRA project as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name self ));
+__PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name projectTypeKey self ));
 
 _make_lazy_ro_accessors(qw/ category assigneeType components description
                             issueTypes lead roles versions /);
 
+use overload
+    '""'   => sub { shift->key },
+    '0+'   => sub { shift->id  },
+    '<=>'  => sub {
+        my($A, $B) = @_;
+        my $AA = ref $A ? $A->id : $A;
+        my $BB = ref $B ? $B->id : $B;
+        $AA <=> $BB
+    },
+    'cmp'  => sub {
+        my($A, $B) = @_;
+        my $AA = ref $A ? $A->name : $A;
+        my $BB = ref $B ? $B->name : $B;
+        $AA cmp $BB
+    };
 
 sub _make_lazy_ro_accessors {
     foreach my $field (@_) {
@@ -51,10 +66,7 @@ sub _do_lazy_load {
         $self->{version_hash}->{$v->id} = $self->{version_hash}->{$v->name} = $v;
         $v;
     } @{ $data->{versions} } ];
-
 }
-
-1;
 
 =method B<assigneeType>
 This method returns the assignee type of the project.
