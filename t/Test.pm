@@ -1,1 +1,0 @@
-lib/JIRA/REST/Class/Test.pm
