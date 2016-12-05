@@ -9,8 +9,9 @@ use lib dirname($0).'/../lib'; # the module itself is under here
 use JIRA::REST::Class;
 use JIRA::REST::Class::Test;
 use List::Util qw( all );
-use Test::More;
 use Try::Tiny;
+
+use Test::More tests => 16;
 
 JIRA::REST::Class::Test->setup_server();
 
