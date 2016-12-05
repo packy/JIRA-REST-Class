@@ -33,9 +33,9 @@ sub _make_lazy_ro_accessors {
     foreach my $field (@_) {
         __PACKAGE__->mk_lazy_ro_accessor($field, sub {
             my $self = shift;
-            $self->_do_lazy_load;
+            $self->_do_lazy_load(@_);
             $self->{$field};
-        });
+        }, @_);
     }
 }
 
@@ -66,6 +66,10 @@ sub _do_lazy_load {
         $self->{version_hash}->{$v->id} = $self->{version_hash}->{$v->name} = $v;
         $v;
     } @{ $data->{versions} } ];
+
+    foreach my $field ( @_ ) {
+        $self->{lazy_loaded}->{$field} = 1;
+    }
 }
 
 =method B<assigneeType>
