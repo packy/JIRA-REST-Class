@@ -20,44 +20,28 @@ try {
     my $pass   = 'password';
     my $client = JIRA::REST::Class->new($host, $user, $pass);
 
-    #
-    # comparison data
-    #
-    my @data = sort qw/ Bug Epic Improvement Sub-task Story Task /,
-        'New Feature';
+    validate_contextual_accessor($client, {
+        method => 'issue_types',
+        class  => 'issuetype',
+        data   => [ sort qw/ Bug Epic Improvement Sub-task Story Task /,
+                    'New Feature' ],
+    });
 
-    my $class = 'JIRA::REST::Class::Issue::Type';
-    my $method = 'JIRA::REST::Class->issue_types';
+    print "#\n# Checking the 'Bug' issue type\n#\n";
 
-    #
-    # run some tests
-    #
-    my $scalar = $client->issue_types;
+    my ($bug) = sort $client->issue_types;
 
-    is( ref $scalar, 'ARRAY',
-        "$method in scalar context returns arrayref" );
+    can_ok_abstract( $bug, qw/ description iconUrl id name self subtask / );
 
-    cmp_ok( @$scalar, '==', @data,
-            "$method arrayref has correct number of items" );
-
-    my @list = $client->issue_types;
-
-    cmp_ok( @list, '==', @data, "$method returns a list of ".
-            "correct size in list context");
-
-    subtest "Checking object types returned by $method", sub {
-        foreach my $type ( sort @list ) {
-            isa_ok( $type, $class, "$type" );
-        }
-    };
-
-    my $list = [ map { "$_" } sort @list ];
-    is_deeply( $list, \@data,
-               "$method returns the expected issue types")
-        or dump_got_expected($list, \@data);
-
-    can_ok_abstract( $list[0], qw/ description iconUrl id name self subtask / );
-
+    validate_expected_fields( $bug, {
+        description => "jira.translation.issuetype.bug.name.desc",
+        iconUrl => "$host/secure/viewavatar?size=xsmall&avatarId=10303"
+                .  "&avatarType=issuetype",
+        id => 10004,
+        name => "Bug",
+        self => "$host/rest/api/latest/issuetype/10004",
+        subtask => JSON::PP::false,
+    });
 }
 catch {
     my $error = $_;  # Try::Tiny puts the error in $_

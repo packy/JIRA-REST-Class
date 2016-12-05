@@ -14,7 +14,8 @@ use Try::Tiny;
 
 use JIRA::REST::Class::TestServer;
 
-our @EXPORT = qw( chomper can_ok_abstract dump_got_expected get_class );
+our @EXPORT = qw( chomper can_ok_abstract dump_got_expected get_class
+                  validate_contextual_accessor validate_expected_fields  );
 
 ###########################################################################
 #
@@ -178,7 +179,89 @@ my %types = (
 
 sub get_class {
     my $type = shift;
-    return $types{$type};
+    return exists $types{$type} ? $types{$type} : $type;
+}
+
+sub validate_contextual_accessor {
+    my $obj        = shift;
+    my $args       = shift;
+    my $methodname = $args->{method};
+    my $class      = get_class($args->{class});
+    my $objectname = $args->{name} || ref $obj;
+    my $method     = join '->', ref($obj), $methodname;
+    my @data       = @{ $args->{data} };
+
+    print "#\n# Checking the $objectname->$methodname accessor\n#\n";
+
+    my $scalar = $obj->$methodname;
+
+    is( ref $scalar, 'ARRAY',
+        "$method in scalar context returns arrayref" );
+
+    cmp_ok( @$scalar, '==', @data,
+            "$method arrayref has correct number of items" );
+
+    my @list = $obj->$methodname;
+
+    cmp_ok( @list, '==', @data, "$method returns correct size list ".
+                                "in list context");
+
+    subtest "Checking object types returned by $method", sub {
+        foreach my $item ( sort @list ) {
+            isa_ok( $item, $class, "$item" );
+        }
+    };
+
+    my $list = [ map { "$_" } sort @list ];
+    is_deeply( $list, \@data,
+               "$method returns the expected $methodname")
+        or dump_got_expected($list, \@data);
+}
+
+sub validate_expected_fields {
+    my $obj    = shift;
+    my $expect = shift;
+    my $isa    = ref $obj || q{};
+    if ($obj->isa('JIRA::REST::Class::Abstract')) {
+        # common accessors for ALL JIRA::REST::Class::Abstract objects
+        $expect->{factory}     = { class => 'factory' };
+        $expect->{jira}        = { class => 'class' };
+        $expect->{JIRA_REST}   = { class => 'JIRA::REST' };
+        $expect->{REST_CLIENT} = { class => 'REST::Client' };
+    }
+
+    foreach my $field ( sort keys %$expect ) {
+        my $value  = $expect->{$field};
+
+        if (! ref $value) {
+            # expected a scalar
+            my $quoted = ($value =~ /^\d+$/) ? $value : qq{'$value'};
+            is( $obj->$field, $value, "'$isa->$field' returns $quoted");
+        }
+        elsif (ref $value && ref($value) =~ /^JSON::PP::/) {
+            # expecting a boolean
+            my $quoted = $value ? 'true' : 'false';
+            is( $obj->$field, $value, "'$isa->$field' returns $quoted");
+        }
+        else {
+            # expecting an object
+            my $class = get_class($value->{class});
+            my $obj2  = $obj->$field;
+
+            isa_ok( $obj2, $class,  $isa.'->'.$field);
+
+            my $expect2 = $value->{expected};
+            next unless $expect2 && ref $expect2 eq 'HASH';
+
+            # check simple accessors on the object
+            foreach my $field2 ( sort keys %$expect2 ) {
+                my $value2 = $expect2->{$field2};
+                my $quoted = ($value2 =~ /^\d+$/) ? $value2 : qq{'$value2'};
+                is( $obj->$field->$field2, $value2,
+                    "'$isa->$field->$field2' method returns $quoted");
+            }
+        }
+    }
 }
 
 1;

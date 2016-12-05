@@ -18,6 +18,14 @@ sub import {
             sub { $class->project_SCRUM_response(@_) },
         '/rest/api/latest/project/10002' =>
             sub { $class->project_SCRUM_response(@_) },
+        '/rest/api/latest/projectCategory' =>
+            sub { $class->project_category_response(@_) },
+        '/rest/api/latest/projectCategory/10000' =>
+            sub { $class->project_category_response(@_, 10000) },
+        '/rest/api/latest/projectCategory/10001' =>
+            sub { $class->project_category_response(@_, 10001) },
+        '/rest/api/latest/projectCategory/10002' =>
+            sub { $class->project_category_response(@_, 10002) },
     );
 }
 
@@ -29,6 +37,16 @@ sub project_response {
 sub project_SCRUM_response {
     my ( $class, $server, $cgi ) = @_;
     return $class->response($server, $class->project_SCRUM_data($server, $cgi));
+}
+
+sub project_category_response {
+    my ( $class, $server, $cgi ) = @_;
+    return $class->response($server, $class->categories($server, $cgi));
+}
+
+sub project_categoryN_response {
+    my ( $class, $server, $cgi, $id ) = @_;
+    return $class->response($server, $class->category($server, $cgi, $id));
 }
 
 sub category {
@@ -122,16 +140,16 @@ sub categories {
           self => "$url/rest/api/latest/projectCategory/10000"
         },
         {
-          description => "These are projects for PacKay Productions",
-          id => 10001,
-          name => "Puppet",
-          self => "$url/rest/api/latest/projectCategory/10001"
-        },
-        {
           description => "These are Packy's Perl projects",
           id => 10002,
           name => "Perl",
           self => "$url/rest/api/latest/projectCategory/10002"
+        },
+        {
+          description => "These are projects for PacKay Productions",
+          id => 10001,
+          name => "Puppet",
+          self => "$url/rest/api/latest/projectCategory/10001"
         },
     ];
 }
