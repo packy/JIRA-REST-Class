@@ -187,9 +187,11 @@ Code to make instantiating objects from $self->data easier.
 sub populate_scalar_data {
     my ($self, $name, $type, $field) = @_;
 
-    $self->{$name} = $self->make_object($type, {
-        data => $self->data->{$field}
-    });
+    if (defined $self->data->{$field}) {
+        $self->{$name} = $self->make_object($type, {
+            data => $self->data->{$field}
+        });
+    }
 }
 
 =internal_method B<populate_date_data>
@@ -200,7 +202,9 @@ Code to make instantiating DateTime objects from $self->data easier.
 
 sub populate_date_data {
     my ($self, $name, $field) = @_;
-    $self->{$name} = $self->make_date( $self->data->{$field} );
+    if (defined $self->data->{$field}) {
+        $self->{$name} = $self->make_date( $self->data->{$field} );
+    }
 }
 
 =internal_method B<populate_list_data>
@@ -211,11 +215,16 @@ Code to make instantiating lists of objects from $self->data easier.
 
 sub populate_list_data {
     my ($self, $name, $type, $field) = @_;
-    $self->{$name} = [
-        map {
-            $self->make_object($type, { data => $_ })
-        } @{ $self->data->{$field} }
-    ];
+    if (defined $self->data->{$field}) {
+        $self->{$name} = [
+            map {
+                $self->make_object($type, { data => $_ })
+            } @{ $self->data->{$field} }
+        ];
+    }
+    else {
+        $self->{$name} = []; # rather than undefined, return an empty list
+    }
 }
 
 =internal_method B<populate_scalar_field>
@@ -226,9 +235,11 @@ Code to make instantiating objects from fields easier.
 
 sub populate_scalar_field {
     my ($self, $name, $type, $field) = @_;
-    $self->{$name} = $self->make_object($type, {
-        data => $self->fields->{$field}
-    });
+    if (defined $self->fields->{$field}) {
+        $self->{$name} = $self->make_object($type, {
+            data => $self->fields->{$field}
+        });
+    }
 }
 
 =internal_method B<populate_list_field>
@@ -239,11 +250,16 @@ Code to make instantiating lists of objects from fields easier.
 
 sub populate_list_field {
     my ($self, $name, $type, $field) = @_;
-    $self->{$name} = [
-        map {
-            $self->make_object($type, { data => $_ })
-        } @{ $self->fields->{$field} }
-    ];
+    if (defined $self->fields->{$field}) {
+        $self->{$name} = [
+            map {
+                $self->make_object($type, { data => $_ })
+            } @{ $self->fields->{$field} }
+        ];
+    }
+    else {
+        $self->{$name} = []; # rather than undefined, return an empty list
+    }
 }
 
 ###########################################################################
@@ -443,6 +459,9 @@ sub __shallow_copy {
         elsif ($class eq 'REST::Client') {
             return '%s->host(%s)', $class, $thing->getHost;
         }
+        elsif ($class eq 'DateTime') {
+            return "DateTime(  $thing  )";
+        }
         elsif ($top) {
             if (reftype $thing eq 'ARRAY') {
                 return [ map { __shallow_copy($_) } @{$thing} ], $class;
@@ -457,8 +476,9 @@ sub __shallow_copy {
         else {
             foreach my $method (qw/ name key id /) {
                 if ( $thing->can($method) ) {
+                    my $value = $thing->$method // 'undef';
                     return sprintf '%s->%s(%s)',
-                        $class, $method, $thing->$method;
+                        $class, $method, $value;
                 }
             }
             return "$thing";
