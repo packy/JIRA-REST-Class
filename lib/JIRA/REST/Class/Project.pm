@@ -73,42 +73,55 @@ sub _do_lazy_load {
 }
 
 =method B<assigneeType>
+
 This method returns the assignee type of the project.
 
 =method B<avatarUrls>
+
 A hashref of the different sizes available for the project's avatar.
 
 =method B<components>
+
 A list of the components for the project.
 
 =method B<description>
+
 Returns the description of the project.
 
 =method B<expand>
+
 Heck if I know what this field does.
 
 =method B<id>
+
 Returns the id of the project.
 
 =method B<issueTypes>
+
 A list of valid issue types for the project.
 
 =method B<key>
+
 Returns the key of the project.
 
 =method B<lead>
+
 Returns the project lead as a C<JIRA::REST::Class::User> object.
 
 =method B<name>
+
 Returns the name of the project.
 
 =method B<category>
+
 Returns a hashref of the category of the project.
 
 =method B<self>
+
 Returns the JIRA REST API URL of the project.
 
 =method B<versions>
+
 Returns a list of the versions of the project.
 
 =method B<metadata>

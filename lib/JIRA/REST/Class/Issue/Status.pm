@@ -24,19 +24,25 @@ sub init {
 1;
 
 =method B<description>
+
 Returns the description of the status.
 
 =method B<iconUrl>
+
 Returns the URL of the icon the status.
 
 =method B<id>
+
 Returns the id of the status.
 
 =method B<name>
+
 Returns the name of the status.
 
 =method B<self>
+
 Returns the JIRA REST API URL of the status.
 
 =method B<category>
+
 Returns the category of the status as a C<JIRA::REST::Class::Issue::Status::Category> object.
