@@ -17,9 +17,6 @@ our $VERSION = '0.01';
   # if your server uses self-signed SSL certificates
   $jira->SSL_verify_none;
 
-  # allow the class to fetch the metadata for your project
-  $jira->project('MYPROJECT');
-
   # get issue by key
   my ($issue) = $jira->issues('MYPROJECT-101');
 
@@ -28,11 +25,11 @@ our $VERSION = '0.01';
 
   # get multiple issues through search
   my @issues =
-      $jira->issues({ jql => 'project = "'MYPROJECT" and status = "open"' });
+      $jira->issues({ jql => 'project = "MYPROJECT" and status = "open"' });
 
   # get an iterator for a search
   my $search =
-      $jira->iterator({ jql => 'project = "'MYPROJECT" and status = "open"' });
+      $jira->iterator({ jql => 'project = "MYPROJECT" and status = "open"' });
 
   if ( $search->issue_count ) {
       printf "Found %d open issues in MYPROJECT:\n", $search->issue_count;
