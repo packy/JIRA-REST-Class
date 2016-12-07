@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use v5.10;
 
+use JSON;
+
 sub import {
     my $class = __PACKAGE__;
     $class->register_dispatch(

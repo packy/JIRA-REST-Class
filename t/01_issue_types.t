@@ -8,6 +8,7 @@ use lib dirname($0).'/../lib'; # the module itself is under here
 
 use JIRA::REST::Class;
 use JIRA::REST::Class::Test;
+use JSON;
 use List::Util qw( all );
 use Try::Tiny;
 
