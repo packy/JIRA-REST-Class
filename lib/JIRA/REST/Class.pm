@@ -166,7 +166,7 @@ sub iterator {
     return $self->factory->make_object('iterator', { iterator_args => $args });
 }
 
-=method B<get> URL [, QUERY]
+=internal_method B<get> URL [, QUERY]
 
 A wrapper for C<JIRA::REST>'s GET method.
 
