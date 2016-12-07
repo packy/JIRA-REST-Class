@@ -11,7 +11,7 @@ our $VERSION = '0.01';
 __PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name projectTypeKey self ));
 
 _make_lazy_ro_accessors(qw/ category assigneeType components description
-                            issueTypes lead roles versions /);
+                            issueTypes subtaskIssueTypes lead roles versions /);
 
 use overload
     '""'   => sub { shift->key },
@@ -57,6 +57,10 @@ sub _do_lazy_load {
         $self->make_object('issuetype', { data => $_ });
     } @{ $data->{issueTypes} } ];
 
+    $self->{subtaskIssueTypes} = [ grep {
+        $_->subtask
+    } @{ $self->{issueTypes} } ];
+
     $self->{lead} = $self->make_object('user', { data => $data->{lead} });
 
     $self->{roles} = $data->{roles};
@@ -99,6 +103,10 @@ Returns the id of the project.
 =method B<issueTypes>
 
 A list of valid issue types for the project.
+
+=method B<subtaskIssueTypes>
+
+Taking a page from the old SOAP interface, this method returns a list of all issue types whose subtask field is true.
 
 =method B<key>
 
@@ -258,6 +266,5 @@ sub field_name {
 
     return $self->{field_names}->{$name};
 }
-
 
 1;
