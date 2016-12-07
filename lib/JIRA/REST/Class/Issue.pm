@@ -8,6 +8,7 @@ our $VERSION = '0.01';
 
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents an individual JIRA issue as an object.
 
+use Carp;
 use Readonly;
 use Scalar::Util qw( weaken );
 
@@ -269,30 +270,109 @@ sub add_issue_link {
 
 =method B<add_subtask>
 
-Adds a subtask to the current issue.  Accepts the summary and description of the task as parameters, along with an optional hash reference of additional fields to define for the subtask.  The project key and parent key are taken from the current issue, and the issue type ID is assigned from ...
+Adds a subtask to the current issue.  Accepts a hashref with named parameters 'summary' and 'description'.  If the parameter 'issuetype' is specified, then a subtask of the specified type is created.  If no issuetype is specified, then the project is queried for valid subtask types, and, if there is only one, that type is used.  If the project has more than one valid subtask type, an issuetype MUST be specified.
 
-TODO: currently, this is hardcoded to use issue type id 8, Technical Task. This should be genericized.
+The remaining named parameters are passed to the create issue call as fields.
 
 =cut
 
 sub add_subtask {
+    my($summary, $desc, $fields, $issuetype);
+
     my $self    = shift;
-    my $summary = shift;
-    my $desc    = shift;
-    my $fields  = shift;
+    my $project = $self->project;
+    my $parent  = $self;
+
+    if (@_ == 1 && ref $_[0] && ref $_[0] eq 'HASH') {
+        $fields = $_[0];
+
+        if (exists $fields->{project} && defined $fields->{project}) {
+            my $proj = $fields->{project};
+            if ( $self->obj_isa($proj, 'project') ) {
+                # we were passed an issue type object
+                $project = $proj;
+            }
+            else {
+                ($project) = grep {
+                    $_->id eq $proj || $_->name eq $proj
+                } $self->jira->projects;
+
+                unless ($project) {
+                    local $Carp::CarpLevel = $Carp::CarpLevel+1;
+                    confess "add_subtask() called with unknown project '$proj'";
+                }
+            }
+        }
+
+        if (exists $fields->{parent} && defined $fields->{parent}) {
+            my $issue = $fields->{parent};
+            if ( $self->obj_isa($issue, 'issue') ) {
+                # we were passed an issue type object
+                $parent = $issue;
+            }
+            else {
+                ($parent) = $self->jira->issues($issue);
+
+                unless ($parent) {
+                    local $Carp::CarpLevel = $Carp::CarpLevel+1;
+                    confess "add_subtask() called with unknown parent '$issue'";
+                }
+            }
+        }
+
+        if (exists $fields->{issuetype} && defined $fields->{issuetype}) {
+            my $type = $fields->{issuetype};
+            if ( $self->obj_isa($type, 'issuetype') ) {
+                # we were passed an issue type object
+                $issuetype = $type;
+            }
+            else {
+                my @types = $project->issueTypes;
+                ($issuetype) = grep {
+                    $_->id eq $type || $_->name eq $type
+                } @types;
+            }
+
+            if ($issuetype && ! $issuetype->subtask) {
+                local $Carp::CarpLevel = $Carp::CarpLevel+1;
+                confess "add_subtask() called with a non-subtask issue type: "
+                    .   "'$issuetype'";
+            }
+        }
+    }
+    else { # backward compatibility
+        $fields  = $_[2] // {};
+
+        $fields->{summary}     //= shift;
+        $fields->{description} //= shift;
+    }
+
+    unless ( $issuetype ) {
+        my @subtasks = $project->subtaskIssueTypes;
+
+        if ( @subtasks == 1 ) {
+            $issuetype = $subtasks[0];
+        }
+        else {
+            local $Carp::CarpLevel = $Carp::CarpLevel+1;
+            my $count = scalar @subtasks;
+            my $list  = join q{, }, @subtasks;
+            confess "add_subtask() called without specifying a subtask type; "
+                .   "there are $count subtask types: $list";
+        }
+    }
 
     my $data = {
         fields => {
-            project     => { key => $self->project->key },
-            parent      => { key => $self->key },
-            summary     => $summary,
-            description => $desc,
-            issuetype   => { id => 8 }
+            project   => { key => $project->key  },
+            parent    => { key => $parent->key   },
+            issuetype => { id  => $issuetype->id },
         }
     };
 
     if ($fields) {
         foreach my $field (keys %$fields) {
+            next if $field =~ /^(project|parent|issuetype)$/;
             $data->{fields}->{$field} = $fields->{$field};
         }
     }
