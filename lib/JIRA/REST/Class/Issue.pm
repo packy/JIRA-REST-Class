@@ -492,7 +492,7 @@ __PACKAGE__->mk_lazy_ro_accessor('sprints', sub {
     my $self = shift;
 
     # in my configuration, 'Sprint' is a custom field
-    my $sprint_field = $self->jira->field_name('Sprint');
+    my $sprint_field = $self->project->field_name('Sprint');
 
     my @sprints;
     foreach my $sprint ( @{ $self->fields->{$sprint_field} } ) {

@@ -147,7 +147,7 @@ sub metadata {
             maxResults => 1,
         });
         my $issuekey = $first_issue->key;
-        $self->{metadata} = $self->get("/issue/$issuekey/editmeta");
+        $self->{metadata} = $self->jira->get("/issue/$issuekey/editmeta");
     }
 
     return $self->{metadata};
