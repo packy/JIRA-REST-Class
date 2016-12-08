@@ -39,9 +39,13 @@ sub find_transition_named {
         return $transition;
     }
 
-    die "Unable to find transition '$name'\n"
-      . "\ntransitions: " . $self->shallow_dump($self->transitions)
-      . "\nissue: " . $self->shallow_dump($self->issue);
+    die sprintf(
+        "Unable to find transition '%s'\n".
+        "issue status: %s\n".
+        "transitions:  %s\n",
+        $name, $self->issue->status->name,
+        $self->shallow_dump([ $self->transitions ]),
+    );
 }
 
 =method B<block>
@@ -147,8 +151,8 @@ sub transition_walk {
             unless ( exists $state_to_transition{$to} ) {
                 die "Unknown target state '$to'!\n";
             }
-            my $trans = $self->find_transition_named( $state_to_transition{$to} )
-              or die "No transition for target state '$to'!\n";
+            my $trans =
+                $self->find_transition_named( $state_to_transition{$to} );
             $callback->($name, $to);
             $trans->go;
         }
@@ -156,9 +160,7 @@ sub transition_walk {
             die "Don't know how to transition from '$name' to '$target'!\n";
         }
 
-        # refresh the data for this issue
-        $self->issue->reload;
-        $self->init($self->factory);
+        # get the new status name
         $name = $self->issue->status->name;
     }
 

@@ -30,6 +30,9 @@ sub go {
     $self->issue->post("/transitions", {
         transition => { id => $self->id }, @_
     });
+
+    # reload the issue's transitions, since these have now changed
+    $self->issue->transitions->init($self->factory);
 }
 
 1;
