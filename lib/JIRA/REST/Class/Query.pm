@@ -26,7 +26,7 @@ Returns a list of C<JIRA::REST::Class::Issue> objects matching the query.
 sub issues {
     my $self = shift;
     my @issues = map {
-        $self->factory->make_object('issue', { data => $_ });
+        $self->make_object('issue', { data => $_ });
     } @{ $self->data->{issues} };
     return @issues;
 }

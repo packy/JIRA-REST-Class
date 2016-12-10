@@ -64,7 +64,8 @@ sub init {
     my $self = shift;
     $self->SUPER::init(@_);
 
-    $self->{url} = $self->jira->strip_protocol_and_host($self->self);
+    my $jira = $self->jira;
+    $self->{url} = $jira->strip_protocol_and_host($self->self);
 
     # make user objects
     foreach my $field ( @USERS ) {
@@ -76,17 +77,17 @@ sub init {
         $self->{$field} = $self->make_date( $self->fields->{$field} );
     }
 
-    $self->populate_list_field('components',     'projectcomp',  'components');
+    $self->populate_list_field(  'components',   'projectcomp',  'components');
     $self->populate_scalar_field('project',      'project',      'project');
     $self->populate_scalar_field('issuetype',    'issuetype',    'issuetype');
     $self->populate_scalar_field('status',       'status',       'status');
     $self->populate_scalar_field('timetracking', 'timetracking', 'timetracking');
-    $self->populate_list_field('versions',       'projectvers',  'versions');
+    $self->populate_list_field(  'versions',     'projectvers',  'versions');
 
     unless (defined &is_bug) {
         # if we haven't defined booleans to determine whether or not this
         # issue is a particular type, define those methods now
-        foreach my $type ( $self->jira->issue_types ) {
+        foreach my $type ( $jira->issue_types ) {
             (my $subname = lc 'is_'.$type->name) =~ s/\s+|\-/_/g;
             $self->make_subroutine($subname, sub {
                 shift->fields->{issuetype}->{id} == $type->id

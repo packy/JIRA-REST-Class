@@ -8,6 +8,8 @@ our $VERSION = '0.01';
 
 # ABSTRACT: A factory class for building all the other classes in C<JIRA::REST::Class>.
 
+# here is our list of every class this factory knows how to make
+#
 JIRA::REST::Class::Factory->add_factory_type(
     factory      => 'JIRA::REST::Class::Factory',
     issue        => 'JIRA::REST::Class::Issue',
@@ -36,17 +38,23 @@ JIRA::REST::Class::Factory->add_factory_type(
 use Carp;
 use DateTime::Format::Strptime;
 
-=internal_method B<jira>
+=internal_method B<init>
 
-Accessor for the C<JIRA::REST::Class> object used to talk to the server.
+Initialize the factory object.  Just copies all the elements in the hashref that were passed in to the object itself.
 
 =cut
 
-sub jira { shift->{jira} }
+sub init {
+    my $self = shift;
+    my $args = shift;
+    my @keys = keys %$args;
+    @{$self}{@keys} = @{$args}{@keys};
+    return $self;
+}
 
 =internal_method B<make_object>
 
-A tweaked version of the object creator from C<Class::Factory::Enhanced>.
+A tweaked version of the object creator from C<Class::Factory::Enhanced> that calls C<init()> with a copy of the factory.
 
 =cut
 
@@ -54,7 +62,7 @@ sub make_object {
     my ($self, $object_type, @args) = @_;
     my $class = $self->get_factory_class($object_type);
     my $obj = $class->new(@args);
-    $obj->init($self);
+    $obj->init($self); # make sure we pass the factory into init()
     return $obj;
 }
 

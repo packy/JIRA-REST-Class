@@ -1,5 +1,5 @@
 package JIRA::REST::Class::Abstract;
-use base qw( Class::Accessor::Fast );
+use base qw( Class::Accessor::Fast JIRA::REST::Class::Mixins );
 use strict;
 use warnings;
 use v5.10;
@@ -10,9 +10,9 @@ our $VERSION = '0.01';
 
 use Carp;
 use Data::Dumper::Concise;
-use Scalar::Util qw( weaken blessed reftype );
+use Scalar::Util qw( weaken blessed reftype refaddr);
 
-__PACKAGE__->mk_ro_accessors(qw( data factory issue lazy_loaded ));
+__PACKAGE__->mk_ro_accessors(qw( data issue lazy_loaded ));
 
 =for Pod::Coverage init
 
@@ -26,21 +26,31 @@ sub init {
     my $self    = shift;
     my $factory = shift;
 
-    # if the first thing we're passed is supposed to be the factory object
+    # the first thing we're passed is supposed to be the factory object
     if (blessed $factory && blessed $factory eq 'JIRA::REST::Class::Factory') {
-        $self->{factory} = $factory;
-        weaken $self->{factory};
+
+        # grab the arguments that the class was called with from the factory
+        # and make new factory and class objects with the same aguments so we
+        # don't have circular dependency issues
+
+        my $args = $factory->{args};
+        $self->factory($args);
+        $self->jira($args);
     }
     else {
         # if we're not passed a factory, let's complain about it
-        local $Carp::CarpLevel = $Carp::CarpLevel+1;
+        local $Carp::CarpLevel = $Carp::CarpLevel + 1;
         confess "factory not passed to init!";
     }
 
+    # unload any lazily loaded data
     $self->unload_lazy;
+
+    # init() has to return the object!
+    return $self;
 }
 
-=method B<unload_lazy>
+=internal_method B<unload_lazy>
 
 Clears the hash that tracks lazily loaded methods so they get loaded again.
 
@@ -57,125 +67,6 @@ sub unload_lazy {
     else {
         $self->{lazy_loaded} = { };
     }
-}
-
-=method B<factory>
-
-Returns the C<JIRA::REST::Class::Factory> object that created this object.
-
-=method B<jira>
-
-Returns the C<JIRA::REST::Class> object that created this object.
-
-=cut
-
-sub jira { shift->factory->jira }
-
-=internal_method B<JIRA_REST>
-
-An accessor that returns the C<JIRA::REST> object being used.
-
-=cut
-
-sub JIRA_REST { shift->jira->{jira_rest} }
-
-=internal_method B<REST_CLIENT>
-
-An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
-
-=cut
-
-sub REST_CLIENT { shift->JIRA_REST->{rest} }
-
-=method B<make_object>
-
-A pass-through method that calls C<JIRA::REST::Class::Factory::make_object()>.
-
-=method B<make_date>
-
-A pass-through method that calls C<JIRA::REST::Class::Factory::make_date()>.
-
-=method B<class_for>
-
-A pass-through method that calls C<JIRA::REST::Class::Factory::get_factory_class()>.
-
-=cut
-
-sub make_object { shift->factory->make_object(@_) }
-sub make_date   { shift->factory->make_date(@_) }
-sub class_for   { shift->factory->get_factory_class(@_) }
-
-=method B<obj_isa>
-
-When passed a scalar that could be an object and a class string, returns whether the scalar is, in fact, an object of that class.  Looks up the actual class using C<class_for()>, which calls  C<JIRA::REST::Class::Factory::get_factory_class()>.
-
-=cut
-
-sub obj_isa  {
-    my ($self, $obj, $type) = @_;
-    return unless blessed $obj;
-    my $class = $self->class_for($type);
-    $obj->isa( $class );
-}
-
-=method B<name_for_user>
-
-When passed a scalar that could be a C<JIRA::REST::Class::User> object, returns the name of the user if it is a C<JIRA::REST::Class::User> object, or the unmodified scalar if it is not.
-
-=cut
-
-sub name_for_user {
-    my($self, $user) = @_;
-    return $self->obj_isa($user, 'user') ? $user->name : $user;
-}
-
-=method B<key_for_issue>
-
-When passed a scalar that could be a C<JIRA::REST::Class::Issue> object, returns the key of the issue if it is a C<JIRA::REST::Class::Issue> object, or the unmodified scalar if it is not.
-
-=cut
-
-sub key_for_issue {
-    my($self, $issue) = @_;
-    return $self->obj_isa($issue, 'issue') ? $issue->key : $issue;
-}
-
-=method B<find_link_name_and_direction>
-
-When passed two scalars, one that could be a C<JIRA::REST::Class::Issue::LinkType> object and another that is a direction (inward/outward), returns the name of the link type and direction if it is a C<JIRA::REST::Class::Issue::LinkType> object, or attempts to determine the link type and direction from the provided scalars.
-
-=cut
-
-sub find_link_name_and_direction {
-    my ($self, $link, $dir) = @_;
-
-    return unless defined $link;
-
-    # determine the link directon, if provided. defaults to inward.
-    $dir = ($dir && $dir =~ /out(?:ward)?/) ? 'outward' : 'inward';
-
-    # if we were passed a link type object, return
-    # the name and the direction we were given
-    if ( $self->obj_isa($link, 'linktype') ) {
-        return $link->name, $dir;
-    }
-
-    # search through the link types
-    my @types = $self->jira->link_types;
-    foreach my $type ( @types ) {
-        if (lc $link eq lc $type->inward) {
-            return $type->name, 'inward';
-        }
-        if (lc $link eq lc $type->outward) {
-            return $type->name, 'outward';
-        }
-        if (lc $link eq lc $type->name) {
-            return $type->name, $dir;
-        }
-    }
-
-    # we didn't find anything, so just return what we were passed
-    return $link, $dir;
 }
 
 =internal_method B<populate_scalar_data>
@@ -417,87 +308,6 @@ Takes a subroutine name and a subroutine reference, and blesses the subroutine i
 
 } # end of ref no-stricture zone
 
-###########################################################################
-
-=method B<dump>
-
-Returns a stringified representation of the issue's data generated by Data::Dumper::Concise.
-
-=cut
-
-sub dump {
-    my $self = shift;
-    return $self->shallow_dump( $self );
-}
-
-=internal_method B<shallow_dump> THING
-
-A utility function to produce a shallow dump of a thing.
-
-=cut
-
-sub shallow_dump {
-    shift; # we don't need $self
-    return Dumper( __shallow_copy(@_, 'top') );
-}
-
-sub __shallow_copy {
-    my $thing = shift;
-    my $top   = pop;
-
-    if (not ref $thing) {
-        return $thing;
-    }
-
-    if ( my $class = blessed $thing ) {
-        if ($class eq 'JSON::PP::Boolean') {
-            return $thing ? 'JSON::PP::true' : 'JSON::PP::false';
-        }
-        elsif ($class eq 'JSON') {
-            return "$thing";
-        }
-        elsif ($class eq 'REST::Client') {
-            return '%s->host(%s)', $class, $thing->getHost;
-        }
-        elsif ($class eq 'DateTime') {
-            return "DateTime(  $thing  )";
-        }
-        elsif ($top) {
-            if (reftype $thing eq 'ARRAY') {
-                return [ map { __shallow_copy($_) } @{$thing} ], $class;
-            }
-            elsif (reftype $thing eq 'HASH') {
-                return +{
-                    map { $_ => __shallow_copy($thing->{$_}) } keys %{$thing}
-                }, $class;
-            }
-            return Dumper($thing);
-        }
-        else {
-            foreach my $method (qw/ name key id /) {
-                if ( $thing->can($method) ) {
-                    my $value = $thing->$method // 'undef';
-                    return sprintf '%s->%s(%s)',
-                        $class, $method, $value;
-                }
-            }
-            return "$thing";
-        }
-    }
-
-    if (ref $thing eq 'SCALAR') {
-        return $$thing;
-    }
-    elsif (ref $thing eq 'ARRAY') {
-        return [ map { __shallow_copy($_) } @{$thing} ];
-    }
-    elsif (ref $thing eq 'HASH') {
-        return +{
-            map { $_ => __shallow_copy($thing->{$_}) } keys %{$thing}
-        };
-    }
-    return $thing;
-}
 
 1;
 

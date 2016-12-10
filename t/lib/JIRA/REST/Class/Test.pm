@@ -148,7 +148,7 @@ sub can_ok_abstract {
                             mk_contextual_ro_accessors mk_deep_ro_accessor
                             mk_lazy_ro_accessor mk_data_ro_accessors
                             mk_field_ro_accessors make_subroutine
-                            dump shallow_dump / );
+                            dump shallow_copy / );
 
 }
 

@@ -11,11 +11,12 @@ our $VERSION = '0.01';
 
   use JIRA::REST::Class;
 
-  my $jira = JIRA::REST::Class->new('https://jira.example.net',
-                                    'myuser', 'mypass');
-
-  # if your server uses self-signed SSL certificates
-  $jira->SSL_verify_none;
+  my $jira = JIRA::REST::Class->new({
+      url            => 'https://jira.example.net',
+      username       => 'myuser',
+      password       => 'mypass',
+     SSL_verify_none => 1, # if your server uses self-signed SSL certificates
+  });
 
   # get issue by key
   my ($issue) = $jira->issues('MYPROJECT-101');
@@ -47,67 +48,119 @@ An OO Class module built atop C<JIRA::REST> for dealing with JIRA issues and the
 data as objects.
 
 This code is a work in progress, so it's bound to be incomplete.  I add methods
-to it as I discover I need them.  I also code for fields that might exist in my JIRA server's configuration but not in yours.  It is my intent to make things more generic as I go on so they will "just work" no matter how your server is configured.
+to it as I discover I need them.  I have also coded for fields that might exist
+in my JIRA server's configuration but not in yours.  It is my I<intent>,
+however, to make things more generic as I go on so they will "just work" no
+matter how your server is configured.
 
-=constructor new(URL, USERNAME, PASSWORD [, REST_CLIENT_CONFIG])
+I'm actively working with the author of C<JIRA::REST> (thanks gnustavo!) to keep
+the arguments for C<JIRA::REST::Class-E<gt>new> exactly the same as
+C<JIRA::REST-E<gt>new>, so I'm just duplicating the documentation for
+C<JIRA::REST-E<gt>new>:
 
-The constructor C<new()> mimics the constructor for C<JIRA::REST>, and accepts up to four arguments (this documentation is lifted directly from  C<JIRA::REST>'s documentation):
+=head1 CONSTRUCTOR
 
-=over
+=head2 new HASHREF
+=head2 new URL, USERNAME, PASSWORD, REST_CLIENT_CONFIG, ANONYMOUS, PROXY, SSL_VERIFY_NONE
 
-=item * URL
+The constructor can take its arguments from a single hash reference or from
+a list of positional parameters. The first form is prefered because it lets
+you specify only the arguments you need. The second form forces you to pass
+undefined values if you need to pass a specific value to an argument further
+to the right.
 
-A string or a URI object denoting the base URL of the JIRA server. This is a required argument.
+The arguments are described below with the names which must be used as the
+hash keys:
 
-You may choose a specific API version by appending the C</rest/api/VERSION> string to the URL's path. It's more common to left it unspecified, in which case the C</rest/api/latest> string is appended automatically to the URL.
+=over 4
 
-=item * USERNAME
+=item * B<url>
 
-The username of a JIRA user.
+A string or a URI object denoting the base URL of the JIRA server. This is a
+required argument.
 
-It can be undefined if PASSWORD is also undefined. In such a case the user credentials are looked up in the C<.netrc> file.
+The REST methods described below all accept as a first argument the
+endpoint's path of the specific API method to call. In general you can pass
+the complete path, beginning with the prefix denoting the particular API to
+use (C</rest/api/VERSION>, C</rest/servicedeskapi>, or
+C</rest/agile/VERSION>). However, to make it easier to invoke JIRA's Core
+API if you pass a path not starting with C</rest/> it will be prefixed with
+C</rest/api/latest> or with this URL's path if it has one. This way you can
+choose a specific version of the JIRA Core API to use instead of the latest
+one. For example:
 
-=item * PASSWORD
+    my $jira = JIRA::REST->new({
+        url => 'https://jira.example.net/rest/api/1',
+    });
 
-The HTTP password of the user. (This is the password the user uses to log in to JIRA's web interface.)
+=item * B<username>
+=item * B<password>
 
-It can be undefined, in which case the user credentials are looked up in the C<.netrc> file.
+The username and password of a JIRA user to use for authentication.
 
-=item * REST_CLIENT_CONFIG
+If B<anonymous> is false then, if either B<username> or B<password> isn't
+defined the module looks them up in either the C<.netrc> file or via
+L<Config::Identity> (which allows C<gpg> encrypted credentials).
 
-A C<JIRA::REST> object uses a C<REST::Client> object to make the REST invocations. This optional argument must be a hash-ref that can be fed to the C<REST::Client> constructor. Note that the C<URL> argument overwrites any value associated with the C<host> key in this hash.
+L<Config::Identity> will look for F<~/.jira-identity> or F<~/.jira>.
+You can change the filename stub from C<jira> to a custom stub with the
+C<JIRA_REST_IDENTITY> environment variable.
 
-To use a network proxy please set the 'proxy' argument to the string or URI object describing the fully qualified (including port) URL to your network proxy. This is an extension to the C<REST::Client> configuration and will be removed from the hash before passing it on to the C<REST::Client> constructor.
+=item * B<rest_client_config>
+
+A JIRA::REST object uses a L<REST::Client> object to make the REST
+invocations. This optional argument must be a hash reference that can be fed
+to the REST::Client constructor. Note that the C<url> argument
+overwrites any value associated with the C<host> key in this hash.
+
+As an extension, the hash reference also accepts one additional argument
+called B<proxy> that is an extension to the REST::Client configuration and
+will be removed from the hash before passing it on to the REST::Client
+constructor. However, this argument is deprecated since v0.017 and you
+should avoid it. Instead, use the following argument instead.
+
+=item * B<proxy>
+
+To use a network proxy set this argument to the string or URI object
+describing the fully qualified URL (including port) to your network proxy.
+
+=item * B<ssl_verify_none>
+
+Sets the C<SSL_verify_mode> and C<verify_hostname ssl> options on the
+underlying L<REST::Client>'s user agent to 0, thus disabling them. This
+allows access to JIRA servers that have self-signed certificates that don't
+pass L<LWP::UserAgent>'s verification methods.
+
+=item * B<anonymous>
+
+Tells the module that you want to connect to the specified JIRA server with
+no username or password.  This way you can access public JIRA servers
+without needing to authenticate.
 
 =back
 
 =cut
 
-use Scalar::Util qw( weaken blessed );
+use Carp;
 
 use JIRA::REST;
 use JIRA::REST::Class::Factory;
 
+use base qw( JIRA::REST::Class::Mixins );
+
 sub new {
     my $class = shift;
-    my @args  = @_;
-    my ($url, $username, $password, $rest_client_config) = @args;
 
-    my $self = bless {
-        jira_rest => JIRA::REST->new(@args),
-        factory   => JIRA::REST::Class::Factory->new('factory'),
-        url       => $url,
-        username  => $username,
-        password  => $password,
-        rest_client_config => $rest_client_config
+    my $args = $class->_get_known_args(
+        \@_, qw/url username password rest_client_config
+                proxy ssl_verify_none anonymous/
+    );
+
+    return bless {
+        jira_rest => $class->JIRA_REST($args),
+        factory   => $class->factory($args),
+        args      => $args,
     }, $class;
-
-    # so every other object can get to it easily,
-    # let's put a reference to ourself in the factory
-    $self->{factory}->{jira} = $self;
-    weaken $self->{factory}->{jira};
-
-    return $self;
 }
 
 
@@ -145,8 +198,8 @@ sub query {
     my $self = shift;
     my $args = shift;
 
-    my $query = $self->JIRA_REST->POST('/search', undef, $args);
-    return $self->factory->make_object('query', { data => $query });
+    my $query = $self->post('/search', $args);
+    return $self->make_object('query', { data => $query });
 }
 
 =method B<iterator> QUERY
@@ -160,7 +213,7 @@ The return value is a single C<JIRA::REST::Class::Iterator> object.  The issues 
 sub iterator {
     my $self = shift;
     my $args = shift;
-    return $self->factory->make_object('iterator', { iterator_args => $args });
+    return $self->make_object('iterator', { iterator_args => $args });
 }
 
 =internal_method B<get> URL [, QUERY]
@@ -236,10 +289,11 @@ Returns a list of defined issue types (as C<JIRA::REST::Class::Issue::Type> obje
 
 sub issue_types {
     my $self = shift;
+
     unless ($self->{issue_types}) {
         my $types = $self->get('/issuetype');
         $self->{issue_types} = [ map {
-            $self->factory->make_object('issuetype', { data => $_ });
+            $self->make_object('issuetype', { data => $_ });
         } @$types ];
     }
 
@@ -265,7 +319,7 @@ sub projects {
 
         my $list = $self->{project_list} = [];
         $self->{project_hash} = { map {
-            my $p = $self->factory->make_object('project', { data => $_ });
+            my $p = $self->make_object('project', { data => $_ });
             push @$list, $p;
             $p->id => $p, $p->key => $p, $p->name => $p
         } @$projects };
@@ -286,9 +340,7 @@ sub project {
     my $proj = shift || return; # if nothing was passed, we return nothing
 
     # if we were passed a project object, just return it
-    return $proj
-        if blessed $proj
-        && $proj->isa($self->factory->get_factory_class('project'));
+    return $proj if $self->obj_isa($proj, 'project');
 
     $self->projects; # load the project hash if it hasn't been loaded
 
@@ -341,7 +393,7 @@ An accessor for the URL passed to the C<JIRA::REST> object.
 
 =cut
 
-sub url { shift->{url} }
+sub url { shift->{args}->{url} }
 
 =internal_method B<username>
 
@@ -349,7 +401,7 @@ An accessor for the username passed to the C<JIRA::REST> object.
 
 =cut
 
-sub username { shift->{username} }
+sub username { shift->{args}->{username} }
 
 =internal_method B<password>
 
@@ -357,7 +409,7 @@ An accessor for the password passed to the C<JIRA::REST> object.
 
 =cut
 
-sub password { shift->{password} }
+sub password { shift->{args}->{password} }
 
 =internal_method B<rest_client_config>
 
@@ -365,31 +417,7 @@ An accessor for the REST client config passed to the C<JIRA::REST> object.
 
 =cut
 
-sub rest_client_config { shift->{rest_client_config} }
-
-=internal_method B<factory>
-
-An accessor for the C<JIRA::REST::Class::Factory>.
-
-=cut
-
-sub factory { shift->{factory} }
-
-=internal_method B<JIRA_REST>
-
-An accessor that returns the C<JIRA::REST> object being used.
-
-=cut
-
-sub JIRA_REST { shift->{jira_rest} }
-
-=internal_method B<REST_CLIENT>
-
-An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
-
-=cut
-
-sub REST_CLIENT { shift->JIRA_REST->{rest} }
+sub rest_client_config { shift->{args}->{rest_client_config} }
 
 1;
 
@@ -414,3 +442,13 @@ Atlassian's official JIRA REST API Reference.
 =head1 REPOSITORY
 
 L<https://github.com/packy/JIRA-REST-Class>
+
+=head1 CREDITS
+
+=over 4
+
+=item L<Gustavo Leite de Mendonça Chaves|https://metacpan.org/author/GNUSTAVO> <gnustavo@cpan.org>
+
+Many thanks to Gustavo for C<JIRA::REST>, which is what I started working with when I first wanted to automate my interactions with JIRA in the summer of 2016, and without which I would have had a LOT of work to do.
+
+=back
