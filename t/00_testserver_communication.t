@@ -7,6 +7,7 @@ use lib dirname($0).'/lib'; # we keep testing-only modules in a lib under t!
 use lib dirname($0).'/../lib'; # the module itself is under here
 
 use constant TESTCOUNT => 11;
+use JSON;
 use Test::More tests => &TESTCOUNT;
 use Try::Tiny;
 
