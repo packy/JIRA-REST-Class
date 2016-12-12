@@ -2,7 +2,10 @@ BASE=$(shell pwd)
 clean:
 	rm -rf .build 
 
-build:
+authordeps:
+	dzil authordeps --missing | cpanm
+
+build: authordeps
 	dzil build --in .build --notgz
 
 author: build
