@@ -165,6 +165,56 @@ sub make_object {
 
 ###########################################################################
 
+=method B<add_attachments>
+
+Accepts a list of filenames to be added to the issue as attachments.
+
+=cut
+
+sub add_attachments {
+    my $self = shift;
+
+    foreach my $file ( @_ ) {
+        croak "unable to find attachment $file"
+            unless -f $file;
+
+        $self->JIRA_REST->attach_files($self->key, $file);
+    }
+}
+
+=method B<add_attachment>
+
+Accepts a single filename to be added to the issue as an attachment.
+
+=cut
+
+sub add_attachment {
+    my $self = shift;
+    my $file = shift;
+
+    croak "unable to find attachment $file"
+        unless -f $file;
+
+    $self->JIRA_REST->attach_files($self->key, $file);
+}
+
+=method B<add_data_attachment>
+
+Accepts a fake filename and a scalar representing the contents of a file and adds it to the issue as an attachment.
+
+=cut
+
+sub add_data_attachment {
+    my $self = shift;
+    my $name = shift;
+    my $data = shift;
+    my $url  = q{/} . join q{/}, 'issue', $self->key, 'attachments';
+
+    $self->jira->data_upload({
+        url => $url, name => $name, data => $data
+    });
+}
+
 =method B<add_comment>
 
 Adds whatever is passed in as a comment on the issue.

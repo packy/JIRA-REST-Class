@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use v5.10;
 
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 
 # ABSTRACT: An OO Class module built atop C<JIRA::REST> for dealing with JIRA issues and their data as objects.
 
@@ -262,6 +262,69 @@ sub delete {
     my $self = shift;
     my $url  = shift;
     $self->JIRA_REST->DELETE($url, @_);
+}
+
+=internal_method B<data_upload>
+
+Similar to C<JIRA::REST-E<gt>attach_files>, but entirely from memory and only attaches one file at a time. Takes the following named parameters:
+
+=over 4
+
+=item + B<url>
+
+The relative URL to POST to.  This will have the hostname and REST version
+information prepended to it, so all you need to provide is something like
+'/issue/I<issueIdOrKey>/attachments'.  I'm allowing the URL to be specified in
+case I later discover something this can be used for besides attching files to
+issues.
+
+=item + B<name>
+
+The name that is specified for this file attachment.
+
+=item + B<data>
+
+The actual data to be uploaded.  If a reference is provided, it will be dereferenced before POSTing the data.
+
+=back
+
+I guess that makes it only a I<little> like C<JIRA::REST-E<gt>attach_files>...
+
+=cut
+
+sub data_upload {
+    my $self = shift;
+    my $args = $self->_get_known_args(\@_, qw/ url name data /);
+    $self->_check_required_args($args,
+        url  => "you must specify a URL to upload to",
+        name => "you must specify a name for the file data",
+        data => "you must specify the file data",
+    );
+
+    my $name = $args->{name};
+    my $data = ref $args->{data} ? ${$args->{data}} : $args->{data};
+
+    # code cribbed from JIRA::REST
+    #
+    my $rest = $self->REST_CLIENT;
+    my $response = $rest->getUseragent()->post(
+        $rest->getHost . $args->{url},
+        %{$rest->{_headers}},
+        'X-Atlassian-Token' => 'nocheck',
+        'Content-Type'      => 'form-data',
+        'Content'           => [
+            file => [
+                undef,
+                $name,
+                Content => $data,
+            ],
+        ],
+    );
+
+    $response->is_success
+        or croak $self->JIRA_REST->_error(
+            $self->_croakmsg($response->status_line, $name)
+        );
 }
 
 =method B<maxResults>
