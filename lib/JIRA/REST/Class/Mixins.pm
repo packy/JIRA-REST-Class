@@ -217,18 +217,19 @@ sub find_link_name_and_direction {
     }
 
     # search through the link types
-    my @types = $self->jira->link_types;
-    foreach my $type ( @types ) {
-        if (lc $link eq lc $type->inward) {
-            return $type->name, 'inward';
-        }
-        if (lc $link eq lc $type->outward) {
-            return $type->name, 'outward';
-        }
-        if (lc $link eq lc $type->name) {
-            return $type->name, $dir;
-        }
-    }
+ # work in progress
+ #   my @types = $self->jira->link_types;
+ #   foreach my $type ( @types ) {
+ #       if (lc $link eq lc $type->inward) {
+ #           return $type->name, 'inward';
+ #       }
+ #       if (lc $link eq lc $type->outward) {
+ #           return $type->name, 'outward';
+ #       }
+ #       if (lc $link eq lc $type->name) {
+ #           return $type->name, $dir;
+ #       }
+ #   }
 
     # we didn't find anything, so just return what we were passed
     return $link, $dir;
