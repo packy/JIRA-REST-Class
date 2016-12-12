@@ -31,7 +31,11 @@ sub go {
         transition => { id => $self->id }, @_
     });
 
-    # reload the issue's transitions, since these have now changed
+    # reload the issue itself, since it's going to have a new status,
+    # which will mean new transitions
+    $self->issue->reload;
+
+    # reload these new transitions
     $self->issue->transitions->init($self->factory);
 }
 
