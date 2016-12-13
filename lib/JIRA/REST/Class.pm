@@ -308,7 +308,7 @@ sub data_upload {
     #
     my $rest = $self->REST_CLIENT;
     my $response = $rest->getUseragent()->post(
-        $rest->getHost . $args->{url},
+        $self->rest_api_url_base . $args->{url},
         %{$rest->{_headers}},
         'X-Atlassian-Token' => 'nocheck',
         'Content-Type'      => 'form-data',
@@ -320,7 +320,7 @@ sub data_upload {
             ],
         ],
     );
-
+    use Data::Dumper::Concise;
     $response->is_success
         or croak $self->JIRA_REST->_error(
             $self->_croakmsg($response->status_line, $name)
@@ -433,7 +433,7 @@ Returns the base URL for this JIRA server's REST API.
 sub rest_api_url_base {
     my $self = shift;
     my ($type) = $self->issue_types;  # grab the first issue type
-    (my $base = $type->self) =~ m{^(.+?rest/api/[^/]+)/};
+    my ($base) = $type->self =~ m{^(.+?rest/api/[^/]+)/};
     return $base;
 }
 
