@@ -320,7 +320,7 @@ sub data_upload {
             ],
         ],
     );
-    use Data::Dumper::Concise;
+
     $response->is_success
         or croak $self->JIRA_REST->_error(
             $self->_croakmsg($response->status_line, $name)
