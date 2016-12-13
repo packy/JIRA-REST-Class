@@ -12,10 +12,10 @@ our $VERSION = '0.03';
   use JIRA::REST::Class;
 
   my $jira = JIRA::REST::Class->new({
-      url            => 'https://jira.example.net',
-      username       => 'myuser',
-      password       => 'mypass',
-     SSL_verify_none => 1, # if your server uses self-signed SSL certificates
+      url             => 'https://jira.example.net',
+      username        => 'myuser',
+      password        => 'mypass',
+      SSL_verify_none => 1, # if your server uses self-signed SSL certificates
   });
 
   # get issue by key

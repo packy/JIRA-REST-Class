@@ -44,7 +44,7 @@ sub find_transition_named {
         "issue status: %s\n".
         "transitions:  %s\n",
         $name, $self->issue->status->name,
-        $self->shallow_copy([ $self->transitions ]),
+        $self->dump([ $self->transitions ]),
     );
 }
 
