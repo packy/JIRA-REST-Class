@@ -246,10 +246,10 @@ Returns a stringified representation of the object's data generated somewhat by 
 sub dump {
     my $self = shift;
     if (@_) {
-        return Dumper( $self->shallow_copy( @_ ) );
+        return $self->shallow_copy( @_ );
     }
     else {
-        return Dumper( $self->shallow_copy( $self ) );
+        return $self->shallow_copy( $self );
     }
 }
 
