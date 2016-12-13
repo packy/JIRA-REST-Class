@@ -251,6 +251,21 @@ sub remove_label {
     $self->update( labels => [ { remove => $label } ] );
 }
 
+=method B<has_label>
+
+Returns true if the issue has the specified label.
+
+=cut
+
+sub has_label {
+    my $self  = shift;
+    my $label = shift;
+    foreach my $has ( $self->labels ) {
+        return 1 if $label eq $has;
+    }
+    return 0;
+}
+
 =method B<add_component>
 
 Adds whatever is passed in as a component for the issue.
