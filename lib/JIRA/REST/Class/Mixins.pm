@@ -341,12 +341,16 @@ sub __shallow_copy {
         return $$thing;
     }
     elsif (ref $thing eq 'ARRAY') {
-        return [ map { __shallow_copy($_) } @{$thing} ];
+        my $thingy = Dumper( [ map { __shallow_copy($_) } @{$thing} ] );
+        chomp $thingy;
+        return $thingy;
     }
     elsif (ref $thing eq 'HASH') {
-        return +{
+        my $thingy = Dumper(+{
             map { $_ => __shallow_copy($thing->{$_}) } keys %{$thing}
-        };
+        });
+        chomp $thingy;
+        return $thingy;
     }
     return $thing;
 }
