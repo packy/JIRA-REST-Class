@@ -3,14 +3,14 @@ use strict;
 use warnings;
 use v5.10;
 
+our $VERSION = '0.01';
+
+# ABSTRACT: An mixin class for C<JIRA::REST::Class> that other objects can inherit methods from.
+
 use Carp;
 use Data::Dumper::Concise;
 use MIME::Base64;
 use Scalar::Util qw( blessed reftype );
-
-use JIRA::REST;
-use JIRA::REST::Class;
-use JIRA::REST::Class::Factory;
 
 =internal_method B<jira>
 

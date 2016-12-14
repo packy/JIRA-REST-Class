@@ -64,7 +64,7 @@ C<JIRA::REST-E<gt>new>:
 =head2 new URL, USERNAME, PASSWORD, REST_CLIENT_CONFIG, ANONYMOUS, PROXY, SSL_VERIFY_NONE
 
 The constructor can take its arguments from a single hash reference or from
-a list of positional parameters. The first form is prefered because it lets
+a list of positional parameters. The first form is preferred because it lets
 you specify only the arguments you need. The second form forces you to pass
 undefined values if you need to pass a specific value to an argument further
 to the right.
@@ -145,8 +145,7 @@ use Carp;
 
 use JIRA::REST;
 use JIRA::REST::Class::Factory;
-
-use base qw( JIRA::REST::Class::Mixins );
+use base qw(JIRA::REST::Class::Mixins);
 
 sub new {
     my $class = shift;

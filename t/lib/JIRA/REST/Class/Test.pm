@@ -8,7 +8,7 @@ use Data::Dumper::Concise;
 use File::Slurp;
 use File::Spec::Functions;
 use Getopt::Long;
-use JSON;
+use JSON::PP;
 use Scalar::Util qw( blessed reftype );
 use Test::More;
 use Try::Tiny;

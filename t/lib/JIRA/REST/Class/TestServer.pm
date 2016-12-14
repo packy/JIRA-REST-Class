@@ -6,7 +6,7 @@ use v5.10;
 
 use Carp;
 use Data::Dumper::Concise;
-use JSON;
+use JSON::PP;
 use Log::Any;
 use Log::Any::Adapter;
 

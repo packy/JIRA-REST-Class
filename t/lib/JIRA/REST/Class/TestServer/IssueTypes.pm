@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 
-use JSON;
+use JSON::PP;
 
 sub import {
     my $class = __PACKAGE__;

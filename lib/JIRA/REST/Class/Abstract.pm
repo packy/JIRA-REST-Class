@@ -14,8 +14,6 @@ use Scalar::Util qw( weaken blessed reftype refaddr);
 
 __PACKAGE__->mk_ro_accessors(qw( data issue lazy_loaded ));
 
-=for Pod::Coverage init
-
 =method B<init>
 
 Method to perform post-instantiation initialization of the object. The first argument will be the factory object which created the object.
