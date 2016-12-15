@@ -24,3 +24,4 @@ The name of the project category.
 =accessor B<self>
 Returns the JIRA REST API URL of the project category.
 
+=for stopwords isAssigneeTypeValid

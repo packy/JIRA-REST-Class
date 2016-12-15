@@ -1,0 +1,62 @@
+
+=internal_method B<jira>
+
+Returns a C<JIRA::REST::Class> object with credentials for the last JIRA user.
+
+=internal_method B<factory>
+
+An accessor for the C<JIRA::REST::Class::Factory>.
+
+=internal_method B<JIRA_REST>
+
+An accessor that returns the C<JIRA::REST> object being used.
+
+=internal_method B<REST_CLIENT>
+
+An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
+
+=internal_method B<make_object>
+
+A pass-through method that calls C<JIRA::REST::Class::Factory::make_object()>.
+
+=internal_method B<make_date>
+
+A pass-through method that calls C<JIRA::REST::Class::Factory::make_date()>.
+
+=internal_method B<class_for>
+
+A pass-through method that calls C<JIRA::REST::Class::Factory::get_factory_class()>.
+
+=internal_method B<obj_isa>
+
+When passed a scalar that could be an object and a class string, returns whether the scalar is, in fact, an object of that class.  Looks up the actual class using C<class_for()>, which calls  C<JIRA::REST::Class::Factory::get_factory_class()>.
+
+=method B<name_for_user>
+
+When passed a scalar that could be a C<JIRA::REST::Class::User> object, returns the name of the user if it is a C<JIRA::REST::Class::User> object, or the unmodified scalar if it is not.
+
+=method B<key_for_issue>
+
+When passed a scalar that could be a C<JIRA::REST::Class::Issue> object, returns the key of the issue if it is a C<JIRA::REST::Class::Issue> object, or the unmodified scalar if it is not.
+
+=method B<find_link_name_and_direction>
+
+When passed two scalars, one that could be a C<JIRA::REST::Class::Issue::LinkType> object and another that is a direction (inward/outward), returns the name of the link type and direction if it is a C<JIRA::REST::Class::Issue::LinkType> object, or attempts to determine the link type and direction from the provided scalars.
+
+=method B<dump>
+
+Returns a stringified representation of the object's data generated somewhat by Data::Dumper::Concise, but only going one level deep.  If it finds objects in the data, it will attempt to represent them in some abbreviated fashion which may not display all the data in the object.
+
+=internal_method B<deep_copy> I<THING>
+
+Returns a deep copy of the hashref it is passed
+
+Example:
+
+    my $bar = Class->deep_copy($foo);
+    $bar->{XXX} = 'new value'; # $foo->{XXX} isn't changed
+
+=internal_method B<shallow_copy> I<THING>
+
+A utility function to produce a shallow copy of a thing (mostly not going down into the contents of objects within objects).
+

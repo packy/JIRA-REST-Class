@@ -46,6 +46,15 @@ sub init {
 
 =accessor B<sequence>
 
+{{
+   use Path::Tiny;
+   $OUT .= q{=for stopwords};
+   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
+       $OUT .= qq{ $word};
+   }
+   $OUT .= qq{\n};
+}}
+
 =cut
 
 __END__

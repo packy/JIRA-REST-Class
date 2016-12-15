@@ -26,6 +26,8 @@ sub init {
 
 Returns a list of individual work items, as C<JIRA::REST::Class::Issue::Worklog::Item> objects.
 
+=for stopwords worklog
+
 =cut
 
 1;

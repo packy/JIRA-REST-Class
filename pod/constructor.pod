@@ -1,0 +1,83 @@
+
+=head1 CONSTRUCTOR
+
+=head2 B<new> I<HASHREF>
+
+=head2 B<new> I<URL>, I<USERNAME>, I<PASSWORD>, I<REST_CLIENT_CONFIG>, I<ANONYMOUS>, I<PROXY>, I<SSL_VERIFY_NONE>
+
+The constructor can take its arguments from a single hash reference or from
+a list of positional parameters. The first form is preferred because it lets
+you specify only the arguments you need. The second form forces you to pass
+undefined values if you need to pass a specific value to an argument further
+to the right.
+
+The arguments are described below with the names which must be used as the
+hash keys:
+
+=over 4
+
+=item * B<url>
+
+A string or a URI object denoting the base URL of the JIRA server. This is a
+required argument.
+
+The REST methods described below all accept as a first argument the
+endpoint's path of the specific API method to call. In general you can pass
+the complete path, beginning with the prefix denoting the particular API to
+use (C</rest/api/VERSION>, C</rest/servicedeskapi>, or
+C</rest/agile/VERSION>). However, to make it easier to invoke JIRA's Core
+API if you pass a path not starting with C</rest/> it will be prefixed with
+C</rest/api/latest> or with this URL's path if it has one. This way you can
+choose a specific version of the JIRA Core API to use instead of the latest
+one. For example:
+
+    my $jira = JIRA::REST::Class->new({
+        url => 'https://jira.example.net/rest/api/1',
+    });
+
+=item * B<username>
+
+=item * B<password>
+
+The username and password of a JIRA user to use for authentication.
+
+If B<anonymous> is false then, if either B<username> or B<password> isn't
+defined the module looks them up in either the C<.netrc> file or via
+L<Config::Identity> (which allows C<gpg> encrypted credentials).
+
+L<Config::Identity> will look for F<~/.jira-identity> or F<~/.jira>.
+You can change the filename stub from C<jira> to a custom stub with the
+C<JIRA_REST_IDENTITY> environment variable.
+
+=item * B<rest_client_config>
+
+A JIRA::REST object uses a L<REST::Client> object to make the REST
+invocations. This optional argument must be a hash reference that can be fed
+to the REST::Client constructor. Note that the C<url> argument
+overwrites any value associated with the C<host> key in this hash.
+
+As an extension, the hash reference also accepts one additional argument
+called B<proxy> that is an extension to the REST::Client configuration and
+will be removed from the hash before passing it on to the REST::Client
+constructor. However, this argument is deprecated since v0.017 and you
+should avoid it. Instead, use the following argument instead.
+
+=item * B<proxy>
+
+To use a network proxy set this argument to the string or URI object
+describing the fully qualified URL (including port) to your network proxy.
+
+=item * B<ssl_verify_none>
+
+Sets the C<SSL_verify_mode> and C<verify_hostname ssl> options on the
+underlying L<REST::Client>'s user agent to 0, thus disabling them. This
+allows access to JIRA servers that have self-signed certificates that don't
+pass L<LWP::UserAgent>'s verification methods.
+
+=item * B<anonymous>
+
+Tells the module that you want to connect to the specified JIRA server with
+no username or password.  This way you can access public JIRA servers
+without needing to authenticate.
+
+=back

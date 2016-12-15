@@ -12,6 +12,8 @@ use Data::Dumper::Concise;
 use MIME::Base64;
 use Scalar::Util qw( blessed reftype );
 
+=for stopwords jira
+
 =internal_method B<jira>
 
 Returns a C<JIRA::REST::Class> object with credentials for the last JIRA user.
@@ -43,7 +45,6 @@ sub jira {
     # called with just the class name
     return JIRA::REST::Class->new($args);
 }
-
 
 =internal_method B<factory>
 
@@ -139,10 +140,6 @@ sub _JIRA_REST_version_has_named_parameters {
 
 An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
 
-=cut
-
-sub REST_CLIENT { shift->JIRA_REST->{rest} }
-
 =internal_method B<make_object>
 
 A pass-through method that calls C<JIRA::REST::Class::Factory::make_object()>.
@@ -157,6 +154,7 @@ A pass-through method that calls C<JIRA::REST::Class::Factory::get_factory_class
 
 =cut
 
+sub REST_CLIENT { shift->JIRA_REST->{rest} }
 sub make_object { shift->factory->make_object(@_) }
 sub make_date   { shift->factory->make_date(@_) }
 sub class_for   { shift->factory->get_factory_class(@_) }
@@ -280,7 +278,7 @@ sub deep_copy {
 
 =internal_method B<shallow_copy> THING
 
-A utility function to produce a shallow copy of a thing (mostly, not going down into the contents of objects within objects).
+A utility function to produce a shallow copy of a thing (mostly not going down into the contents of objects within objects).
 
 =cut
 

@@ -110,3 +110,14 @@ sub update {
 }
 
 1;
+
+=pod
+
+{{
+   use Path::Tiny;
+   $OUT .= q{=for stopwords};
+   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
+       $OUT .= qq{ $word};
+   }
+   $OUT .= qq{\n};
+}}

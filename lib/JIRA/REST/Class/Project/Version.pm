@@ -47,3 +47,4 @@ A boolean indicating whether the version is released.
 =accessor B<self>
 Returns the JIRA REST API URL of the project version.
 
+=for stopwords projectId

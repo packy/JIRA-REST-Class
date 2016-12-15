@@ -62,3 +62,12 @@ This method returns the update author of the JIRA issue's work item as a C<JIRA:
 
 =accessor B<updated>
 This method returns the update time of the JIRA issue's work item as a C<DateTime> object.
+
+{{
+   use Path::Tiny;
+   $OUT .= q{=for stopwords};
+   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
+       $OUT .= qq{ $word};
+   }
+   $OUT .= qq{\n};
+}}

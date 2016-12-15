@@ -25,3 +25,12 @@ __PACKAGE__->mk_data_ro_accessors(qw/ field fieldtype
 =accessor B<to>
 
 =accessor B<toString>
+
+{{
+   use Path::Tiny;
+   $OUT .= q{=for stopwords};
+   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
+       $OUT .= qq{ $word};
+   }
+   $OUT .= qq{\n};
+}}

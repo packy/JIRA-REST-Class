@@ -1,0 +1,35 @@
+=head1 SYNOPSIS
+
+  use JIRA::REST::Class;
+
+  my $jira = JIRA::REST::Class->new({
+      url             => 'https://jira.example.net',
+      username        => 'myuser',
+      password        => 'mypass',
+      SSL_verify_none => 1, # if your server uses self-signed SSL certs
+  });
+
+  # get issue by key
+  my ($issue) = $jira->issues('MYPROJ-101');
+
+  # get multiple issues by key
+  my @issues = $jira->issues('MYPROJ-101', 'MYPROJ-102', 'MYPROJ-103');
+
+  # get multiple issues through search
+  my @issues =
+      $jira->issues({ jql => q/project = "MYPROJ" and status = "open"/ });
+
+  # get an iterator for a search
+  my $search =
+      $jira->iterator({ jql => q/project = "MYPROJ" and status = "open"/ });
+
+  if ( $search->issue_count ) {
+      printf "Found %d open issues in MYPROJ:\n", $search->issue_count;
+      while ( my $issue = $search->next ) {
+          printf "  Issue %s is open\n", $issue->key;
+      }
+  }
+  else {
+      print "No open issues in MYPROJ.\n";
+  }
+

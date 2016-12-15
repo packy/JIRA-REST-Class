@@ -901,3 +901,11 @@ Returns the JIRA REST API's full URL for this issue.
 
 Returns the JIRA REST API's URL for this issue in a form used by C<JIRA::REST::Class>.
 
+{{
+   use Path::Tiny;
+   $OUT .= q{=for stopwords};
+   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
+       $OUT .= qq{ $word};
+   }
+   $OUT .= qq{\n};
+}}

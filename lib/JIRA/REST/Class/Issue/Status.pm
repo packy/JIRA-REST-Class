@@ -46,3 +46,5 @@ Returns the JIRA REST API URL of the status.
 =method B<category>
 
 Returns the category of the status as a C<JIRA::REST::Class::Issue::Status::Category> object.
+
+=for stopwords iconUrl

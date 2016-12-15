@@ -47,3 +47,5 @@ Returns the JIRA REST API URL of the issue type.
 
 =accessor B<subtask>
 Returns a boolean indicating whether the issue type is a subtask.
+
+=for stopwords iconUrl
