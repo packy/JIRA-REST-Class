@@ -383,41 +383,13 @@ __END__
 
 {{ include( "pod/mixins.pod" )->fill_in; }}
 
-=head1 SEE ALSO
-
-=over
-
-=item * L<JIRA::REST>
-
-C<JIRA::REST::Class> uses C<JIRA::REST> to perform all its interaction with JIRA.
-
-=item * L<REST::Client>
-
-C<JIRA::REST> uses a C<REST::Client> object to perform its low-level interactions.
-
-=item * L<JIRA REST API Reference|https://docs.atlassian.com/jira/REST/latest/>
-
-Atlassian's official JIRA REST API Reference.
-
-=back
+{{ include( "pod/see-also.pod" )->fill_in; }}
 
 =head1 REPOSITORY
 
 L<https://github.com/packy/JIRA-REST-Class>
 
-=head1 CREDITS
-
-=for stopwords Gustavo Leite de Mendonça Chaves
-
-=for stopwords gnustavo
-
-=over 4
-
-=item L<Gustavo Leite de Mendonça Chaves|https://metacpan.org/author/GNUSTAVO> <gnustavo@cpan.org>
-
-Many thanks to Gustavo for C<JIRA::REST>, which is what I started working with when I first wanted to automate my interactions with JIRA in the summer of 2016, and without which I would have had a LOT of work to do.
-
-=back
+{{ include( "pod/credits.pod" )->fill_in; }}
 
 {{
    use Path::Tiny;

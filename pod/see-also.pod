@@ -1,0 +1,17 @@
+=head1 SEE ALSO
+
+=over
+
+=item * L<JIRA::REST>
+
+C<JIRA::REST::Class> uses C<JIRA::REST> to perform all its interaction with JIRA.
+
+=item * L<REST::Client>
+
+C<JIRA::REST> uses a C<REST::Client> object to perform its low-level interactions.
+
+=item * L<JIRA REST API Reference|https://docs.atlassian.com/jira/REST/latest/>
+
+Atlassian's official JIRA REST API Reference.
+
+=back
