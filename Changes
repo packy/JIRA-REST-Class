@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+0.03      2016-12-14 23:56:06-05:00 America/New_York
+
+          Fixed the tests that were breaking on other systems (hopefully),
+          added a method to allow uploading of files from data in memory.
+
 0.02      2016-12-06 23:43:16-05:00 America/New_York
 
           Reworked Issue->add_subtask() to automatically detect the project's
