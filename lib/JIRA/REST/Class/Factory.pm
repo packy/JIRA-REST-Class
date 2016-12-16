@@ -16,6 +16,7 @@ JIRA::REST::Class::Factory->add_factory_type(
     changelog    => 'JIRA::REST::Class::Issue::Changelog',
     change       => 'JIRA::REST::Class::Issue::Changelog::Change',
     changeitem   => 'JIRA::REST::Class::Issue::Changelog::Change::Item',
+    comment      => 'JIRA::REST::Class::Issue::Comment',
     linktype     => 'JIRA::REST::Class::Issue::LinkType',
     status       => 'JIRA::REST::Class::Issue::Status',
     statuscat    => 'JIRA::REST::Class::Issue::Status::Category',

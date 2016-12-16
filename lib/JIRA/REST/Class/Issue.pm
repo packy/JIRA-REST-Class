@@ -120,6 +120,14 @@ __PACKAGE__->mk_lazy_ro_accessor('changelog', sub {
     $self->make_object('changelog');
 });
 
+__PACKAGE__->mk_lazy_ro_accessor('comments', sub {
+    my $self = shift;
+    my $data = $self->get('/comment');
+    $self->{comments} = [ map {
+        $self->make_object('comment', { data => $_ });
+    } @{ $data->{comments} } ];
+});
+
 __PACKAGE__->mk_lazy_ro_accessor('worklog', sub {
     my $self = shift;
     $self->make_object('worklog');
