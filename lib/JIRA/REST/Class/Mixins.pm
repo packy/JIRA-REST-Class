@@ -243,12 +243,14 @@ Returns a stringified representation of the object's data generated somewhat by 
 
 sub dump {
     my $self = shift;
+    my $result;
     if (@_) {
-        return $self->shallow_copy( @_ );
+        $result = $self->shallow_copy( @_ );
     }
     else {
-        return $self->shallow_copy( $self );
+        $result = $self->shallow_copy( $self );
     }
+    return ref($result) ? Dumper($result) : $result;
 }
 
 =internal_method B<deep_copy>
@@ -339,16 +341,12 @@ sub __shallow_copy {
         return $$thing;
     }
     elsif (ref $thing eq 'ARRAY') {
-        my $thingy = Dumper( [ map { __shallow_copy($_) } @{$thing} ] );
-        chomp $thingy;
-        return $thingy;
+        return [ map { __shallow_copy($_) } @{$thing} ];
     }
     elsif (ref $thing eq 'HASH') {
-        my $thingy = Dumper(+{
+        return +{
             map { $_ => __shallow_copy($thing->{$_}) } keys %{$thing}
-        });
-        chomp $thingy;
-        return $thingy;
+        };
     }
     return $thing;
 }
