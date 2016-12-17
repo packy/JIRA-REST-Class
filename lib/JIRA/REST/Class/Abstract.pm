@@ -161,7 +161,7 @@ if (eval { require Sub::Name }) {
     Sub::Name->import;
 }
 
-=method B<mk_contextual_ro_accessors> list of accessors to make
+=internal_method B<mk_contextual_ro_accessors> list of accessors to make
 
 Because I didn't want to give up Class::Accessor::Fast, but wanted to be
 able to make contextual accessors when it was useful.
@@ -192,7 +192,7 @@ sub mk_contextual_ro_accessors {
     return $class;
 };
 
-=method B<mk_deep_ro_accessor> LIST OF KEYS TO HASH
+=internal_method B<mk_deep_ro_accessor> LIST OF KEYS TO HASH
 
 Why do accessors have to be only for the top level of the hash?  Why can't they be several layers deep?  This method takes a list of keys for the hash this object is based on and creates an accessor that goes down deeper than just the first level.
 
@@ -224,7 +224,7 @@ sub mk_deep_ro_accessor {
     return $class;
 };
 
-=method B<mk_lazy_ro_accessor> field, sub_ref_to_construct_value
+=internal_method B<mk_lazy_ro_accessor> field, sub_ref_to_construct_value
 
 Makes an accessor that checks to see if the value for the accessor has been loaded, and, if it hasn't, runs the provided subroutine to construct the value.  Especially good for loading values that are objects populated by REST calls.
 
