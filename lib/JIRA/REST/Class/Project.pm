@@ -8,36 +8,33 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a JIRA project as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name projectTypeKey self ));
+__PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name
+                                      projectTypeKey self ));
 
-_make_lazy_ro_accessors(qw/ category assigneeType components description
-                            issueTypes subtaskIssueTypes lead roles versions /);
-
-use overload
-    '""'   => sub { shift->key },
-    '0+'   => sub { shift->id  },
-    '<=>'  => sub {
-        my($A, $B) = @_;
-        my $AA = ref $A ? $A->id : $A;
-        my $BB = ref $B ? $B->id : $B;
-        $AA <=> $BB
-    },
-    'cmp'  => sub {
-        my($A, $B) = @_;
-        my $AA = ref $A ? $A->name : $A;
-        my $BB = ref $B ? $B->name : $B;
-        $AA cmp $BB
-    };
-
-sub _make_lazy_ro_accessors {
-    foreach my $field (@_) {
-        __PACKAGE__->mk_lazy_ro_accessor($field, sub {
-            my $self = shift;
-            $self->_do_lazy_load(@_);
-            $self->{$field};
-        }, @_);
-    }
+for my $field (qw/ category assigneeType components description
+                   issueTypes subtaskIssueTypes lead roles versions /) {
+    __PACKAGE__->mk_lazy_ro_accessor($field, sub {
+                                         my $self = shift;
+                                         $self->_do_lazy_load(@_);
+                                         $self->{$field};
+                                     });
 }
+
+#
+# I'm putting this here as a reminder to myself and as an explanation to
+# anyone who wonders why I'm lazily loading so much information. There are
+# two ways this object can be instantiated: either as a request for all the
+# information on a particular project, or as an accessor object wrapping
+# the data returned by the GET /rest/api/latest/project API call, which
+# only returns the following attributes: "self", "id", "key", "name",
+# "avatarUrls", and "projectCategory".  I didn't want to incur a REST API
+# call for each of these objects if all they were being used for is
+# accessing the data in the project list, so I made the accessors for
+# information that wasn't in that list be lazily loaded.  If the end user
+# gets an object from the project list method and asks for information that
+# only comes from making the full /rest/api/latest/project/{projectIdOrKey}
+# API call, we make the call at that time.
+#
 
 sub _do_lazy_load {
     my $self  = shift;
@@ -266,6 +263,25 @@ sub field_name {
 
     return $self->{field_names}->{$name};
 }
+
+
+
+use overload
+    '""'   => sub { shift->key },
+    '0+'   => sub { shift->id  },
+    '<=>'  => sub {
+        my($A, $B) = @_;
+        my $AA = ref $A ? $A->id : $A;
+        my $BB = ref $B ? $B->id : $B;
+        $AA <=> $BB
+    },
+    'cmp'  => sub {
+        my($A, $B) = @_;
+        my $AA = ref $A ? $A->name : $A;
+        my $BB = ref $B ? $B->name : $B;
+        $AA cmp $BB
+    };
+
 
 1;
 
