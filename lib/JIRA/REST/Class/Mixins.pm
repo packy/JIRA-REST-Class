@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use v5.10;
 
-our $VERSION = '0.01';
+use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: An mixin class for C<JIRA::REST::Class> that other objects can inherit methods from.
 

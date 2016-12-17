@@ -6,7 +6,7 @@ use v5.10;
 
 use Carp;
 
-our $VERSION = '0.01';
+use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
 

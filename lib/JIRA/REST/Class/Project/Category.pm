@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 
-our $VERSION = '0.01';
+use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the category of a JIRA project as an object.
 

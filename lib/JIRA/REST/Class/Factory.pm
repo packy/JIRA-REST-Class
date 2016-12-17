@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 
-our $VERSION = '0.01';
+use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A factory class for building all the other classes in C<JIRA::REST::Class>.
 

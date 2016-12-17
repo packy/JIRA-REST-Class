@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 
-our $VERSION = '0.01';
+use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a JIRA query as an object.  Attempts to return an array of all results from the query.
 
