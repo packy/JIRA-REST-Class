@@ -3,23 +3,23 @@ use strict;
 use warnings;
 
 use File::Basename;
-use lib dirname($0).'/lib'; # we keep testing-only modules in a lib under t!
-use lib dirname($0).'/../lib'; # the module itself is under here
+use lib dirname($0);
 
-use constant TESTCOUNT => 12;
+use constant TESTCOUNT => 11;
 use JSON;
 use Test::More tests => &TESTCOUNT;
 use Try::Tiny;
 
-use_ok('JIRA::REST::Class');
-use_ok('Test');
+use MyTest;
 
-Test->setup_server();
-my $log = Test->server_log->clone( prefix => "[pid $$] " );
+use_ok('JIRA::REST::Class');
+
+TestServer_setup();
+my $log = TestServer_log->clone( prefix => "[pid $$] " );
 
 # testing connection to server via JIRA::REST::Class
 try {
-    my $host   = Test->server_url();
+    my $host   = TestServer_url();
     my $user   = 'username';
     my $pass   = 'password';
     my $client = JIRA::REST::Class->new($host, $user, $pass);
@@ -39,20 +39,20 @@ try {
     is( $client->password, $pass,
         "client->password returns JIRA password");
 
-    my $pid = Test->server_pid();
+    my $pid = TestServer_pid();
 
     isnt( $pid, undef, 'PID defined for server' );
 
     like( $pid, qr/^\d+$/, "PID '$pid' is numeric" );
 
-    ok( Test->server_is_running(),
+    ok( TestServer_is_running(),
         sprintf("server is running on PID %s",
                 $pid || 'undef' ));
 
-    is( Test->test_server(), '{"test":"SUCCESS"}',
+    is( TestServer_test(), '{"GET":"SUCCESS"}',
         'server test URL works' );
 
-    is( Test->stop_server(), '{"quit":"SUCCESS"}',
+    is( TestServer_stop(), '{"quit":"SUCCESS"}',
         'server stop reports success' );
 }
 catch {
@@ -62,4 +62,3 @@ catch {
 
 done_testing();
 exit;
-

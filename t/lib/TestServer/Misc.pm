@@ -5,12 +5,19 @@ use warnings;
 use v5.10;
 
 use JSON::PP;
+use Data::Dumper::Concise;
 
 sub import {
     my $class = __PACKAGE__;
     $class->register_dispatch(
-        '/test' => sub { $class->test(@_) },
-        '/quit' => sub { $class->quit(@_) },
+        '/test'                        => sub { $class->test(@_) },
+        '/rest/api/latest/test'        => sub { $class->test(@_) },
+        'POST /rest/api/latest/test'   => sub { $class->test(@_) },
+        'PUT /rest/api/latest/test'    => sub { $class->test(@_) },
+        'DELETE /rest/api/latest/test' => sub { $class->test(@_) },
+
+        'POST /rest/api/latest/data_upload' => sub { $class->upload(@_) },
+
         '/rest/api/latest/configuration' =>
             sub { $class->configuration_response(@_) },
     );
@@ -18,13 +25,25 @@ sub import {
 
 sub test {
     my ( $class, $server, $cgi ) = @_;
-    $class->response($server, { test => 'SUCCESS' });
+    my $method = $cgi->request_method;
+    my $path   = $cgi->path_info;
+    $class->response($server, { $method => 'SUCCESS' });
+    $server->log->info("successful $method $path request");
 }
 
-sub quit {
+sub upload {
     my ( $class, $server, $cgi ) = @_;
-    $class->response($server, { quit => 'SUCCESS' });
-    exit;
+    my $method = $cgi->request_method;
+    my $file = $cgi->param( 'file' );
+    my $retval = $cgi->uploadInfo( $file );
+    $retval->{name} = "$file";
+    while (my $line = <$file>) {
+        $retval->{data} .= $line;
+    }
+    $retval->{$method} = 'SUCCESS';
+    $class->response($server, $retval);
+    $server->log->info("upload info for $file: ".
+                       Dumper($cgi->uploadInfo( $file )));
 }
 
 sub configuration_response {

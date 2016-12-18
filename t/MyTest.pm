@@ -1,84 +1,145 @@
-package Test;
+package MyTest;
 use base qw( Exporter );
 use strict;
 use warnings;
 use v5.10;
 
+use Carp;
+use Clone::Any qw( clone );
 use Data::Dumper::Concise;
 use File::Slurp;
 use File::Spec::Functions;
 use Getopt::Long;
+use IO::Socket::INET;
 use JSON::PP;
+use Module::Load;
 use REST::Client;
-use Scalar::Util qw( blessed reftype );
-use Test::More;
 use Try::Tiny;
+
+use Test::Deep;
+use Test::Exception;
+use Test::More;
+
+use File::Basename;
+use lib dirname($0).'/lib'; # we keep testing-only modules in a lib under t!
+use lib dirname($0).'/../lib'; # the module itself is under here
 
 use TestServer;
 
-our @EXPORT = qw( chomper can_ok_abstract dump_got_expected get_class
-                  validate_contextual_accessor validate_expected_fields  );
+my $port = 7657; # port the test server will listen on
+
+
+BEGIN {
+    autoload Carp::Always # so any die() statements produce stack traces
+        if TestServer::logfile() # but only if we're logging
+}
+
+my @TestServerSubs = qw( TestServer_setup
+                         TestServer_log
+                         TestServer_pid
+                         TestServer_is_running
+                         TestServer_rest
+                         TestServer_test
+                         TestServer_stop
+                         TestServer_url );
+
+my @MyTestSubs = qw( chomper can_ok_abstract can_ok_mixins
+                     dump_got_expected get_class
+                     validate_contextual_accessor
+                     validate_wrapper_method 
+                     validate_expected_fields  );
+
+our @EXPORT = ( @TestServerSubs,
+                @MyTestSubs,
+                # re-export things we're importing
+                @Test::Deep::EXPORT,
+                @Test::Exception::EXPORT,
+                @Test::More::EXPORT,
+                @Try::Tiny::EXPORT );
 
 ###########################################################################
 #
 # support for starting the test server
 #
 
-my $port = 7657;
-my $rest;
-my $log;
 my $pid;
+my $quit = 0;
 
-
-sub setup_server {
-    server_log();
+sub TestServer_setup {
+    my $log = TestServer_log();
 
     try {
         # start the server
         $log->info('starting server and sending to background');
         $pid = TestServer->new($port)->background();
     };
-    if ((! defined $pid) || $$ == $pid) { exit }
+    unless ($pid) { exit } # error or child fell through
     $log->info("started server on PID ".$pid);
 }
 
-sub server_log {
+sub TestServer_stop {
+    my $log = TestServer_log();
+
+    if ( TestServer_is_listening() ) {
+        $log->info("Quit request processing");
+        my $result = TestServer_rest('GET' => '/quit');
+        return $result;
+    }
+    $log->info("Quit skipped because server is down");
+}
+
+sub TestServer_log {
+    state $log;
     unless (defined $log) {
         $log = TestServer->get_logger->clone( prefix => "[pid $$] " );
     }
     return $log;
 }
 
-sub server_pid {
+sub TestServer_pid {
     return $pid;
 }
 
-sub server_is_running {
+sub TestServer_is_running {
     return unless defined $pid && $pid =~ /^\d+$/;
     kill 0, $pid;
 }
 
-sub rest {
+sub get_rest_client {
+    my $rest = REST::Client->new;
+    $rest->setHost(TestServer_url());
+    $rest->setTimeout(5);
+    return $rest;
+}
+
+sub TestServer_rest {
     my ($method, $request) = @_;
-    unless (defined $rest) {
-        $rest = REST::Client->new;
-        $rest->setHost(server_url());
-    }
+    state $rest = get_rest_client();
     my $result = $rest->$method($request)->responseContent();
-    $log->info($result);
     return $result;
 }
 
-sub test_server {
-    return rest('GET' => '/test');
+sub TestServer_test {
+    return TestServer_rest('GET' => '/test');
 }
 
-sub stop_server {
-    return rest('GET' => '/quit');
-}
-
-sub server_url {
+sub TestServer_url {
     return "http://localhost:$port";
+}
+
+sub TestServer_is_listening {
+    return 0 unless TestServer_is_running();
+
+    TestServer_log()->info("testing for port $port");
+    # cribbed from IO::Socket::PortState
+    # I didn't want to add ANOTHER dependency
+    my $sock = IO::Socket::INET->new(
+        PeerAddr => 'localhost',
+        PeerPort => $port,
+        Proto    => 'tcp',
+        Timeout  => 5,
+    );
+    return !defined $sock ? 0 : 1;
 }
 
 ###########################################################################
@@ -87,8 +148,7 @@ sub server_url {
 #
 
 sub chomper {
-    my $thing = Dumper( @_ );
-    chomp $thing;
+    chomp(my $thing = Dumper( @_ ));
     return $thing;
 }
 
@@ -115,8 +175,8 @@ sub can_ok_mixins {
     can_ok( $thing, @_, qw/ jira factory JIRA_REST REST_CLIENT
                             _JIRA_REST_version_has_named_parameters
                             make_object make_date class_for obj_isa
-                            name_for_user key_for_issue dump deep_copy
-                            shallow_copy find_link_name_and_direction
+                            name_for_user key_for_issue dump
+                            cosmetic_copy find_link_name_and_direction
                             _get_known_args _check_required_args
                             _croakmsg _quoted_list / );
 }
@@ -169,6 +229,7 @@ sub validate_expected_fields {
     my $obj    = shift;
     my $expect = shift;
     my $isa    = ref $obj || q{};
+
     if ($obj->isa(get_class('abstract'))) {
         # common accessors for ALL JIRA::REST::Class::Abstract objects
         $expect->{factory}     = { class => 'factory' };
@@ -209,6 +270,22 @@ sub validate_expected_fields {
             }
         }
     }
+}
+
+sub validate_wrapper_method {
+    my ($sub, $expected, $name) = @_;
+
+    TestServer_log->info("starting '$name'");
+    my $results;
+    try {
+        $results = $sub->();
+    }
+    catch {
+        $results = $_;
+    };
+
+    is_deeply( $results, $expected, $name );
+    TestServer_log->info("finishing '$name'")
 }
 
 1;

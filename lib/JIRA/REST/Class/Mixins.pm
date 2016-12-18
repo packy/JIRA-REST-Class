@@ -8,17 +8,10 @@ use JIRA::REST::Class::Version qw( $VERSION );
 # ABSTRACT: An mixin class for C<JIRA::REST::Class> that other objects can inherit methods from.
 
 use Carp;
+use Clone::Any qw( clone );
 use Data::Dumper::Concise;
 use MIME::Base64;
 use Scalar::Util qw( blessed reftype );
-
-=for stopwords jira
-
-=internal_method B<jira>
-
-Returns a C<JIRA::REST::Class> object with credentials for the last JIRA user.
-
-=cut
 
 sub jira {
     my $self  = shift;
@@ -46,11 +39,37 @@ sub jira {
     return JIRA::REST::Class->new($args);
 }
 
-=internal_method B<factory>
+#---------------------------------------------------------------------------
 
-An accessor for the C<JIRA::REST::Class::Factory>.
+=begin test setup
+
+BEGIN {
+    use File::Basename;
+    use lib dirname($0).'/../lib';
+
+    use InlineTest;
+    use Clone::Any qw( clone );
+    use Scalar::Util qw(refaddr);
+
+    use_ok('JIRA::REST::Class::Mixins');
+    use_ok('JIRA::REST::Class::Factory');
+    use_ok('JIRA::REST::Class::FactoryTypes', qw( %TYPES ));
+}
+
+=end test
+
+=begin testing constructor 3
+
+my $jira = JIRA::REST::Class::Mixins->jira(InlineTest->constructor_args);
+isa_ok($jira, $TYPES{class}, 'Mixins->jira');
+isa_ok($jira->JIRA_REST, 'JIRA::REST', 'JIRA::REST::Class->JIRA_REST');
+isa_ok($jira->REST_CLIENT, 'REST::Client', 'JIRA::REST::Class->REST_CLIENT');
+
+=end testing
 
 =cut
+
+#---------------------------------------------------------------------------
 
 sub factory {
     my $self  = shift;
@@ -75,11 +94,28 @@ sub factory {
     return JIRA::REST::Class::Factory->new('factory', { args => $args });
 }
 
-=internal_method B<JIRA_REST>
+#---------------------------------------------------------------------------
 
-An accessor that returns the C<JIRA::REST> object being used.
+=begin test setup
+
+sub get_factory {
+    JIRA::REST::Class::Mixins->factory(InlineTest->constructor_args);
+}
+
+=end test
+
+=begin testing factory 2
+
+my $factory = get_factory();
+isa_ok($factory, $TYPES{factory}, 'Mixins->factory');
+ok(JIRA::REST::Class::Mixins->obj_isa($factory, 'factory'),
+   'Mixins->obj_isa works');
+
+=end testing
 
 =cut
+
+#---------------------------------------------------------------------------
 
 sub JIRA_REST {
     my $self = shift;
@@ -147,39 +183,11 @@ sub _JIRA_REST_version_has_separate_path {
     return $retval;
 }
 
-=internal_method B<REST_CLIENT>
-
-An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
-
-=internal_method B<JSON>
-
-An accessor that returns the C<JSON> object inside the C<JIRA::REST> object being used.
-
-=internal_method B<make_object>
-
-A pass-through method that calls C<JIRA::REST::Class::Factory::make_object()>.
-
-=internal_method B<make_date>
-
-A pass-through method that calls C<JIRA::REST::Class::Factory::make_date()>.
-
-=internal_method B<class_for>
-
-A pass-through method that calls C<JIRA::REST::Class::Factory::get_factory_class()>.
-
-=cut
-
 sub REST_CLIENT { shift->JIRA_REST->{rest} }
 sub JSON        { shift->JIRA_REST->{json} }
 sub make_object { shift->factory->make_object(@_) }
 sub make_date   { shift->factory->make_date(@_) }
 sub class_for   { shift->factory->get_factory_class(@_) }
-
-=internal_method B<obj_isa>
-
-When passed a scalar that could be an object and a class string, returns whether the scalar is, in fact, an object of that class.  Looks up the actual class using C<class_for()>, which calls  C<JIRA::REST::Class::Factory::get_factory_class()>.
-
-=cut
 
 sub obj_isa  {
     my ($self, $obj, $type) = @_;
@@ -188,33 +196,15 @@ sub obj_isa  {
     $obj->isa( $class );
 }
 
-=method B<name_for_user>
-
-When passed a scalar that could be a C<JIRA::REST::Class::User> object, returns the name of the user if it is a C<JIRA::REST::Class::User> object, or the unmodified scalar if it is not.
-
-=cut
-
 sub name_for_user {
     my($self, $user) = @_;
     return $self->obj_isa($user, 'user') ? $user->name : $user;
 }
 
-=method B<key_for_issue>
-
-When passed a scalar that could be a C<JIRA::REST::Class::Issue> object, returns the key of the issue if it is a C<JIRA::REST::Class::Issue> object, or the unmodified scalar if it is not.
-
-=cut
-
 sub key_for_issue {
     my($self, $issue) = @_;
     return $self->obj_isa($issue, 'issue') ? $issue->key : $issue;
 }
-
-=method B<find_link_name_and_direction>
-
-When passed two scalars, one that could be a C<JIRA::REST::Class::Issue::LinkType> object and another that is a direction (inward/outward), returns the name of the link type and direction if it is a C<JIRA::REST::Class::Issue::LinkType> object, or attempts to determine the link type and direction from the provided scalars.
-
-=cut
 
 sub find_link_name_and_direction {
     my ($self, $link, $dir) = @_;
@@ -251,67 +241,65 @@ sub find_link_name_and_direction {
 
 ###########################################################################
 
-=method B<dump>
-
-Returns a stringified representation of the object's data generated somewhat by Data::Dumper::Concise, but only going one level deep.  If it finds objects in the data, it will attempt to represent them in some abbreviated fashion which may not display all the data in the object.
-
-=cut
-
 sub dump {
     my $self = shift;
     my $result;
     if (@_) {
-        $result = $self->shallow_copy( @_ );
+        $result = $self->cosmetic_copy( @_ );
     }
     else {
-        $result = $self->shallow_copy( $self );
+        $result = $self->cosmetic_copy( $self );
     }
     return ref($result) ? Dumper($result) : $result;
 }
 
-=internal_method B<deep_copy>
-
- Returns a deep copy of the hashref it is passed
-
- Example:
-
-    my $bar = Class->deep_copy($foo);
-    $bar->{XXX} = 'new value'; # $foo->{XXX} isn't changed
-
-=cut
-
-sub deep_copy {
-    my $class = shift;
-    my $thing = shift;
-    if (not ref $thing) {
-        return $thing;
-    }
-    elsif (ref $thing eq 'ARRAY') {
-        return [ map { $class->deep_copy($_) } @$thing ];
-    }
-    elsif (ref $thing eq 'HASH') {
-        return +{ map { $_ => $class->deep_copy($thing->{$_}) } keys %$thing };
-    }
-}
-
-=internal_method B<shallow_copy> THING
-
-A utility function to produce a shallow copy of a thing (mostly not going down into the contents of objects within objects).
-
-=cut
-
-sub shallow_copy {
+sub cosmetic_copy {
     shift; # we don't need $self
-    return __shallow_copy(@_, 'top');
+    return __cosmetic_copy(@_, 'top');
 }
 
-sub __shallow_copy {
+#---------------------------------------------------------------------------
+
+=begin testing cosmetic_copy 3
+
+my @PROJ = InlineTest->project_data;
+my $orig = [ @PROJ ];
+my $copy = JIRA::REST::Class::Mixins->cosmetic_copy($orig);
+
+is_deeply( $orig, $copy, "simple cosmetic copy has same content as original" );
+
+cmp_ok( refaddr($orig), 'ne', refaddr($copy),
+        "simple cosmetic copy has different address as original" );
+
+# make a complex reference to copy
+my $factory = get_factory();
+$orig = [ map { $factory->make_object('project', { data => $_ }) } @PROJ ];
+$copy = JIRA::REST::Class::Mixins->cosmetic_copy($orig);
+
+is_deeply( $copy, [
+  "JIRA::REST::Class::Project->name(JIRA::REST::Class)",
+  "JIRA::REST::Class::Project->name(Kanban software development sample project)",
+  "JIRA::REST::Class::Project->name(PacKay Productions)",
+  "JIRA::REST::Class::Project->name(Project Management Sample Project)",
+  "JIRA::REST::Class::Project->name(Scrum Software Development Sample Project)"
+], "complex cosmetic copy is properly serialized");
+
+=end testing
+
+=cut
+
+#---------------------------------------------------------------------------
+
+
+sub __cosmetic_copy {
     my $thing = shift;
     my $top   = pop;
 
     if (not ref $thing) {
         return $thing;
     }
+
+    my $hash_copy = sub {};
 
     if ( my $class = blessed $thing ) {
         if ($class eq 'JSON::PP::Boolean') {
@@ -328,28 +316,34 @@ sub __shallow_copy {
         }
         elsif ($top) {
             if (reftype $thing eq 'ARRAY') {
-                chomp ( my $data = Dumper([
-                    map { __shallow_copy($_) } @{$thing}
-                ]) );
+                chomp ( my $data = Dumper( __array_copy($thing) ) );
                 return "bless( $data => $class )";
             }
             elsif (reftype $thing eq 'HASH') {
-                chomp ( my $data = Dumper({
-                    map { $_ => __shallow_copy($thing->{$_}) } keys %{$thing}
-                }) );
+                chomp ( my $data = Dumper( __hash_copy($thing) ) );
                 return "bless( $data => $class )";
             }
             return Dumper($thing);
         }
         else {
+            my $fallback;
+            # see if the object has any of these methods
             foreach my $method (qw/ name key id /) {
                 if ( $thing->can($method) ) {
-                    my $value = $thing->$method // 'undef';
-                    return sprintf '%s->%s(%s)',
-                        $class, $method, $value;
+                    my $value = $thing->$method;
+
+                    # if the method returned a value, great!
+                    return sprintf '%s->%s(%s)', $class, $method, $value
+                        if defined $value;
+
+                    # we can use it as a stringification if we have to
+                    $fallback //= sprintf '%s->%s(undef)', $class, $method;
                 }
             }
-            return "$thing";
+
+            # fall back to either a $class->$method(undef)
+            # or the default stringification
+            return $fallback ? $fallback : "$thing";
         }
     }
 
@@ -357,14 +351,24 @@ sub __shallow_copy {
         return $$thing;
     }
     elsif (ref $thing eq 'ARRAY') {
-        return [ map { __shallow_copy($_) } @{$thing} ];
+        return __array_copy($thing);
     }
     elsif (ref $thing eq 'HASH') {
-        return +{
-            map { $_ => __shallow_copy($thing->{$_}) } keys %{$thing}
-        };
+        return __hash_copy($thing);
     }
     return $thing;
+}
+
+sub __array_copy {
+    my $thing = shift;
+    return [ map { __cosmetic_copy($_) } @{$thing} ];
+}
+
+sub __hash_copy {
+    my $thing = shift;
+    return +{
+        map { $_ => __cosmetic_copy($thing->{$_}) } keys %{$thing}
+    };
 }
 
 
@@ -391,22 +395,22 @@ sub _get_known_args {
     my $out  = {};
     my @args = @_;
 
+    # get the package->name of the sub that called US
+    my $sub = $self->__subname(caller(1));
+
+    # if we croak, croak from the perspective of our CALLER's caller
+    local $Carp::CarpLevel = $Carp::CarpLevel + 2;
+
     # $in is an arrayref with a single hashref in it
     if (@$in == 1 && ref $$in[0] && ref $$in[0] eq 'HASH') {
         # copy that hashref into $in
-        $in = $self->deep_copy($in->[0]);
+        $in = clone($in->[0]);
 
         # moving arguments using the semi-magical hash reference slice
         @{$out}{@args} = delete @{$in}{@args};
 
         # if there are leftover keys
         if (keys %$in) {
-            # get the package->name of the sub that called US
-            (my $sub = +(caller(1))[3]) =~ s/(.*)::([^:]+)$/$1->$2/;
-
-            # croak from the perspective of our CALLER's caller
-            local $Carp::CarpLevel = $Carp::CarpLevel + 2;
-
             my $arguments = 'argument' . (keys %$in == 1 ? q{} : q{s});
 
             croak "$sub: unknown $arguments - "
@@ -420,15 +424,9 @@ sub _get_known_args {
             @{$out}{@args} = @$in;
         }
         else {
-            # get the package->name of the sub that called US
-            (my $sub = +(caller(1))[3]) =~ s/(.*)::([^:]+)$/$1->$2/;
-
             my $got  = scalar @$in;
             my $max  = scalar @args;
             my $list = $self->_quoted_list(@args);
-
-            # croak from the perspective of our CALLER's caller
-            local $Carp::CarpLevel = $Carp::CarpLevel + 2;
 
             croak "$sub: too many arguments - got $got, max $max ($list)";
         }
@@ -437,19 +435,101 @@ sub _get_known_args {
     return $out;
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing _get_known_args 5
+
+package InlineTestMixins;
+use Test::Exception;
+use Test::More;
+
+sub test_too_many_args {
+    JIRA::REST::Class::Mixins->_get_known_args(
+        [ qw/ url username password rest_client_config proxy
+              ssl_verify_none anonymous unknown1 unknown2 / ],
+        qw/ url username password rest_client_config proxy
+            ssl_verify_none anonymous/
+    );
+}
+
+# also excercizes __subname()
+
+throws_ok( sub { test_too_many_args() },
+           qr/^InlineTestMixins->test_too_many_args:/,
+           '_get_known_args constructs caller string okay' );
+
+throws_ok( sub { test_too_many_args() },
+           qr/too many arguments/,
+           '_get_known_args catches too many args okay' );
+
+sub test_unknown_args {
+    JIRA::REST::Class::Mixins->_get_known_args(
+        [ { map { $_ => $_ } qw/ url username password
+                                rest_client_config proxy
+                                ssl_verify_none anonymous
+                                unknown1 unknown2 / } ],
+        qw/ url username password rest_client_config proxy
+            ssl_verify_none anonymous /
+    );
+}
+
+# also excercizes _quoted_list()
+
+throws_ok( sub { test_unknown_args() },
+           qr/unknown arguments - 'unknown1', 'unknown2'/,
+           '_get_known_args catches unknown args okay' );
+
+my %expected = (
+    map { $_ => $_ } qw/ url username password
+                         rest_client_config proxy
+                         ssl_verify_none anonymous /
+);
+
+sub test_positional_args {
+    JIRA::REST::Class::Mixins->_get_known_args(
+        [ qw/ url username password rest_client_config proxy
+              ssl_verify_none anonymous / ],
+        qw/ url username password rest_client_config proxy
+            ssl_verify_none anonymous /
+    );
+}
+
+is_deeply( test_positional_args(), \%expected,
+           '_get_known_args processes positional args okay' );
+
+sub test_named_args {
+    JIRA::REST::Class::Mixins->_get_known_args(
+        [ { map { $_ => $_ } qw/ url username password
+                                rest_client_config proxy
+                                ssl_verify_none anonymous / } ],
+        qw/ url username password rest_client_config proxy
+            ssl_verify_none anonymous /
+    );
+}
+
+is_deeply( test_named_args(), \%expected,
+           '_get_known_args processes named args okay' );
+
+=end testing
+
+=cut
+
+#---------------------------------------------------------------------------
+
 # accepts a hashref and a list of required arguments
 
 sub _check_required_args {
     my $self = shift;
     my $args = shift;
     my @args = @_;
+
     while ( my($arg, $err) = splice @args, 0, 2 ) {
         next if exists  $args->{$arg}
              && defined $args->{$arg}
              && length  $args->{$arg};
 
         # get the package->name of the sub that called US
-        (my $sub = +(caller(1))[3]) =~ s/(.*)::([^:]+)$/$1->$2/;
+        my $sub = $self->__subname(caller(1));
 
         # croak from the perspective of our CALLER's caller
         local $Carp::CarpLevel = $Carp::CarpLevel + 2;
@@ -458,7 +538,32 @@ sub _check_required_args {
     }
 }
 
-# internal function so I don't have to build a "Package::subroutine:" prefix
+#---------------------------------------------------------------------------
+
+=begin testing _check_required_args 1
+
+use Test::Exception;
+use Test::More;
+
+sub test_missing_req_args {
+    my %args = map { $_ => $_ } qw/ username password /;
+    JIRA::REST::Class::Mixins->_check_required_args(
+        \%args,
+        url  => "you must specify a URL to connect to",
+    );
+}
+
+throws_ok( sub { test_missing_req_args() },
+           qr/you must specify a URL to connect to/,
+           '_check_required_args identifies missing args okay' );
+
+=end testing
+
+=cut
+
+#---------------------------------------------------------------------------
+
+# internal function so I don't have to build a "Package->subroutine:" prefix
 # whenever I want to croak
 
 sub _croakmsg {
@@ -467,10 +572,41 @@ sub _croakmsg {
     my $args = @_ ? q{(}.join(q{, },@_).q{)} : q{};
 
     # get the package->name of the sub that called US
-    (my $sub = +(caller(1))[3]) =~ s/(.*)::([^:]+)$/$1->$2/;
+    my $sub = $self->__subname(caller(1));
 
     return join q{ }, "$sub$args:", $msg;
 }
+
+#---------------------------------------------------------------------------
+
+=begin testing _croakmsg 2
+
+package InlineTestMixins;
+use Test::More;
+
+sub test_croakmsg_noargs {
+    JIRA::REST::Class::Mixins->_croakmsg("I died");
+}
+
+# also excercizes __subname()
+
+is( test_croakmsg_noargs(),
+    'InlineTestMixins->test_croakmsg_noargs: I died',
+    '_croakmsg constructs no argument string okay' );
+
+sub test_croakmsg_args {
+    JIRA::REST::Class::Mixins->_croakmsg("I died", qw/ arg1 arg2 /);
+}
+
+is( test_croakmsg_args(),
+    'InlineTestMixins->test_croakmsg_args(arg1, arg2): I died',
+    '_croakmsg constructs argument string okay' );
+
+=end testing
+
+=cut
+
+#---------------------------------------------------------------------------
 
 #
 # __PACKAGE__->_quoted_list(qw/ a b c /) returns q/'a', 'b', 'c'/
@@ -480,5 +616,20 @@ sub _quoted_list {
     return q{'} . join(q{', '}, @_) . q{'};
 }
 
+#
+#                              arguments provided by caller(n)
+# __PACKAGE__->__subname('Some::Pkg', 'filename', lineno, 'Some::Pkg::subname')
+#   returns 'Some::Pkg->subname'
+#
+sub __subname {
+    my($self, @callerN) = @_;
+    (my $sub = $callerN[3]) =~ s/(.*)::([^:]+)$/$1->$2/;
+    return $sub;
+}
+
 
 1;
+
+__END__
+
+{{ include( "pod/mixins.pod" )->fill_in; }}

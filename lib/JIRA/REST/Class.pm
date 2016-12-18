@@ -5,9 +5,10 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: An OO Class module built atop C<JIRA::REST> for dealing with JIRA issues and their data as objects.
+# ABSTRACT: An OO Class module built atop L<JIRA::REST> for dealing with JIRA issues and their data as objects.
 
 use Carp;
+use Clone::Any qw( clone );
 
 use JIRA::REST;
 use JIRA::REST::Class::Factory;
@@ -22,12 +23,103 @@ sub new {
     );
 
     return bless {
-        jira_rest => $class->JIRA_REST($args),
-        factory   => $class->factory($args),
-        args      => $args,
+        jira_rest => $class->JIRA_REST(clone($args)),
+        factory   => $class->factory(clone($args)),
+        args      => clone($args),
     }, $class;
 }
 
+#---------------------------------------------------------------------------
+#
+# using Inline::Test to generate testing files from tests
+# declared next to the code that it's testing
+#
+
+=begin test setup 1
+
+use File::Basename;
+use lib dirname($0).'/..';
+use MyTest;
+use v5.10;
+
+TestServer_setup();
+
+END {
+    TestServer_stop();
+}
+
+use_ok('JIRA::REST::Class');
+
+sub get_test_client {
+    state $test =
+        JIRA::REST::Class->new(TestServer_url(), 'username', 'password');
+    $test->REST_CLIENT->setTimeout(5);
+    return $test;
+};
+
+=end test
+
+#---------------------------------------------------------------------------
+
+=begin testing new 5
+
+my $jira;
+try {
+    $jira = JIRA::REST::Class->new({
+        url       => TestServer_url(),
+        username  => 'user',
+        password  => 'pass',
+        proxy     => '',
+        anonymous => 0,
+        ssl_verify_none => 1,
+        rest_client_config => {},
+    });
+}
+catch {
+    $jira = $_; # as good a place as any to stash the error, because
+                # isa_ok() will complain that it's not an object.
+};
+
+isa_ok($jira, 'JIRA::REST::Class', 'JIRA::REST::Class->new');
+
+throws_ok(
+    sub {
+        JIRA::REST::Class->new();
+    },
+    qr/URL argument must be defined/,
+    'JIRA::REST::Class->new with no parameters throws an exception',
+);
+
+throws_ok(
+    sub {
+        JIRA::REST::Class->new({
+            username  => 'user',
+            password  => 'pass',
+        });
+    },
+    qr/URL argument must be defined/,
+    'JIRA::REST::Class->new with no url throws an exception',
+);
+
+throws_ok(
+    sub {
+        JIRA::REST::Class->new('https://jira.example.com/');
+    },
+    qr/No credentials found/,
+    q{JIRA::REST::Class->new with just url tries to find credentials},
+);
+
+lives_ok(
+    sub {
+        JIRA::REST::Class->new('https://jira.example.com/',
+                               'user', 'pass');
+    },
+    q{JIRA::REST::Class->new with url, username, and password does't croak!},
+);
+
+=end testing
+
+#---------------------------------------------------------------------------
 
 =method B<issues> QUERY
 
@@ -35,7 +127,7 @@ sub new {
 
 The C<issues> method can be called two ways: either by providing a list of
 issue keys, or by proving a single hash reference which describes a JIRA
-query in the same format used by C<JIRA::REST> (essentially, jql => "JQL
+query in the same format used by L<JIRA::REST> (essentially, jql => "JQL
 query string").
 
 The return value is an array of C<JIRA::REST::Class::Issue> objects.
@@ -54,10 +146,17 @@ sub issues {
     }
 }
 
+#---------------------------------------------------------------------------
+#
+# =begin testing issues
+# =end testing
+#
+#---------------------------------------------------------------------------
+
 =method B<query> QUERY
 
 The C<query> method takes a single parameter: a hash reference which
-describes a JIRA query in the same format used by C<JIRA::REST>
+describes a JIRA query in the same format used by L<JIRA::REST>
 (essentially, jql => "JQL query string").
 
 The return value is a single C<JIRA::REST::Class::Query> object.
@@ -72,10 +171,17 @@ sub query {
     return $self->make_object('query', { data => $query });
 }
 
+#---------------------------------------------------------------------------
+#
+# =begin testing query
+# =end testing
+#
+#---------------------------------------------------------------------------
+
 =method B<iterator> QUERY
 
 The C<query> method takes a single parameter: a hash reference which
-describes a JIRA query in the same format used by C<JIRA::REST>
+describes a JIRA query in the same format used by L<JIRA::REST>
 (essentially, jql => "JQL query string").  It accepts an additional field,
 however: restart_if_lt_total.  If this field is set to a true value, the
 iterator will keep track of the number of results fetched and, if when the
@@ -97,9 +203,16 @@ sub iterator {
     return $self->make_object('iterator', { iterator_args => $args });
 }
 
+#---------------------------------------------------------------------------
+#
+# =begin testing iterator
+# =end testing
+#
+#---------------------------------------------------------------------------
+
 =internal_method B<get> URL [, QUERY]
 
-A wrapper for C<JIRA::REST>'s GET method.
+A wrapper for L<JIRA::REST>'s GET method.
 
 =cut
 
@@ -109,9 +222,20 @@ sub get {
     return $self->JIRA_REST->GET($url, undef, @_);
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing get
+
+validate_wrapper_method( sub { get_test_client()->get('/test'); },
+                         { GET => 'SUCCESS' }, 'get() method works' );
+
+=end testing
+
+#---------------------------------------------------------------------------
+
 =internal_method B<post>
 
-Wrapper around C<JIRA::REST>'s POST method.
+Wrapper around L<JIRA::REST>'s POST method.
 
 =cut
 
@@ -121,9 +245,20 @@ sub post {
     $self->JIRA_REST->POST($url, undef, @_);
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing post
+
+validate_wrapper_method( sub { get_test_client()->post('/test', "key=value"); },
+                         { POST => 'SUCCESS' }, 'post() method works' );
+
+=end testing
+
+#---------------------------------------------------------------------------
+
 =internal_method B<put>
 
-Wrapper around C<JIRA::REST>'s PUT method.
+Wrapper around L<JIRA::REST>'s PUT method.
 
 =cut
 
@@ -133,9 +268,20 @@ sub put {
     $self->JIRA_REST->PUT($url, undef, @_);
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing put
+
+validate_wrapper_method( sub { get_test_client()->put('/test', "key=value"); },
+                         { PUT => 'SUCCESS' }, 'put() method works' );
+
+=end testing
+
+#---------------------------------------------------------------------------
+
 =internal_method B<delete>
 
-Wrapper around C<JIRA::REST>'s DELETE method.
+Wrapper around L<JIRA::REST>'s DELETE method.
 
 =cut
 
@@ -145,10 +291,22 @@ sub delete {
     $self->JIRA_REST->DELETE($url, @_);
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing delete
+
+validate_wrapper_method( sub { get_test_client()->delete('/test'); },
+                         { DELETE => 'SUCCESS' }, 'delete() method works' );
+
+=end testing
+
+#---------------------------------------------------------------------------
+
 =internal_method B<data_upload>
 
 Similar to C<< JIRA::REST->attach_files >>, but entirely from memory and
-only attaches one file at a time. Takes the following named parameters:
+only attaches one file at a time. Returns the L<HTTP::Response> object from
+the post request.  Takes the following named parameters:
 
 =over 4
 
@@ -209,7 +367,49 @@ sub data_upload {
         or croak $self->JIRA_REST->_error(
             $self->_croakmsg($response->status_line, $name)
         );
+
+    return $response;
 }
+
+#---------------------------------------------------------------------------
+
+=begin testing data_upload
+
+my $expected = {
+  "Content-Disposition" => "form-data; name=\"file\"; filename=\"file.txt\"",
+  POST => "SUCCESS",
+  data => "An OO Class module built atop C<JIRA::REST> for dealing with "
+       .  "JIRA issues and their data as objects.",
+  name => "file.txt"
+};
+
+my $test1_name = 'return value from data_upload()';
+my $test2_name = 'data_upload() method succeeded';
+my $test3_name = 'data_upload() method returned expected data';
+
+my $test = get_test_client();
+my $results;
+my $got;
+
+try {
+    $results = $test->data_upload({
+        url  => "/data_upload",
+        name => $expected->{name},
+        data => $expected->{data},
+    });
+    $got = $test->JSON->decode($results->decoded_content);
+}
+catch {
+    $results = $_;
+};
+
+my $test1_ok = isa_ok( $results, 'HTTP::Response', $test1_name );
+my $test2_ok = ok($test1_ok && $results->is_success, $test2_name );
+$test2_ok ? is_deeply( $got, $expected, $test3_name ) : fail( $test3_name );
+
+=end testing
+
+#---------------------------------------------------------------------------
 
 =method B<maxResults>
 
@@ -251,6 +451,43 @@ sub issue_types {
     return $self->{issue_types};
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing issue_types 16
+
+try {
+    my $test = get_test_client();
+
+    validate_contextual_accessor($test, {
+        method => 'issue_types',
+        class  => 'issuetype',
+        data   => [ sort qw/ Bug Epic Improvement Sub-task Story Task /,
+                    'New Feature' ],
+    });
+
+    print "#\n# Checking the 'Bug' issue type\n#\n";
+
+    my ($bug) = sort $test->issue_types;
+
+    can_ok_abstract( $bug, qw/ description iconUrl id name self subtask / );
+
+    my $host = TestServer_url();
+
+    validate_expected_fields( $bug, {
+        description => "jira.translation.issuetype.bug.name.desc",
+        iconUrl => "$host/secure/viewavatar?size=xsmall&avatarId=10303"
+                .  "&avatarType=issuetype",
+        id => 10004,
+        name => "Bug",
+        self => "$host/rest/api/latest/issuetype/10004",
+        subtask => JSON::PP::false,
+    });
+};
+
+=end testing
+
+#---------------------------------------------------------------------------
+
 =method B<projects>
 
 Returns a list of projects (as C<JIRA::REST::Class::Project> objects) for
@@ -280,6 +517,24 @@ sub projects {
     return $self->{project_list};
 }
 
+#---------------------------------------------------------------------------
+
+=begin testing projects 5
+
+my $test = get_test_client();
+
+try {
+    validate_contextual_accessor($test, {
+        method => 'projects',
+        class  => 'project',
+        data   => [ qw/ JRC KANBAN PACKAY PM SCRUM / ],
+    });
+};
+
+=end testing
+
+#---------------------------------------------------------------------------
+
 =method B<project> PROJECT_ID || PROJECT_KEY || PROJECT_NAME
 
 Returns a C<JIRA::REST::Class::Project> object for the project
@@ -299,6 +554,53 @@ sub project {
     return unless exists $self->{project_hash}->{$proj};
     return $self->{project_hash}->{$proj};
 }
+
+#---------------------------------------------------------------------------
+
+=begin testing project 17
+
+try {
+    print "#\n# Checking the SCRUM project\n#\n";
+
+    my $test = get_test_client();
+
+    my $proj = $test->project('SCRUM');
+
+    can_ok_abstract( $proj, qw/ avatarUrls expand id key name self
+                                category assigneeType components
+                                description issueTypes lead roles versions
+                                allowed_components allowed_versions
+                                allowed_fix_versions allowed_issue_types
+                                allowed_priorities allowed_field_values
+                                field_metadata_exists field_metadata
+                                field_name
+                              / );
+
+    validate_expected_fields( $proj, {
+        expand => "description,lead,url,projectKeys",
+        id => 10002,
+        key => 'SCRUM',
+        name => "Scrum Software Development Sample Project",
+        projectTypeKey => "software",
+        lead => {
+            class => 'user',
+            expected => {
+                key => 'packy'
+            },
+        },
+    });
+
+    validate_contextual_accessor($proj, {
+        method => 'versions',
+        class  => 'projectvers',
+        name   => "SCRUM project's",
+        data   => [ "Version 1.0", "Version 2.0", "Version 3.0" ],
+    });
+};
+
+=end testing
+
+#---------------------------------------------------------------------------
 
 =method B<SSL_verify_none>
 
@@ -345,37 +647,118 @@ sub strip_protocol_and_host {
     return $url;
 }
 
-=internal_method B<url>
+=accessor B<args>
 
-An accessor for the URL passed to the C<JIRA::REST> object.
-
-=cut
-
-sub url { shift->{args}->{url} }
-
-=internal_method B<username>
-
-An accessor for the username passed to the C<JIRA::REST> object.
+An accessor for the copy of the arguments passed to the constuctor.
 
 =cut
 
-sub username { shift->{args}->{username} }
+sub args { shift->{args} }
 
-=internal_method B<password>
+=accessor B<url>
 
-An accessor for the password passed to the C<JIRA::REST> object.
-
-=cut
-
-sub password { shift->{args}->{password} }
-
-=internal_method B<rest_client_config>
-
-An accessor for the REST client config passed to the C<JIRA::REST> object.
+An accessor for the URL passed to the L<JIRA::REST> object.
 
 =cut
 
-sub rest_client_config { shift->{args}->{rest_client_config} }
+sub url { shift->args->{url} }
+
+=accessor B<username>
+
+An accessor for the username passed to the L<JIRA::REST> object.
+
+=cut
+
+sub username { shift->args->{username} }
+
+=accessor B<password>
+
+An accessor for the password passed to the L<JIRA::REST> object.
+
+=cut
+
+sub password { shift->args->{password} }
+
+=accessor B<rest_client_config>
+
+An accessor for the REST client config passed to the L<JIRA::REST> object.
+
+=cut
+
+sub rest_client_config { shift->args->{rest_client_config} }
+
+=accessor B<anonymous>
+
+An accessor for the C<anonymous> prameter passed to the L<JIRA::REST> object.
+
+=cut
+
+sub anonymous { shift->args->{anonymous} }
+
+=accessor B<proxy>
+
+An accessor for the C<proxy> parameter passed to the L<JIRA::REST> object.
+
+=cut
+
+sub proxy { shift->args->{proxy} }
+
+#---------------------------------------------------------------------------
+
+=begin testing parameter_accessors 7
+
+try{
+    my $test = get_test_client();
+    my $url  = TestServer_url();
+
+    my $args = {
+        url       => $url,
+        username  => 'username',
+        password  => 'password',
+        proxy     => undef,
+        anonymous => undef,
+        rest_client_config => undef,
+        ssl_verify_none => undef,
+    };
+
+    # the args accessor will have keys for ALL the possible arguments,
+    # whether they were passed in or not.
+
+    cmp_deeply( $test,
+                methods( args      => { %$args, },
+                         url       => $args->{url},
+                         username  => $args->{username},
+                         password  => $args->{password},
+                         proxy     => $args->{proxy},
+                         anonymous => $args->{anonymous},
+                         rest_client_config => $args->{rest_client_config} ),
+                q{All accessors for parameters passed }.
+                q{into the constructor okay});
+
+    my $ua = $test->REST_CLIENT->getUseragent();
+    $test->SSL_verify_none;
+    cmp_deeply($ua->{ssl_opts}, { SSL_verify_mode => 0, verify_hostname => 0 },
+               q{SSL_verify_none() does disable SSL verification});
+
+    is($test->rest_api_url_base($url . "/rest/api/latest/foo"),
+       $url . "/rest/api/latest", q{rest_api_url_base() works as expected});
+
+    is($test->strip_protocol_and_host($url . "/foo"),
+       "/foo", q{strip_protocol_and_host() works as expected});
+
+    is($test->maxResults, 50, q{maxResults() default is correct});
+
+    is($test->maxResults(10), 10, q{maxResults(N) returns N});
+
+    is($test->maxResults, 10,
+       q{maxResults() was successfully set by previous call});
+};
+
+=end testing
+
+=cut
+
+#---------------------------------------------------------------------------
 
 1;
 
