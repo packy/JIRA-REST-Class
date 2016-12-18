@@ -1,13 +1,13 @@
-package JIRA::REST::Class::TestServer::Projects;
-use base qw( JIRA::REST::Class::TestServer::Plugin );
+package TestServer::Projects;
+use base qw( TestServer::Plugin );
 use strict;
 use warnings;
 use v5.10;
 
 use JSON;
 
-use JIRA::REST::Class::TestServer::IssueTypes;
-use JIRA::REST::Class::TestServer::Users;
+use TestServer::IssueTypes;
+use TestServer::Users;
 
 sub import {
     my $class = __PACKAGE__;
@@ -184,7 +184,7 @@ sub project_SCRUM_issuetype_data {
     my ( $class, $server, $cgi ) = @_;
     my $url = "http://localhost:" . $server->port;
 
-    return JIRA::REST::Class::TestServer::IssueTypes->issuetype_filtered(
+    return TestServer::IssueTypes->issuetype_filtered(
         $server, $cgi, 10000, 10001, 10002, 10003, 10004
     );
 }
@@ -228,7 +228,7 @@ sub project_SCRUM_version_data {
 
 sub user_packy {
     my ( $class, $server, $cgi ) = @_;
-    return JIRA::REST::Class::TestServer::Users->minuser(
+    return TestServer::Users->minuser(
         $server, $cgi, 'packy'
     );
 }

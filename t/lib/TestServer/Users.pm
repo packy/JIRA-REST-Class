@@ -1,5 +1,5 @@
-package JIRA::REST::Class::TestServer::Users;
-use base qw( JIRA::REST::Class::TestServer::Plugin );
+package TestServer::Users;
+use base qw( TestServer::Plugin );
 use strict;
 use warnings;
 use v5.10;

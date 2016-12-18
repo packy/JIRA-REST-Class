@@ -7,17 +7,17 @@ use lib dirname($0).'/lib'; # we keep testing-only modules in a lib under t!
 use lib dirname($0).'/../lib'; # the module itself is under here
 
 use JIRA::REST::Class;
-use JIRA::REST::Class::Test;
+use Test;
 use JSON;
 use List::Util qw( all );
 use Try::Tiny;
 
 use Test::More tests => 22;
 
-JIRA::REST::Class::Test->setup_server();
+Test->setup_server();
 
 try {
-    my $host   = JIRA::REST::Class::Test->server_url();
+    my $host   = Test->server_url();
     my $user   = 'username';
     my $pass   = 'password';
     my $client = JIRA::REST::Class->new($host, $user, $pass);
@@ -73,7 +73,7 @@ catch {
 };
 
 
-JIRA::REST::Class::Test->stop_server();
+Test->stop_server();
 
 done_testing();
 exit;

@@ -1,4 +1,4 @@
-package JIRA::REST::Class::Test;
+package Test;
 use base qw( Exporter );
 use strict;
 use warnings;
@@ -9,11 +9,12 @@ use File::Slurp;
 use File::Spec::Functions;
 use Getopt::Long;
 use JSON::PP;
+use REST::Client;
 use Scalar::Util qw( blessed reftype );
 use Test::More;
 use Try::Tiny;
 
-use JIRA::REST::Class::TestServer;
+use TestServer;
 
 our @EXPORT = qw( chomper can_ok_abstract dump_got_expected get_class
                   validate_contextual_accessor validate_expected_fields  );
@@ -23,76 +24,32 @@ our @EXPORT = qw( chomper can_ok_abstract dump_got_expected get_class
 # support for starting the test server
 #
 
-my $port    = 7657;
-my $tmpdir  = '/tmp';
-my $pidfile = 'jira_rest_class_test.pid';
-my $pidpath;
+my $port = 7657;
+my $rest;
 my $log;
 my $pid;
 
-sub process_commandline {
-    unless (defined $pidpath) {
-        GetOptions
-            'port=i'    => \$port,
-            'pidfile=s' => \$pidfile,
-            'tmpdir=s'  => sub {
-                my(undef, $value) = @_;
-                if (-d $value && -w $value) {
-                    $tmpdir = $value;
-                    return;
-                }
-                elsif (! -d $value) {
-                    die "$value is not a directory/n";
-                }
-                elsif (! -w $value) {
-                    die "$value is not writable/n";
-                }
-            };
-
-        get_pid();
-    }
-}
-
-sub get_pid {
-    $pidpath = catfile $tmpdir, $pidfile
-        unless defined $pidpath;
-
-    if ( -f $pidpath && -s $pidpath ) {
-        $pid = read_file($pidpath);
-        chomp $pid;
-    }
-}
 
 sub setup_server {
-    process_commandline();
-    get_pid();
     server_log();
-
-    # if the server is already running, return
-    if ( server_is_running() ) {
-        $log->info('server already running on PID '.$pid);
-        return;
-    }
 
     try {
         # start the server
         $log->info('starting server and sending to background');
-        $pid = JIRA::REST::Class::TestServer->new($port)->background();
-        write_file($pidpath, "$pid\n") if $pid;
+        $pid = TestServer->new($port)->background();
     };
     if ((! defined $pid) || $$ == $pid) { exit }
-    $log->info("[$$] started server on PID ".$pid);
+    $log->info("started server on PID ".$pid);
 }
 
 sub server_log {
     unless (defined $log) {
-        $log = JIRA::REST::Class::TestServer->get_logger();
+        $log = TestServer->get_logger->clone( prefix => "[pid $$] " );
     }
     return $log;
 }
 
 sub server_pid {
-    get_pid();
     return $pid;
 }
 
@@ -101,18 +58,23 @@ sub server_is_running {
     kill 0, $pid;
 }
 
-sub stop_server {
-    get_pid();
-    server_log()->info('stopping server on PID '.$pid);
-    kill 15, $pid;  # tell the server to stop
-
-    # remove the temp file
-    $pidpath = catfile $tmpdir, $pidfile;
-    if ( -f $pidpath ) {
-        unlink $pidpath;
+sub rest {
+    my ($method, $request) = @_;
+    unless (defined $rest) {
+        $rest = REST::Client->new;
+        $rest->setHost(server_url());
     }
+    my $result = $rest->$method($request)->responseContent();
+    $log->info($result);
+    return $result;
+}
 
-    undef $pid;
+sub test_server {
+    return rest('GET' => '/test');
+}
+
+sub stop_server {
+    return rest('GET' => '/quit');
 }
 
 sub server_url {
@@ -139,48 +101,32 @@ sub dump_got_expected {
 
 sub can_ok_abstract {
     my $thing = shift;
-    can_ok( $thing, @_, qw/ data factory issue lazy_loaded init unload_lazy
-                            jira JIRA_REST REST_CLIENT make_object make_date
-                            class_for obj_isa name_for_user key_for_issue
-                            find_link_name_and_direction populate_scalar_data
-                            populate_date_data populate_list_data
-                            populate_scalar_field populate_list_field
-                            mk_contextual_ro_accessors mk_deep_ro_accessor
-                            mk_lazy_ro_accessor mk_data_ro_accessors
-                            mk_field_ro_accessors make_subroutine
-                            dump shallow_copy / );
-
+    can_ok( $thing, @_, qw/ data issue lazy_loaded init unload_lazy
+                            populate_scalar_data populate_date_data
+                            populate_list_data populate_scalar_field
+                            populate_list_field mk_contextual_ro_accessors
+                            mk_deep_ro_accessor mk_lazy_ro_accessor
+                            mk_data_ro_accessors mk_field_ro_accessors
+                            make_subroutine / );
 }
 
-my %types = (
-    class        => 'JIRA::REST::Class',
-    factory      => 'JIRA::REST::Class::Factory',
-    issue        => 'JIRA::REST::Class::Issue',
-    changelog    => 'JIRA::REST::Class::Issue::Changelog',
-    change       => 'JIRA::REST::Class::Issue::Changelog::Change',
-    changeitem   => 'JIRA::REST::Class::Issue::Changelog::Change::Item',
-    linktype     => 'JIRA::REST::Class::Issue::LinkType',
-    status       => 'JIRA::REST::Class::Issue::Status',
-    statuscat    => 'JIRA::REST::Class::Issue::Status::Category',
-    timetracking => 'JIRA::REST::Class::Issue::TimeTracking',
-    transitions  => 'JIRA::REST::Class::Issue::Transitions',
-    transition   => 'JIRA::REST::Class::Issue::Transitions::Transition',
-    issuetype    => 'JIRA::REST::Class::Issue::Type',
-    worklog      => 'JIRA::REST::Class::Issue::Worklog',
-    workitem     => 'JIRA::REST::Class::Issue::Worklog::Item',
-    project      => 'JIRA::REST::Class::Project',
-    projectcat   => 'JIRA::REST::Class::Project::Category',
-    projectcomp  => 'JIRA::REST::Class::Project::Component',
-    projectvers  => 'JIRA::REST::Class::Project::Version',
-    iterator     => 'JIRA::REST::Class::Iterator',
-    sprint       => 'JIRA::REST::Class::Sprint',
-    query        => 'JIRA::REST::Class::Query',
-    user         => 'JIRA::REST::Class::User',
-);
+sub can_ok_mixins {
+    my $thing = shift;
+    can_ok( $thing, @_, qw/ jira factory JIRA_REST REST_CLIENT
+                            _JIRA_REST_version_has_named_parameters
+                            make_object make_date class_for obj_isa
+                            name_for_user key_for_issue dump deep_copy
+                            shallow_copy find_link_name_and_direction
+                            _get_known_args _check_required_args
+                            _croakmsg _quoted_list / );
+}
+
+
+use JIRA::REST::Class::FactoryTypes qw( %TYPES );
 
 sub get_class {
     my $type = shift;
-    return exists $types{$type} ? $types{$type} : $type;
+    return exists $TYPES{$type} ? $TYPES{$type} : $type;
 }
 
 sub validate_contextual_accessor {
@@ -223,7 +169,7 @@ sub validate_expected_fields {
     my $obj    = shift;
     my $expect = shift;
     my $isa    = ref $obj || q{};
-    if ($obj->isa('JIRA::REST::Class::Abstract')) {
+    if ($obj->isa(get_class('abstract'))) {
         # common accessors for ALL JIRA::REST::Class::Abstract objects
         $expect->{factory}     = { class => 'factory' };
         $expect->{jira}        = { class => 'class' };

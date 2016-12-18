@@ -1,4 +1,4 @@
-package JIRA::REST::Class::TestServer;
+package TestServer;
 use base qw( HTTP::Server::Simple::CGI );
 use strict;
 use warnings;
@@ -10,13 +10,14 @@ use JSON::PP;
 use Log::Any;
 use Log::Any::Adapter;
 
-use JIRA::REST::Class::TestServer::IssueTypes;
-use JIRA::REST::Class::TestServer::Projects;
+use TestServer::IssueTypes;
+use TestServer::Projects;
+use TestServer::Misc;
 
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
-    $self->{logger} = get_logger();
+    $self->{logger} = get_logger()->clone( prefix => "[pid $$] $class: " );
     return $self;
 }
 
@@ -26,13 +27,15 @@ sub get_logger {
     if ($ENV{JIRA_REST_CLASS_TESTLOG}) {
         Log::Any::Adapter->set( File => $ENV{JIRA_REST_CLASS_TESTLOG} );
     }
-    return Log::Any->get_logger;
+    return Log::Any->get_logger()
 }
 
 sub print_banner {
     my $self = shift;
-    $self->log->info( ref($self) . ' running on http://localhost:' .
-                      $self->port );
+    # get a new logger with the new pid
+    my $class = ref $self;
+    $self->{logger} = $self->log->clone( prefix => "[pid $$] $class: " );
+    $self->log->info( 'running on http://localhost:' . $self->port );
 }
 
 sub valid_http_method {
@@ -56,11 +59,20 @@ sub handle_request {
 
     $self->log->info("REQUEST: $method $uri");
 
-    my $handler = JIRA::REST::Class::TestServer::Plugin->DISPATCH_TABLE->{$path};
+    my $handler = TestServer::Plugin->DISPATCH_TABLE->{$path};
 
     if (ref($handler) eq "CODE") {
         print "HTTP/1.0 200 OK\r\n";
         $handler->($self, $cgi);
+    }
+    elsif ($path eq '/test') {
+        print "HTTP/1.0 200 OK\r\nSUCCESS";
+        $self->log->info("successful /test request");
+    }
+    elsif ($path eq '/quit') {
+        print "HTTP/1.0 200 OK\r\n";
+        $self->log->info("stopping server on $$ due to /quit request");
+        exit;
     }
     else {
         my $response = "HTTP/1.0 404 NOT FOUND\r\n\n$path";

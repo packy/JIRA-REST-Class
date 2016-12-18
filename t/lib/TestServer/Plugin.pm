@@ -1,4 +1,4 @@
-package JIRA::REST::Class::TestServer::Plugin;
+package TestServer::Plugin;
 use strict;
 use warnings;
 use v5.10;
@@ -10,7 +10,7 @@ my %DISPATCH;
 my %REGISTERED;
 
 sub DISPATCH_TABLE {
-    return \%JIRA::REST::Class::TestServer::Plugin::DISPATCH;
+    return \%TestServer::Plugin::DISPATCH;
 }
 
 sub register_dispatch {
