@@ -76,8 +76,10 @@ Make it easy to get C<DateTime> objects from the factory.
 sub make_date {
     my ($self, $date) = @_;
     return unless $date;
-    state $parser = DateTime::Format::Strptime->new( pattern => '%FT%T.%N%Z' );
-    return $parser->parse_datetime($date);
+    my $pattern = '%FT%T.%N%z';
+    state $parser = DateTime::Format::Strptime->new( pattern => $pattern );
+    return( $parser->parse_datetime($date) or
+        confess qq{Unable to parse date "$date" using pattern "$pattern"} );
 }
 
 =internal_method B<factory_error>
