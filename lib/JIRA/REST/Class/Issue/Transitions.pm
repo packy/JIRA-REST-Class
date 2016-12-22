@@ -15,6 +15,11 @@ __PACKAGE__->mk_contextual_ro_accessors(qw/ transitions /);
 sub init {
     my $self = shift;
     $self->SUPER::init(@_);
+    $self->_refresh_transitions;
+}
+
+sub _refresh_transitions {
+    my $self = shift;
 
     $self->{data} = $self->issue->get('/transitions?expand=transitions.fields');
 
@@ -22,7 +27,6 @@ sub init {
         $self->issue->make_object('transition', { data => $_ })
     } @{ $self->data->{transitions} } ];
 }
-
 
 =internal_method B<find_transition_named>
 
@@ -33,6 +37,8 @@ Returns the transition object for the named transition provided.
 sub find_transition_named {
     my $self = shift;
     my $name = shift or confess "no name specified";
+
+    $self->_refresh_transitions;
 
     foreach my $transition ( $self->transitions ) {
         next unless $transition->name eq $name;
@@ -141,9 +147,9 @@ sub transition_walk {
     my $target   = shift;
     my $map      = shift;
     my $callback = shift // sub {};
-
-    my $assignee = $self->issue->assignee;
     my $name     = $self->issue->status->name;
+
+    my $orig_assignee = $self->issue->assignee // q{};
 
     until ($name eq $target) {
         if (exists $map->{$name} ) {
@@ -166,8 +172,9 @@ sub transition_walk {
 
     # put the owner back to who it's supposed
     # to be if it changed during our walk
-    if ($self->issue->assignee ne $assignee) {
-        $self->issue->set_assignee($assignee);
+    my $current_assignee = $self->issue->assignee // q{};
+    if ($current_assignee ne $orig_assignee) {
+        $self->issue->set_assignee($orig_assignee);
     }
 }
 
