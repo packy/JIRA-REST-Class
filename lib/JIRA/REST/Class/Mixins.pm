@@ -126,19 +126,34 @@ sub JIRA_REST {
     return $jira_rest;
 }
 
-sub _JIRA_REST_version_has_named_parameters {
+sub _JIRA_REST_version {
+    my $version = shift;
     eval {
         # we don't want SIGDIE taking us someplace
         # if VERSION throws an exception
         local $SIG{__DIE__} = undef;
 
-        JIRA::REST->VERSION && JIRA::REST->VERSION(0.017);
+        JIRA::REST->VERSION && JIRA::REST->VERSION($version);
     };
+}
+
+sub _JIRA_REST_version_has_named_parameters {
+    state $retval = _JIRA_REST_version(0.017);
+    return $retval;
+}
+
+sub _JIRA_REST_version_has_separate_path {
+    state $retval = _JIRA_REST_version(0.015);
+    return $retval;
 }
 
 =internal_method B<REST_CLIENT>
 
 An accessor that returns the C<REST::Client> object inside the C<JIRA::REST> object being used.
+
+=internal_method B<JSON>
+
+An accessor that returns the C<JSON> object inside the C<JIRA::REST> object being used.
 
 =internal_method B<make_object>
 
@@ -155,6 +170,7 @@ A pass-through method that calls C<JIRA::REST::Class::Factory::get_factory_class
 =cut
 
 sub REST_CLIENT { shift->JIRA_REST->{rest} }
+sub JSON        { shift->JIRA_REST->{json} }
 sub make_object { shift->factory->make_object(@_) }
 sub make_date   { shift->factory->make_date(@_) }
 sub class_for   { shift->factory->get_factory_class(@_) }

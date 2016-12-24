@@ -321,9 +321,15 @@ Returns the base URL for this JIRA server's REST API.
 
 sub rest_api_url_base {
     my $self = shift;
-    my ($type) = $self->issue_types;  # grab the first issue type
-    my ($base) = $type->self =~ m{^(.+?rest/api/[^/]+)/};
-    return $base;
+    if ($self->_JIRA_REST_version_has_separate_path) {
+        (my $host = $self->REST_CLIENT->getHost) =~ s{/$}{};
+        my $path = $self->JIRA_REST->{path};
+        return $host . $path;
+    }
+    else {
+        my ($base) = $self->REST_CLIENT->getHost =~ m{^(.+?rest/api/[^/]+)/?};
+        return $base;
+    }
 }
 
 =internal_method B<strip_protocol_and_host>
