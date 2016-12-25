@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.04      2016-12-24 22:44:46-05:00 America/New_York
+
           Update a lot of the testing code, and start using Inline::Test.
 
           Moved to using JIRA::REST::Class::Version as the source for the
