@@ -29,7 +29,7 @@ The version of the L<JIRA::REST::Class> module.
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.05';
 
 =head2 $SOURCE
 
@@ -44,6 +44,8 @@ Useful if you are concerned with whether features are implemented or not,
 since code from GitHub should report a version one version ahead of the
 last tagged release, due to the actions of L<BumpVersionAfterRelease|Dist::Zilla::Plugin::BumpVersionAfterRelease>.
 
+=for stopwords BumpVersionAfterRelease
+
 =cut
 
 our $SOURCE = 'CPAN';
@@ -52,4 +54,9 @@ $SOURCE = 'GitHub'; # COMMENT
 
 1;
 
-=for stopwords BumpVersionAfterRelease
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

@@ -59,6 +59,8 @@ sub get_test_client {
 
 =end test
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =begin testing new 5
@@ -119,6 +121,8 @@ lives_ok(
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =method B<issues> QUERY
@@ -127,10 +131,10 @@ lives_ok(
 
 The C<issues> method can be called two ways: either by providing a list of
 issue keys, or by proving a single hash reference which describes a JIRA
-query in the same format used by L<JIRA::REST> (essentially, jql => "JQL
-query string").
+query in the same format used by L<JIRA::REST> (essentially,
+C<< jql => "JQL query string" >>).
 
-The return value is an array of C<JIRA::REST::Class::Issue> objects.
+The return value is an array of L<JIRA::REST::Class::Issue> objects.
 
 =cut
 
@@ -157,9 +161,9 @@ sub issues {
 
 The C<query> method takes a single parameter: a hash reference which
 describes a JIRA query in the same format used by L<JIRA::REST>
-(essentially, jql => "JQL query string").
+(essentially, C<< jql => "JQL query string" >>).
 
-The return value is a single C<JIRA::REST::Class::Query> object.
+The return value is a single L<JIRA::REST::Class::Query> object.
 
 =cut
 
@@ -182,18 +186,18 @@ sub query {
 
 The C<query> method takes a single parameter: a hash reference which
 describes a JIRA query in the same format used by L<JIRA::REST>
-(essentially, jql => "JQL query string").  It accepts an additional field,
-however: restart_if_lt_total.  If this field is set to a true value, the
-iterator will keep track of the number of results fetched and, if when the
-results run out this number doesn't match the number of results predicted
-by the query, it will restart the query.  This is particularly useful if
-you are transforming a number of issues through an iterator, and the
-transformation causes the issues to no longer match the query.
+(essentially, C<< jql => "JQL query string" >>).  It accepts an additional
+field, however: C<restart_if_lt_total>.  If this field is set to a true value,
+the iterator will keep track of the number of results fetched and, if when
+the results run out this number doesn't match the number of results
+predicted by the query, it will restart the query.  This is particularly
+useful if you are transforming a number of issues through an iterator, and
+the transformation causes the issues to no longer match the query.
 
-The return value is a single C<JIRA::REST::Class::Iterator> object.
-The issues returned by the query can be obtained in serial by
-repeatedly calling B<next> on this object, which returns a series
-of C<JIRA::REST::Class::Issue> objects.
+The return value is a single L<JIRA::REST::Class::Iterator> object.  The
+issues returned by the query can be obtained in serial by repeatedly calling
+L<next|JIRA::REST::Class::Iterator/next> on this object, which returns a
+series of L<JIRA::REST::Class::Issue> objects.
 
 =cut
 
@@ -210,9 +214,9 @@ sub iterator {
 #
 #---------------------------------------------------------------------------
 
-=internal_method B<get> URL [, QUERY]
+=internal_method B<get>
 
-A wrapper for L<JIRA::REST>'s GET method.
+A wrapper for C<JIRA::REST>'s L<GET|JIRA::REST/"GET RESOURCE [, QUERY]"> method.
 
 =cut
 
@@ -231,11 +235,13 @@ validate_wrapper_method( sub { get_test_client()->get('/test'); },
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =internal_method B<post>
 
-Wrapper around L<JIRA::REST>'s POST method.
+Wrapper around C<JIRA::REST>'s L<POST|JIRA::REST/"POST RESOURCE, QUERY, VALUE [, HEADERS]"> method.
 
 =cut
 
@@ -254,11 +260,13 @@ validate_wrapper_method( sub { get_test_client()->post('/test', "key=value"); },
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =internal_method B<put>
 
-Wrapper around L<JIRA::REST>'s PUT method.
+Wrapper around C<JIRA::REST>'s L<PUT|JIRA::REST/"PUT RESOURCE, QUERY, VALUE [, HEADERS]"> method.
 
 =cut
 
@@ -277,11 +285,13 @@ validate_wrapper_method( sub { get_test_client()->put('/test', "key=value"); },
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =internal_method B<delete>
 
-Wrapper around L<JIRA::REST>'s DELETE method.
+Wrapper around C<JIRA::REST>'s L<DELETE|JIRA::REST/"DELETE RESOURCE [, QUERY]"> method.
 
 =cut
 
@@ -300,13 +310,16 @@ validate_wrapper_method( sub { get_test_client()->delete('/test'); },
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =internal_method B<data_upload>
 
-Similar to C<< JIRA::REST->attach_files >>, but entirely from memory and
-only attaches one file at a time. Returns the L<HTTP::Response> object from
-the post request.  Takes the following named parameters:
+Similar to L<< JIRA::REST->attach_files|JIRA::REST/"attach_files ISSUE FILE..." >>,
+but entirely from memory and only attaches one file at a time. Returns the
+L<HTTP::Response> object from the post request.  Takes the following named
+parameters:
 
 =over 4
 
@@ -378,7 +391,7 @@ sub data_upload {
 my $expected = {
   "Content-Disposition" => "form-data; name=\"file\"; filename=\"file.txt\"",
   POST => "SUCCESS",
-  data => "An OO Class module built atop C<JIRA::REST> for dealing with "
+  data => "An OO Class module built atop L<JIRA::REST> for dealing with "
        .  "JIRA issues and their data as objects.",
   name => "file.txt"
 };
@@ -409,13 +422,19 @@ $test2_ok ? is_deeply( $got, $expected, $test3_name ) : fail( $test3_name );
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =method B<maxResults>
 
-An accessor that allows setting a global default for maxResults.
+A getter/setter method that allows setting a global default for the L<maxResults pagination parameter for JIRA's REST API |https://docs.atlassian.com/jira/REST/latest/#pagination>.  This determines the I<maximum> number of results returned by the L<issues|/"issues QUERY"> and L<query|/"query QUERY"> methods; and the initial number of results fetched by the L<iterator|/"iterator QUERY"> (when L<next|JIRA::REST::Class::Iterator/next> exhausts that initial cache of results it will automatically make subsequent calls to the REST API to fetch more results).
 
 Defaults to 50.
+
+  say $jira->maxResults; # returns 50
+
+  $jira->maxResults(10); # only return 10 results at a time
 
 =cut
 
@@ -432,7 +451,7 @@ sub maxResults {
 
 =method B<issue_types>
 
-Returns a list of defined issue types (as C<JIRA::REST::Class::Issue::Type>
+Returns a list of defined issue types (as L<JIRA::REST::Class::Issue::Type>
 objects) for this server.
 
 =cut
@@ -486,11 +505,13 @@ try {
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =method B<projects>
 
-Returns a list of projects (as C<JIRA::REST::Class::Project> objects) for
+Returns a list of projects (as L<JIRA::REST::Class::Project> objects) for
 this server.
 
 =cut
@@ -533,11 +554,13 @@ try {
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =method B<project> PROJECT_ID || PROJECT_KEY || PROJECT_NAME
 
-Returns a C<JIRA::REST::Class::Project> object for the project
+Returns a L<JIRA::REST::Class::Project> object for the project
 specified. Returns undef if the project doesn't exist.
 
 =cut
@@ -600,12 +623,14 @@ try {
 
 =end testing
 
+=cut
+
 #---------------------------------------------------------------------------
 
 =method B<SSL_verify_none>
 
-Disables the SSL options SSL_verify_mode and verify_hostname on the user
-agent used by this class' C<REST::Client> object.
+Sets to false the SSL options C<SSL_verify_mode> and C<verify_hostname> on the
+L<LWP::UserAgent> object that is used by L<REST::Client> (which, in turn, is used by L<JIRA::REST>, which is used by this module).
 
 =cut
 
@@ -617,7 +642,7 @@ sub SSL_verify_none {
 
 =internal_method B<rest_api_url_base>
 
-Returns the base URL for this JIRA server's REST API.
+Returns the base URL for this JIRA server's REST API.  For example, if your JIRA server is at C<http://jira.example.com>, this would return C<http://jira.example.com/rest/api/latest>.
 
 =cut
 
@@ -636,7 +661,7 @@ sub rest_api_url_base {
 
 =internal_method B<strip_protocol_and_host>
 
-A method to take the provided URL and strip the protocol and host from it.
+A method to take the provided URL and strip the protocol and host from it.  For example, if the URL C<http://jira.example.com/rest/api/latest> was passed to this method, C</rest/api/latest> would be returned.
 
 =cut
 
@@ -649,7 +674,7 @@ sub strip_protocol_and_host {
 
 =accessor B<args>
 
-An accessor for the copy of the arguments passed to the constructor.
+An accessor that returns a copy of the arguments passed to the constructor. Useful for passing around to utility objects.
 
 =cut
 
@@ -657,7 +682,7 @@ sub args { shift->{args} }
 
 =accessor B<url>
 
-An accessor for the URL passed to the L<JIRA::REST> object.
+An accessor that returns the C<url> parameter passed to this object's constructor.
 
 =cut
 
@@ -665,7 +690,7 @@ sub url { shift->args->{url} }
 
 =accessor B<username>
 
-An accessor for the username passed to the L<JIRA::REST> object.
+An accessor that returns the username used to connect to the JIRA server, even if the username was read from a C<.netrc> or L<Config::Identity> file.
 
 =cut
 
@@ -673,7 +698,7 @@ sub username { shift->args->{username} }
 
 =accessor B<password>
 
-An accessor for the password passed to the L<JIRA::REST> object.
+An accessor that returns the password used to connect to the JIRA server, even if the password was read from a C<.netrc> or L<Config::Identity> file.
 
 =cut
 
@@ -681,7 +706,7 @@ sub password { shift->args->{password} }
 
 =accessor B<rest_client_config>
 
-An accessor for the REST client config passed to the L<JIRA::REST> object.
+An accessor that returns the C<rest_client_config> parameter passed to this object's constructor.
 
 =cut
 
@@ -689,7 +714,7 @@ sub rest_client_config { shift->args->{rest_client_config} }
 
 =accessor B<anonymous>
 
-An accessor for the C<anonymous> parameter passed to the L<JIRA::REST> object.
+An accessor that returns the C<anonymous> parameter passed to this object's constructor.
 
 =cut
 
@@ -697,7 +722,7 @@ sub anonymous { shift->args->{anonymous} }
 
 =accessor B<proxy>
 
-An accessor for the C<proxy> parameter passed to the L<JIRA::REST> object.
+An accessor that returns the C<proxy> parameter passed to this object's constructor.
 
 =cut
 
@@ -764,27 +789,13 @@ try{
 
 __END__
 
-{{ include( "pod/synopsis.pod" )->fill_in; }}
-
-{{ include( "pod/description.pod" )->fill_in; }}
-
-{{ include( "pod/constructor.pod" )->fill_in; }}
-
-{{ include( "pod/mixins.pod" )->fill_in; }}
-
-{{ include( "pod/see-also.pod" )->fill_in; }}
-
-=head1 REPOSITORY
-
-L<https://github.com/packy/JIRA-REST-Class>
-
-{{ include( "pod/credits.pod" )->fill_in; }}
-
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    for my $pod (qw/ synopsis description constructor mixins
+                     see-also repository credits /) {
+        $OUT .= include( "pod/$pod.pod" )->fill_in . "\n\n";
+    }
+
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

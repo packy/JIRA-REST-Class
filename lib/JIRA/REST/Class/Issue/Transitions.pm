@@ -8,7 +8,7 @@ use Carp;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
 
 __PACKAGE__->mk_contextual_ro_accessors(qw/ transitions /);
 
@@ -191,5 +191,11 @@ resource. If a field is not configured to appear on the transition screen, then
 it will not be in the transition metadata, and a field validation error will
 occur if it is submitted.
 
+=cut
 
+__END__
 
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

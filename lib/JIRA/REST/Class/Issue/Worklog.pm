@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the worklog of a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the worklog of a JIRA issue as an object.
 
 __PACKAGE__->mk_contextual_ro_accessors(qw/ items /);
 
@@ -24,7 +24,7 @@ sub init {
 
 =method B<items>
 
-Returns a list of individual work items, as C<JIRA::REST::Class::Issue::Worklog::Item> objects.
+Returns a list of individual work items, as L<JIRA::REST::Class::Issue::Worklog::Item> objects.
 
 =for stopwords worklog
 
@@ -32,3 +32,9 @@ Returns a list of individual work items, as C<JIRA::REST::Class::Issue::Worklog:
 
 1;
 
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

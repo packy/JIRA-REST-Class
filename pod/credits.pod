@@ -8,6 +8,6 @@
 
 =item L<Gustavo Leite de Mendonça Chaves|https://metacpan.org/author/GNUSTAVO> <gnustavo@cpan.org>
 
-Many thanks to Gustavo for C<JIRA::REST>, which is what I started working with when I first wanted to automate my interactions with JIRA in the summer of 2016, and without which I would have had a LOT of work to do.
+Many thanks to Gustavo for L<JIRA::REST>, which is what I started working with when I first wanted to automate my interactions with JIRA in the summer of 2016, and without which I would have had a LOT of work to do.
 
 =back

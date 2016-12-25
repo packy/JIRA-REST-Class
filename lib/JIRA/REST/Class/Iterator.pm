@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.  Wraps L<JIRA::REST>'s L<set_search_iterator|JIRA::REST/"set_search_iterator PARAMS"> and L<next_issue|JIRA::REST/next_issue> methods to make them a bit more object-like.
 
 __PACKAGE__->mk_accessors(qw( total
                               fetched
@@ -46,9 +46,9 @@ sub issue_count { shift->total }
 
 =method B<next>
 
-The next issue returned by the query, as a C<JIRA::REST::Class::Issue> object.  If there are no more issues matched by the query, this method returns an undefined value.
+The next issue returned by the query, as a L<JIRA::REST::Class::Issue> object.  If there are no more issues matched by the query, this method returns an undefined value.
 
-If the 'restart_if_lt_total' method is set to true and the number of issues fetched is less than the total number of issues matched by the query (see the B<issue_count> method), this method will rerun the query and keep returning issues. This is particularly useful if you are transforming a number of issues through an iterator, and the transformation causes the issues to no longer match the query.
+If the L</restart_if_lt_total> method is set to true and the number of issues fetched is less than the total number of issues matched by the query (see the L</issue_count> method), this method will rerun the query and keep returning issues. This is particularly useful if you are transforming a number of issues through an iterator, and the transformation causes the issues to no longer match the query.
 
 =cut
 
@@ -95,7 +95,9 @@ sub _get_next_unseen_issue {
 
 =method B<restart_if_lt_total>
 
-This accessor tells the iterator whether to restart the search if the number of issues found is less than the issue count returned by the initial search.
+This getter/setter method tells the iterator whether to restart the search
+if the number of issues found is less than the issue count returned by the
+initial search.
 
 =cut
 
@@ -125,3 +127,10 @@ sub set_search_iterator {
 }
 
 1;
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

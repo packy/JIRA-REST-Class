@@ -5,7 +5,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: An mixin class for C<JIRA::REST::Class> that other objects can inherit methods from.
+# ABSTRACT: An mixin class for L<JIRA::REST::Class> that other objects can inherit methods from.
 
 use Carp;
 use Clone::Any qw( clone );
@@ -627,6 +627,7 @@ sub __subname {
     return $sub;
 }
 
+# put a reference to JIRA::REST::Class::Abstract here for related classes
 
 1;
 
@@ -635,10 +636,7 @@ __END__
 {{ include( "pod/mixins.pod" )->fill_in; }}
 
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

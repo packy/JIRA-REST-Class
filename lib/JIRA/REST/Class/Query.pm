@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a JIRA query as an object.  Attempts to return an array of all results from the query.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA query as an object.  Attempts to return an array of all results from the query.
 
 
 =method B<issue_count>
@@ -19,7 +19,7 @@ sub issue_count { shift->data->{total} }
 
 =method B<issues>
 
-Returns a list of C<JIRA::REST::Class::Issue> objects matching the query.
+Returns a list of L<JIRA::REST::Class::Issue> objects matching the query.
 
 =cut
 
@@ -32,3 +32,10 @@ sub issues {
 }
 
 1;
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

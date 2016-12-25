@@ -3,7 +3,7 @@
 
 =head1 DESCRIPTION
 
-An OO Class module built atop C<JIRA::REST> for dealing with JIRA issues and
+An OO Class module built atop L<JIRA::REST> for dealing with JIRA issues and
 their data as objects.
 
 This code is a work in progress, so it's bound to be incomplete.  I add methods
@@ -12,7 +12,7 @@ in my JIRA server's configuration but not in yours.  It is my I<intent>,
 however, to make things more generic as I go on so they will "just work" no
 matter how your server is configured.
 
-I'm actively working with the author of C<JIRA::REST> (thanks gnustavo!) to keep
+I'm actively working with the author of L<JIRA::REST> (thanks gnustavo!) to keep
 the arguments for C<< JIRA::REST::Class->new >> exactly the same as
 C<< JIRA::REST->new >>, so I'm just duplicating the documentation for
-C<< JIRA::REST->new >>:
+L<< JIRA::REST->new|JIRA::REST/CONSTRUCTOR >>:

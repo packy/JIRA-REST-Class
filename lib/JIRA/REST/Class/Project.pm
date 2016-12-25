@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a JIRA project as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA project as an object.
 
 __PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name
                                       projectTypeKey self ));
@@ -73,63 +73,63 @@ sub _do_lazy_load {
     }
 }
 
-=method B<assigneeType>
+=accessor B<assigneeType>
 
-This method returns the assignee type of the project.
+This accessor returns the assignee type of the project.
 
-=method B<avatarUrls>
+=accessor B<avatarUrls>
 
 A hashref of the different sizes available for the project's avatar.
 
-=method B<components>
+=accessor B<components>
 
-A list of the components for the project.
+A list of the components for the project as L<JIRA::REST::Class::Project::Component> objects.
 
-=method B<description>
+=accessor B<description>
 
 Returns the description of the project.
 
-=method B<expand>
+=accessor B<expand>
 
-Heck if I know what this field does.
+A comma-separated list of fields in the project that weren't expanded in the initial REST call.
 
-=method B<id>
+=accessor B<id>
 
 Returns the id of the project.
 
-=method B<issueTypes>
+=accessor B<issueTypes>
 
-A list of valid issue types for the project.
+A list of valid issue types for the project as L<JIRA::REST::Class::Issue::Type> objects.
 
-=method B<subtaskIssueTypes>
+=accessor B<subtaskIssueTypes>
 
-Taking a page from the old SOAP interface, this method returns a list of all issue types whose subtask field is true.
+Taking a page from the old SOAP interface, this accessor returns a list of all issue types (as L<JIRA::REST::Class::Issue::Type> objects) whose subtask field is true.
 
-=method B<key>
+=accessor B<key>
 
 Returns the key of the project.
 
-=method B<lead>
+=accessor B<lead>
 
-Returns the project lead as a C<JIRA::REST::Class::User> object.
+Returns the project lead as a L<JIRA::REST::Class::User> object.
 
-=method B<name>
+=accessor B<name>
 
 Returns the name of the project.
 
-=method B<category>
+=accessor B<category>
 
-Returns a hashref of the category of the project.
+Returns a hashref of the category of the project as L<JIRA::REST::Class::Project::Category> objects.
 
-=method B<self>
+=accessor B<self>
 
 Returns the JIRA REST API URL of the project.
 
-=method B<versions>
+=accessor B<versions>
 
-Returns a list of the versions of the project.
+Returns a list of the versions of the project as L<JIRA::REST::Class::Project::Version> objects.
 
-=method B<metadata>
+=accessor B<metadata>
 
 Returns the metadata associated with this project.
 
@@ -150,7 +150,7 @@ sub metadata {
     return $self->{metadata};
 }
 
-=method B<allowed_components>
+=accessor B<allowed_components>
 
 Returns a list of the allowed values for the 'components' field in the project.
 
@@ -158,7 +158,7 @@ Returns a list of the allowed values for the 'components' field in the project.
 
 sub allowed_components   { shift->allowed_field_values('components', @_);  }
 
-=method B<allowed_versions>
+=accessor B<allowed_versions>
 
 Returns a list of the allowed values for the 'versions' field in the project.
 
@@ -166,7 +166,7 @@ Returns a list of the allowed values for the 'versions' field in the project.
 
 sub allowed_versions     { shift->allowed_field_values('versions', @_); }
 
-=method B<allowed_fix_versions>
+=accessor B<allowed_fix_versions>
 
 Returns a list of the allowed values for the 'fixVersions' field in the project.
 
@@ -174,7 +174,7 @@ Returns a list of the allowed values for the 'fixVersions' field in the project.
 
 sub allowed_fix_versions { shift->allowed_field_values('fixVersions', @_); }
 
-=method B<allowed_issue_types>
+=accessor B<allowed_issue_types>
 
 Returns a list of the allowed values for the 'issuetype' field in the project.
 
@@ -182,7 +182,7 @@ Returns a list of the allowed values for the 'issuetype' field in the project.
 
 sub allowed_issue_types  { shift->allowed_field_values('issuetype', @_);   }
 
-=method B<allowed_priorities>
+=accessor B<allowed_priorities>
 
 Returns a list of the allowed values for the 'priority' field in the project.
 
@@ -209,7 +209,7 @@ sub allowed_field_values {
 
 =internal_method B<field_metadata_exists> FIELD_NAME
 
-Boolean indicating whether there is metadata for a given field in the project.
+Boolean indicating whether there is metadata for a given field in the project. Read-only.
 
 =cut
 
@@ -225,7 +225,7 @@ sub field_metadata_exists {
 
 =internal_method B<field_metadata> FIELD_NAME
 
-Looks for metadata under either a field's key or name in the project.
+Looks for metadata under either a field's key or name in the project. Read-only.
 
 =cut
 
@@ -245,7 +245,7 @@ sub field_metadata {
 
 =internal_method B<field_name> FIELD_KEY
 
-Looks up field names in the project metadata in the project.
+Looks up field names in the project metadata in the project. Read-only.
 
 =cut
 
@@ -264,7 +264,11 @@ sub field_name {
     return $self->{field_names}->{$name};
 }
 
+=head1 DESCRIPTION
 
+This object represents a JIRA project as an object.  It is overloaded so it returns the C<key> of the project when stringified, and the C<id> of the project when it is used in a numeric context.  Note, however, that if two of these objects are compared I<as strings>, the C<name> of the projects will be used for the comparison (numeric comparison will compare the C<id>s of the projects).
+
+=cut
 
 use overload
     '""'   => sub { shift->key },
@@ -285,13 +289,10 @@ use overload
 
 1;
 
-=pod
+__END__
 
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

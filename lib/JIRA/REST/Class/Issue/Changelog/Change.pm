@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents an individual change to a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual change to a JIRA issue as an object.
 
 __PACKAGE__->mk_ro_accessors(qw/ author created /);
 __PACKAGE__->mk_data_ro_accessors(qw/ id /);
@@ -29,13 +29,26 @@ sub init {
 1;
 
 =accessor B<author>
-Returns the author of a JIRA issue's change as a C<JIRA::REST::Class::User> object.
+
+Returns the author of a JIRA issue's change as a L<JIRA::REST::Class::User> object.
 
 =accessor B<created>
-Returns the creation time of a JIRA issue's change as a C<DateTime> object.
+
+Returns the creation time of a JIRA issue's change as a L<DateTime> object.
 
 =accessor B<id>
+
 Returns the id of a JIRA issue's change.
 
 =accessor B<items>
-Returns the list of items modified by a JIRA issue's change as a list of C<JIRA::REST::Class::Issue::Changelog::Change::Item> objects.
+
+Returns the list of items modified by a JIRA issue's change as a list of L<JIRA::REST::Class::Issue::Changelog::Change::Item> objects.
+
+=cut
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

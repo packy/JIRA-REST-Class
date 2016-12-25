@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
 
 __PACKAGE__->mk_ro_accessors(qw/ issue to /);
 __PACKAGE__->mk_data_ro_accessors(qw/ id name hasScreen fields /);
@@ -40,3 +40,10 @@ sub go {
 }
 
 1;
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

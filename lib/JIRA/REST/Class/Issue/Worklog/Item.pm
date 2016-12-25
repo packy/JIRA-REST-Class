@@ -8,7 +8,7 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 use Readonly;
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents an individual worklog item for a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual worklog item for a JIRA issue as an object.
 
 Readonly my @USERS => qw( author updateAuthor );
 Readonly my @DATES => qw( created updated );
@@ -34,40 +34,51 @@ sub init {
 1;
 
 =accessor B<author>
-This method returns the author of the JIRA issue's work item as a C<JIRA::REST::Class::User> object.
+
+This method returns the author of the JIRA issue's work item as a L<JIRA::REST::Class::User> object.
 
 =accessor B<comment>
+
 This method returns the comment of the JIRA issue's work item as a string.
 
 =accessor B<created>
-This method returns the creation time of the JIRA issue's work item as a C<DateTime> object.
+
+This method returns the creation time of the JIRA issue's work item as a L<DateTime> object.
 
 =accessor B<id>
+
 This method returns the ID of the JIRA issue's work item as a string.
 
 =accessor B<self>
+
 This method returns the JIRA REST API URL of the work item as a string.
 
 =accessor B<started>
-This method returns the start time of the JIRA issue's work item as a C<DateTime> object.
+
+This method returns the start time of the JIRA issue's work item as a L<DateTime> object.
 
 =accessor B<timeSpent>
+
 This method returns the time spent on the JIRA issue's work item as a string.
 
 =accessor B<timeSpentSeconds>
+
 This method returns the time spent on the JIRA issue's work item as a number of seconds.
 
 =accessor B<updateAuthor>
-This method returns the update author of the JIRA issue's work item as a C<JIRA::REST::Class::User> object.
+
+This method returns the update author of the JIRA issue's work item as a L<JIRA::REST::Class::User> object.
 
 =accessor B<updated>
-This method returns the update time of the JIRA issue's work item as a C<DateTime> object.
+
+This method returns the update time of the JIRA issue's work item as a L<DateTime> object.
+
+=cut
+
+__END__
 
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

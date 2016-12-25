@@ -6,11 +6,10 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents an individual item in an individual change to a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual item in an individual change to a JIRA issue as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw/ field fieldtype
-                                      from fromString
-                                      to toString /);
+__PACKAGE__->mk_data_ro_accessors(qw/ field fieldtype from fromString to
+                                      toString /);
 
 1;
 
@@ -26,11 +25,12 @@ __PACKAGE__->mk_data_ro_accessors(qw/ field fieldtype
 
 =accessor B<toString>
 
+=cut
+
+__END__
+
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

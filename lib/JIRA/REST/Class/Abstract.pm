@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: An abstract class for C<JIRA::REST::Class> that most of the other objects are based on.
+# ABSTRACT: An abstract class for L<JIRA::REST::Class> that most of the other objects are based on.
 
 use Carp;
 use Data::Dumper::Concise;
@@ -16,7 +16,10 @@ __PACKAGE__->mk_ro_accessors(qw( data issue lazy_loaded ));
 
 =internal_method B<init>
 
-Method to perform post-instantiation initialization of the object. The first argument will be the factory object which created the object.
+Method to perform post-instantiation initialization of the object. The first
+argument must be the factory object which created the object.  Subclasses of
+C<JIRA::REST::Class::Abstract> are expected to call
+C<< $self->SUPER::init(@_); >> somewhere in their own C<init()>.
 
 =cut
 
@@ -50,7 +53,9 @@ sub init {
 
 =internal_method B<unload_lazy>
 
-Clears the hash that tracks lazily loaded methods so they get loaded again.
+I'm using a hash to track which lazily loaded methods have already been
+loaded, and this method clears that hash (and the field that got loaded) so
+they get loaded again.
 
 =cut
 
@@ -69,7 +74,18 @@ sub unload_lazy {
 
 =internal_method B<populate_scalar_data>
 
-Code to make instantiating objects from $self->data easier.
+Code to make instantiating objects from C<< $self->{data} >> easier.  Accepts
+three unnamed parameters:
+
+=over 2
+
+=item * key in this object's hash which will hold the resulting object
+
+=item * nickname for object type being created (to be passed to C<make_object()>)
+
+=item * key under C<< $self->{data} >> that should be passed as the data to C<make_object()>
+
+=back
 
 =cut
 
@@ -85,7 +101,16 @@ sub populate_scalar_data {
 
 =internal_method B<populate_date_data>
 
-Code to make instantiating DateTime objects from $self->data easier.
+Code to make instantiating DateTime objects from C<< $self->{data} >> easier.
+Accepts two unnamed parameters:
+
+=over 2
+
+=item * key in this object's hash which will hold the resulting object
+
+=item * key under C<< $self->{data} >> that should be passed as the data to C<make_date()>
+
+=back
 
 =cut
 
@@ -98,7 +123,18 @@ sub populate_date_data {
 
 =internal_method B<populate_list_data>
 
-Code to make instantiating lists of objects from $self->data easier.
+Code to make instantiating lists of objects from C<< $self->{data} >> easier.
+Like L</populate_scalar_data>, it accepts three unnamed parameters:
+
+=over 2
+
+=item * key in this object's hash which will hold the resulting list reference
+
+=item * nickname for object type being created (to be passed to C<make_object()>) as each item in the list
+
+=item * key under C<< $self->{data} >> that should be interpreted as a list reference, each element of which is passed as the data to C<make_object()>
+
+=back
 
 =cut
 
@@ -118,7 +154,18 @@ sub populate_list_data {
 
 =internal_method B<populate_scalar_field>
 
-Code to make instantiating objects from fields easier.
+Code to make instantiating objects from C<<  $self->{data}->{fields} >> easier.   Accepts
+three unnamed parameters:
+
+=over 2
+
+=item * key in this object's hash which will hold the resulting object
+
+=item * nickname for object type being created (to be passed to C<make_object()>)
+
+=item * key under C<<  $self->{data}->{fields} >> that should be passed as the data to C<make_object()>
+
+=back
 
 =cut
 
@@ -133,7 +180,18 @@ sub populate_scalar_field {
 
 =internal_method B<populate_list_field>
 
-Code to make instantiating lists of objects from fields easier.
+Code to make instantiating lists of objects from C<<  $self->{data}->{fields} >> easier.
+Like L</populate_scalar_field>, it accepts three unnamed parameters:
+
+=over 2
+
+=item * key in this object's hash which will hold the resulting list reference
+
+=item * nickname for object type being created (to be passed to C<make_object()>) as each item in the list
+
+=item * key under C<<  $self->{data}->{fields} >> that should be interpreted as a list reference, each element of which is passed as the data to C<make_object()>
+
+=back
 
 =cut
 
@@ -161,10 +219,11 @@ if (eval { require Sub::Name }) {
     Sub::Name->import;
 }
 
-=internal_method B<mk_contextual_ro_accessors> list of accessors to make
+=internal_method B<mk_contextual_ro_accessors>
 
-Because I didn't want to give up Class::Accessor::Fast, but wanted to be
-able to make contextual accessors when it was useful.
+Because I didn't want to give up L<Class::Accessor::Fast>, but wanted to be
+able to make contextual accessors when it was useful.  Accepts a list of
+accessors to make.
 
 =cut
 
@@ -192,9 +251,15 @@ sub mk_contextual_ro_accessors {
     return $class;
 };
 
-=internal_method B<mk_deep_ro_accessor> LIST OF KEYS TO HASH
+=internal_method B<mk_deep_ro_accessor>
 
-Why do accessors have to be only for the top level of the hash?  Why can't they be several layers deep?  This method takes a list of keys for the hash this object is based on and creates an accessor that goes down deeper than just the first level.
+Why do accessors have to be only for the top level of the hash?  Why can't
+they be several layers deep?  This method takes a list of keys for the hash
+this object is based on and creates a contextual accessor that goes down
+deeper than just the first level.
+
+  # create accessor for $self->{foo}->{bar}->{baz}
+  __PACKAGE__->mk_deep_ro_accessor(qw/ foo bar baz /);
 
 =cut
 
@@ -224,9 +289,22 @@ sub mk_deep_ro_accessor {
     return $class;
 };
 
-=internal_method B<mk_lazy_ro_accessor> field, sub_ref_to_construct_value
+=internal_method B<mk_lazy_ro_accessor>
 
-Makes an accessor that checks to see if the value for the accessor has been loaded, and, if it hasn't, runs the provided subroutine to construct the value.  Especially good for loading values that are objects populated by REST calls.
+Takes two parameters: field to make a lazy accessor for, and a subroutine
+reference to construct the value of the accessor when it IS loaded.
+
+This method makes an accessor with the given name that checks to see if the
+value for the accessor has been loaded, and, if it hasn't, runs the provided
+subroutine to construct the value and stores that value for later use.
+Especially good for loading values that are objects populated by REST calls.
+
+  # code to construct a lazy accessor named 'foo'
+  __PACKAGE__->mk_lazy_ro_accessor('foo', sub {
+      my $self = shift;
+      # make the value for foo, in say, $foo
+      return $foo;
+  });
 
 =cut
 
@@ -258,7 +336,7 @@ sub mk_lazy_ro_accessor {
 
 =internal_method B<mk_data_ro_accessors>
 
-Makes accessors for keys under $self->{data}
+Makes accessors for keys under C<< $self->{data} >>
 
 =cut
 
@@ -272,7 +350,7 @@ sub mk_data_ro_accessors {
 
 =internal_method B<mk_field_ro_accessors>
 
-Makes accessors for keys under $self->{data}->{fields}
+Makes accessors for keys under C<< $self->{data}->{fields} >>
 
 =cut
 
@@ -286,7 +364,9 @@ sub mk_field_ro_accessors {
 
 =internal_method B<make_subroutine>
 
-Takes a subroutine name and a subroutine reference, and blesses the subroutine into the class used to call this method.  Can be called with either a class name or a blessed object reference.
+Takes a subroutine name and a subroutine reference, and blesses the
+subroutine into the class used to call this method.  Can be called with
+either a class name or a blessed object reference.
 
 =cut
 
@@ -309,3 +389,11 @@ Takes a subroutine name and a subroutine reference, and blesses the subroutine i
 
 1;
 
+__END__
+
+{{ include( "pod/mixins.pod" )->fill_in; }}
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

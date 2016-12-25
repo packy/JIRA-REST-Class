@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-#ABSTRACT: The module that exports the current version of L<JIRA::REST::Class> to the rest of the modules in the project.
+#ABSTRACT: The module that exports the list of object types in the L<JIRA::REST::Class> module to L<JIRA::REST::Class::Factory> and the testing code.
 
 =head1 DESCRIPTION
 
@@ -52,3 +52,10 @@ our %TYPES = (
 );
 
 1;
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents an individual JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual JIRA issue as an object.
 
 use Carp;
 use Readonly;
@@ -43,6 +43,16 @@ Readonly my @FIELDS => qw( aggregateprogress aggregatetimeestimate
                            votes watches workratio );
 
 __PACKAGE__->mk_field_ro_accessors(@FIELDS);
+
+=head1 DESCRIPTION
+
+This object represents a JIRA issue as an object.  It is overloaded so it
+returns the C<key> of the issue when stringified, and the C<id> of the issue
+when it is used in a numeric context.  If two of these objects are compared
+I<as strings>, the C<key> of the issues will be used for the comparison,
+while numeric comparison will compare the C<id>s of the issues.
+
+=cut
 
 use overload
     '""'   => sub { shift->key },
@@ -143,9 +153,9 @@ __PACKAGE__->mk_lazy_ro_accessor('timetracking', sub {
     $self->make_object('timetracking');
 });
 
-=method B<make_object>
+=internal_method B<make_object>
 
-A pass-through method that calls C<JIRA::REST::Class::Factory::make_object()>, but adds a weakened link to this issue in the object as well.
+A pass-through method that calls L<JIRA::REST::Class::Factory::make_object()|JIRA::REST::Class::Factory/make_object>, but adds a weakened link to this issue in the object as well.
 
 =cut
 
@@ -300,7 +310,7 @@ sub remove_component {
 
 =method B<set_assignee>
 
-Sets the assignee for the issue to be the user passed in.  Can either be a string representing the name or a C<JIRA::REST::Class::User> object.
+Sets the assignee for the issue to be the user passed in.  Can either be a string representing the name or a L<JIRA::REST::Class::User> object.
 
 =cut
 
@@ -312,7 +322,7 @@ sub set_assignee {
 
 =method B<set_reporter>
 
-Sets the reporter for the issue to be the user passed in.  Can either be a string representing the name or a C<JIRA::REST::Class::User> object.
+Sets the reporter for the issue to be the user passed in.  Can either be a string representing the name or a L<JIRA::REST::Class::User> object.
 
 =cut
 
@@ -324,7 +334,7 @@ sub set_reporter {
 
 =method B<add_issue_link>
 
-Adds a link from this issue to another one.  Accepts the link type (either a string representing the name or a C<JIRA::REST::Class::Issue::LinkType>), the issue to be linked to, and (optionally) the direction of the link (inward/outward).  If the direction cannot be determined from the name of the link type, the default direction is 'inward';
+Adds a link from this issue to another one.  Accepts the link type (either a string representing the name or a L<JIRA::REST::Class::Issue::LinkType>), the issue to be linked to, and (optionally) the direction of the link (inward/outward).  If the direction cannot be determined from the name of the link type, the default direction is 'inward';
 
 =cut
 
@@ -511,7 +521,7 @@ sub reload {
 
 =internal_method B<get>
 
-Wrapper around C<JIRA::REST>'s GET method that defaults to this issue's URL. Allows for extra parameters to be specified.
+Wrapper around C<JIRA::REST::Class>' L<get|JIRA::REST::Class/get> method that defaults to this issue's URL. Allows for extra parameters to be specified.
 
 =cut
 
@@ -521,32 +531,9 @@ sub get {
     $self->jira->get($self->url . $extra, @_);
 }
 
-=internal_method B<delete>
-
-Wrapper around C<JIRA::REST::Class>' DELETE method that defaults to this issue's URL. Allows for extra parameters to be specified.
-
-=cut
-
-sub delete {
-    my $self  = shift;
-    my $extra = shift // q{};
-    $self->jira->delete($self->url . $extra, @_);
-}
-
-=internal_method B<put>
-
-Wrapper around C<JIRA::REST::Class>' PUT method that defaults to this issue's URL. Allows for extra parameters to be specified.
-
-=cut
-
-sub put {
-    my $self = shift;
-    $self->jira->put($self->url, @_);
-}
-
 =internal_method B<post>
 
-Wrapper around C<JIRA::REST::Class>' POST method that defaults to this issue's URL. Allows for extra parameters to be specified.
+Wrapper around C<JIRA::REST::Class>' L<post|JIRA::REST::Class/post> method that defaults to this issue's URL. Allows for extra parameters to be specified.
 
 =cut
 
@@ -556,9 +543,32 @@ sub post {
     $self->jira->post($self->url . $extra, @_);
 }
 
+=internal_method B<put>
+
+Wrapper around C<JIRA::REST::Class>' L<put|JIRA::REST::Class/put> method that defaults to this issue's URL. Allows for extra parameters to be specified.
+
+=cut
+
+sub put {
+    my $self = shift;
+    $self->jira->put($self->url, @_);
+}
+
+=internal_method B<delete>
+
+Wrapper around C<JIRA::REST::Class>' L<delete|JIRA::REST::Class/delete> method that defaults to this issue's URL. Allows for extra parameters to be specified.
+
+=cut
+
+sub delete {
+    my $self  = shift;
+    my $extra = shift // q{};
+    $self->jira->delete($self->url . $extra, @_);
+}
+
 =method B<sprints>
 
-Generates a list of C<JIRA::REST::Class::Sprint> objects from the fields for an issue.  Uses the field_name() method on the C<JIRA::REST::Class> object to determine the name of the custom sprint field.
+Generates a list of L<JIRA::REST::Class::Sprint> objects from the fields for an issue.  Uses the field_name() accessor on the L<JIRA::REST::Class::Project|JIRA::REST::Class::Project/"field_name FIELD_KEY"> object to determine the name of the custom sprint field. Currently, this only really works if you're using L<Atlassian GreenHopper|https://www.atlassian.com/software/jira/agile>.
 
 =cut
 
@@ -577,7 +587,7 @@ __PACKAGE__->mk_lazy_ro_accessor('sprints', sub {
 
 =method B<children>
 
-Returns a list of issue objects that are children of the issue. Requires the ScriptRunner plugin.
+Returns a list of issue objects that are children of the issue. Currently requires the L<ScriptRunner plugin|https://marketplace.atlassian.com/plugins/com.onresolve.jira.groovy.groovyrunner/cloud/overview>.
 
 =cut
 
@@ -729,7 +739,7 @@ Returns the aggregate time original estimate for the issue.
 
 TODO: Turn this into an object that can return either seconds or a w/d/h/m/s string.
 
-=accessor Baggregatetimespent>
+=accessor B<aggregatetimespent>
 
 Returns the aggregate time spent for the issue.
 
@@ -737,15 +747,26 @@ TODO: Turn this into an object that can return either seconds or a w/d/h/m/s str
 
 =accessor B<assignee>
 
-Returns the issue's assignee as a C<JIRA::REST::Class::User> object.
+Returns the issue's assignee as a L<JIRA::REST::Class::User> object.
 
-=method B<changelog>
+=accessor B<changelog>
 
-Returns the issue's change log as a C<JIRA::REST::Class::Changelog> object.
+Returns the issue's change log as a L<JIRA::REST::Class::Issue::Changelog>
+object.
+
+=accessor B<comments>
+
+Returns a list of the issue's comments as
+L<JIRA::REST::Class::Issue::Comment> objects. If called in a scalar
+context, returns an array reference to the list, not the number of elements
+in the list.
 
 =accessor B<components>
 
-Returns a list of the issue's components as C<JIRA::REST::Class::Project::Component> objects. If called in a scalar context, returns an array reference to the list, not the number of elements in the list.
+Returns a list of the issue's components as
+L<JIRA::REST::Class::Project::Component> objects. If called in a scalar
+context, returns an array reference to the list, not the number of elements
+in the list.
 
 =accessor B<component_count>
 
@@ -753,11 +774,11 @@ Returns a count of the issue's components.
 
 =accessor B<created>
 
-Returns the issue's creation date as a C<DateTime> object.
+Returns the issue's creation date as a L<DateTime> object.
 
 =accessor B<creator>
 
-Returns the issue's assignee as a C<JIRA::REST::Class::User> object.
+Returns the issue's assignee as a L<JIRA::REST::Class::User> object.
 
 =accessor B<description>
 
@@ -765,7 +786,7 @@ Returns the description of the issue.
 
 =accessor B<duedate>
 
-Returns the issue's due date as a C<DateTime> object.
+Returns the issue's due date as a L<DateTime> object.
 
 =accessor B<environment>
 
@@ -787,7 +808,7 @@ TODO: Turn this into a list of objects.
 
 =accessor B<issuetype>
 
-Returns the issue type as a C<JIRA::REST::Class::Issue::Type> object.
+Returns the issue type as a L<JIRA::REST::Class::Issue::Type> object.
 
 =accessor B<labels>
 
@@ -795,11 +816,11 @@ Returns the issue's labels as an array reference.
 
 =accessor B<lastViewed>
 
-Returns the issue's last view date as a C<DateTime> object.
+Returns the issue's last view date as a L<DateTime> object.
 
 =accessor B<parent>
 
-Returns the issue's parent as a C<JIRA::REST::Class::Issue> object.
+Returns the issue's parent as a L<JIRA::REST::Class::Issue> object.
 
 =accessor B<has_parent>
 
@@ -819,11 +840,11 @@ TODO: Turn this into an object.
 
 =accessor B<project>
 
-Returns the issue's project as a C<JIRA::REST::Class::Project> object.
+Returns the issue's project as a L<JIRA::REST::Class::Project> object.
 
 =accessor B<reporter>
 
-Returns the issue's reporter as a C<JIRA::REST::Class::User> object.
+Returns the issue's reporter as a L<JIRA::REST::Class::User> object.
 
 =accessor B<resolution>
 
@@ -833,11 +854,11 @@ TODO: Turn this into an object.
 
 =accessor B<resolutiondate>
 
-Returns the issue's resolution date as a C<DateTime> object.
+Returns the issue's resolution date as a L<DateTime> object.
 
 =accessor B<status>
 
-Returns the issue's status as a C<JIRA::REST::Class::Status> object.
+Returns the issue's status as a L<JIRA::REST::Class::Issue::Status> object.
 
 =accessor B<summary>
 
@@ -863,15 +884,15 @@ TODO: Turn this into an object that can return either seconds or a w/d/h/m/s str
 
 =accessor B<timetracking>
 
-Returns the time tracking of the issue as a C<JIRA::REST::Class::Issue::TimeTracking> object.
+Returns the time tracking of the issue as a L<JIRA::REST::Class::Issue::TimeTracking> object.
 
 =accessor B<transitions>
 
-Returns the valid transitions for the issue as a C<JIRA::REST::Class::Issue::Transitions> object.
+Returns the valid transitions for the issue as a L<JIRA::REST::Class::Issue::Transitions> object.
 
 =accessor B<updated>
 
-Returns the issue's updated date as a C<DateTime> object.
+Returns the issue's updated date as a L<DateTime> object.
 
 =accessor B<versions>
 
@@ -887,7 +908,7 @@ watches
 
 =accessor B<worklog>
 
-Returns the issue's change log as a C<JIRA::REST::Class::Worklog> object.
+Returns the issue's change log as a L<JIRA::REST::Class::Worklog> object.
 
 =accessor B<workratio>
 
@@ -907,13 +928,16 @@ Returns the JIRA REST API's full URL for this issue.
 
 =accessor B<url>
 
-Returns the JIRA REST API's URL for this issue in a form used by C<JIRA::REST::Class>.
+Returns the JIRA REST API's URL for this issue in a form used by L<JIRA::REST::Class>.
+
+=for stopwords aggregatetimespent
+
+=cut
+
+__END__
 
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

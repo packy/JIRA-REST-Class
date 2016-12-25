@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the time tracking for a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the time tracking for a JIRA issue as an object.
 
 use Contextual::Return;
 
@@ -111,13 +111,10 @@ sub update {
 
 1;
 
-=pod
+__END__
 
 {{
-   use Path::Tiny;
-   $OUT .= q{=for stopwords};
-   for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
-       $OUT .= qq{ $word};
-   }
-   $OUT .= qq{\n};
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::include_stopwords();
+    $OUT .= PodUtil::related_classes($plugin);
 }}

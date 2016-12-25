@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents a comment on a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a comment on a JIRA issue as an object.
 
 use Readonly;
 
@@ -87,3 +87,12 @@ The full URL for the JIRA REST API call for the comment.
 A hash reference representing the visibility of the comment.
 
 =for stopwords iconUrl updateAuthor
+
+=cut
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}

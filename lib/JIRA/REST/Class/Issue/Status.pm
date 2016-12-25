@@ -6,7 +6,7 @@ use v5.10;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for C<JIRA::REST::Class> that represents the status of a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the status of a JIRA issue as an object.
 
 __PACKAGE__->mk_ro_accessors(qw/ category /);
 __PACKAGE__->mk_data_ro_accessors(qw/ description iconUrl id name self /);
@@ -45,6 +45,15 @@ Returns the JIRA REST API URL of the status.
 
 =method B<category>
 
-Returns the category of the status as a C<JIRA::REST::Class::Issue::Status::Category> object.
+Returns the category of the status as a L<JIRA::REST::Class::Issue::Status::Category> object.
 
 =for stopwords iconUrl
+
+=cut
+
+__END__
+
+{{
+    require "pod/PodUtil.pm";
+    $OUT .= PodUtil::related_classes($plugin);
+}}
