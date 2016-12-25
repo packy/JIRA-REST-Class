@@ -51,3 +51,5 @@ our $SOURCE = 'CPAN';
 $SOURCE = 'GitHub'; # COMMENT
 
 1;
+
+=for stopwords BumpVersionAfterRelease

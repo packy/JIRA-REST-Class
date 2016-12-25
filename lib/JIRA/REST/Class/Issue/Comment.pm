@@ -86,4 +86,4 @@ The full URL for the JIRA REST API call for the comment.
 
 A hash reference representing the visibility of the comment.
 
-=for stopwords iconUrl
+=for stopwords iconUrl updateAuthor

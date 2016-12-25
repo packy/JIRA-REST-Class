@@ -649,7 +649,7 @@ sub strip_protocol_and_host {
 
 =accessor B<args>
 
-An accessor for the copy of the arguments passed to the constuctor.
+An accessor for the copy of the arguments passed to the constructor.
 
 =cut
 
@@ -689,7 +689,7 @@ sub rest_client_config { shift->args->{rest_client_config} }
 
 =accessor B<anonymous>
 
-An accessor for the C<anonymous> prameter passed to the L<JIRA::REST> object.
+An accessor for the C<anonymous> parameter passed to the L<JIRA::REST> object.
 
 =cut
 

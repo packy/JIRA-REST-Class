@@ -1,5 +1,15 @@
 {{$NEXT}}
 
+          Update a lot of the testing code, and start using Inline::Test.
+
+          Moved to using JIRA::REST::Class::Version as the source for the
+          module's version number.
+
+          Fixed pattern problem that was causing dates to not become
+          DataTime objects.
+
+          Added a JIRA::REST::Class::Issue::Comment object type.
+
 0.03      2016-12-14 23:56:06-05:00 America/New_York
 
           Fixed the tests that were breaking on other systems (hopefully),

@@ -30,6 +30,8 @@ sub init {
 
 1;
 
+__END__
+
 =accessor B<id>
 
 =accessor B<rapidViewId>
@@ -46,6 +48,8 @@ sub init {
 
 =accessor B<sequence>
 
+=cut
+
 {{
    use Path::Tiny;
    $OUT .= q{=for stopwords};
@@ -54,10 +58,6 @@ sub init {
    }
    $OUT .= qq{\n};
 }}
-
-=cut
-
-__END__
 
 # These methods don't work, probably because JIRA doesn't have a well-defined
 # interface for adding/removing issues from a sprint.
