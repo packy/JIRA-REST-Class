@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::Comment;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a comment on a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a comment on a JIRA issue as an object.
 
 use Readonly;
 
@@ -35,6 +35,8 @@ sub init {
     foreach my $field ( @DATES ) {
         $self->{$field} = $self->make_date( $self->data->{$field} );
     }
+
+    return;
 }
 
 =method B<delete>
@@ -43,32 +45,36 @@ Deletes the comment from the issue. Returns nothing.
 
 =cut
 
-sub delete {
+sub delete { ## no critic (ProhibitBuiltinHomonyms)
     my $self = shift;
     $self->issue->delete( '/comment/' . $self->id );
 
     # now that we've deleted this comment, the
     # lazy accessor will need to be reloaded
     undef $self->issue->{comments};
+
+    return;
 }
 
 1;
 
 =accessor B<author>
 
-The author of the comment as a L<JIRA::REST::Class::User> object.
+The author of the comment as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<updateAuthor>
 
-The updateAuthor of the comment as a L<JIRA::REST::Class::User> object.
+The updateAuthor of the comment as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<created>
 
-The created date for the comment as a L<DateTime> object.
+The created date for the comment as a L<DateTime|DateTime> object.
 
 =accessor B<updated>
 
-The updated date for the comment as a L<DateTime> object.
+The updated date for the comment as a L<DateTime|DateTime> object.
 
 =accessor B<body>
 

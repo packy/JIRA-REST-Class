@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::LinkType;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA link type as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA link type as an object.
 
 __PACKAGE__->mk_data_ro_accessors( qw( id name inward outward self ) );
 

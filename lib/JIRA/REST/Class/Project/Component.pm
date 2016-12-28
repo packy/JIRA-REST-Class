@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Project::Component;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a component of a JIRA project as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a component of a JIRA project as an object.
 
 __PACKAGE__->mk_data_ro_accessors( qw( id isAssigneeTypeValid name self ) );
 

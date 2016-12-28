@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::Status;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the status of a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the status of a JIRA issue as an object.
 
 __PACKAGE__->mk_ro_accessors( qw/ category / );
 __PACKAGE__->mk_data_ro_accessors( qw/ description iconUrl id name self / );
@@ -22,6 +22,8 @@ sub init {
             data => $self->data->{statusCategory}
         }
     );
+
+    return;
 }
 
 1;
@@ -48,7 +50,9 @@ Returns the JIRA REST API URL of the status.
 
 =method B<category>
 
-Returns the category of the status as a L<JIRA::REST::Class::Issue::Status::Category> object.
+Returns the category of the status as a
+L<JIRA::REST::Class::Issue::Status::Category|JIRA::REST::Class::Issue::Status::Category>
+object.
 
 =for stopwords iconUrl
 

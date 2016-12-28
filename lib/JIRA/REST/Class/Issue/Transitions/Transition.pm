@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::Transitions::Transition;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
 
 __PACKAGE__->mk_ro_accessors( qw/ issue to / );
 __PACKAGE__->mk_data_ro_accessors( qw/ id name hasScreen fields / );
@@ -17,6 +17,8 @@ sub init {
     $self->SUPER::init( @_ );
 
     $self->{to} = $self->make_object( 'status', { data => $self->data->{to} } );
+
+    return;
 }
 
 =method B<go>
@@ -26,12 +28,12 @@ Perform the transition represented by this object on the issue.
 =cut
 
 sub go {
-    my $self = shift;
+    my ( $self, @args ) = @_;
     $self->issue->post(
-        "/transitions",
+        '/transitions',
         {
             transition => { id => $self->id },
-            @_
+            @args
         }
     );
 
@@ -41,6 +43,8 @@ sub go {
 
     # reload these new transitions
     $self->issue->transitions->init( $self->factory );
+
+    return;
 }
 
 1;

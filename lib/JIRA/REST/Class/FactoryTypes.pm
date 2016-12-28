@@ -1,12 +1,12 @@
 package JIRA::REST::Class::FactoryTypes;
-use base qw( Exporter );
+use parent qw( Exporter );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-#ABSTRACT: The module that exports the list of object types in the L<JIRA::REST::Class> module to L<JIRA::REST::Class::Factory> and the testing code.
+#ABSTRACT: The module that exports the list of object types in the L<JIRA::REST::Class|JIRA::REST::Class> module to L<JIRA::REST::Class::Factory|JIRA::REST::Class::Factory> and the testing code.
 
 =head1 DESCRIPTION
 
@@ -19,7 +19,8 @@ our @EXPORT_OK = qw( %TYPES );
 
 =head2 %TYPES
 
-A hash where the keys map to the full names of the classes of objects in the L<JIRA::REST::Class> package.
+A hash where the keys map to the full names of the classes of objects in the
+L<JIRA::REST::Class|JIRA::REST::Class> package.
 
 =cut
 

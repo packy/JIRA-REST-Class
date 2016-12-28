@@ -1,15 +1,15 @@
 package JIRA::REST::Class::Issue::Changelog::Change::Item;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual item in an individual change to a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual item in an individual change to a JIRA issue as an object.
 
 __PACKAGE__->mk_data_ro_accessors(
-    qw/ field fieldtype from fromString to toString /    #
+    qw/ field fieldtype from fromString to toString / ##
 );
 
 1;

@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::TimeTracking;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the time tracking for a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the time tracking for a JIRA issue as an object.
 
 use Contextual::Return;
 
@@ -16,6 +16,8 @@ sub init {
 
     my $data = $self->issue->get( q{}, { fields => 'timetracking' } );
     $self->{data} = $data->{fields}->{timetracking};
+
+    return;
 }
 
 =accessor B<originalEstimate>
@@ -75,7 +77,7 @@ Sets the original estimate to the amount of time given.  Accepts any time format
 sub set_originalEstimate {
     my $self = shift;
     my $est  = shift;
-    $self->update( { originalEstimate => $est } );
+    return $self->update( { originalEstimate => $est } );
 }
 
 =method B<set_remainingEstimate>
@@ -87,7 +89,7 @@ Sets the remaining estimate to the amount of time given.  Accepts any time forma
 sub set_remainingEstimate {
     my $self = shift;
     my $est  = shift;
-    $self->update( { remainingEstimate => $est } );
+    return $self->update( { remainingEstimate => $est } );
 }
 
 =method B<update>
@@ -113,7 +115,7 @@ sub update {
         }
     }
 
-    $self->issue->put_field( timetracking => $update );
+    return $self->issue->put_field( timetracking => $update );
 }
 
 1;

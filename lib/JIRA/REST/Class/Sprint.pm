@@ -1,27 +1,30 @@
 package JIRA::REST::Class::Sprint;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the sprint of a JIRA issue as an object (if you're using L<Atlassian GreenHopper|https://www.atlassian.com/software/jira/agile>).
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the sprint of a JIRA issue as an object (if you're using L<Atlassian GreenHopper|https://www.atlassian.com/software/jira/agile>).
 
 use Readonly;
 
 Readonly my @ACCESSORS => qw( id rapidViewId state name startDate endDate
                               completeDate sequence );
 
-__PACKAGE__->mk_ro_accessors( @ACCESORS );
+__PACKAGE__->mk_ro_accessors( @ACCESSORS );
+
+Readonly my $GREENHOPPER_SPRINT => qr{ com [.] atlassian [.] greenhopper [.]
+                                       service [.] sprint [.] Sprint }x;
 
 sub init {
     my $self = shift;
     $self->SUPER::init( @_ );
 
     my $data = $self->data;
-    $data =~ s{com\.atlassian\.greenhopper\.service\.sprint\.Sprint[^\[]+\[}{};
-    $data =~ s{\]$}{};
+    $data =~ s{ $GREENHOPPER_SPRINT [ ^ \[ ]+ \[ }{}x;
+    $data =~ s{\]$}{}x;
     my @fields = split /,/, $data;
     foreach my $field ( @fields ) {
         my ( $k, $v ) = split /=/, $field;
@@ -30,6 +33,8 @@ sub init {
         }
         $self->{$k} = $v;
     }
+
+    return;
 }
 
 1;

@@ -37,7 +37,7 @@ sub get_logger {
     $class = ref $class ? ref $class : $class;
 
     my %args = (@_ % 2) ? () : @_; # no exceptions for odd # of params
-    my $class  = exists $args{class} ? $args{class} : $class;
+    $class     = exists $args{class} ? $args{class} : $class;
     my $prefix = exists $args{prefix} ? $args{prefix}
                : $class               ? "[pid $$] $class: "
                :                        "[pid $$] ";

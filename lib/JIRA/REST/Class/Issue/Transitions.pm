@@ -1,14 +1,14 @@
 package JIRA::REST::Class::Issue::Transitions;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use Carp;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
 
 __PACKAGE__->mk_contextual_ro_accessors( qw/ transitions / );
 
@@ -16,6 +16,7 @@ sub init {
     my $self = shift;
     $self->SUPER::init( @_ );
     $self->_refresh_transitions;
+    return;
 }
 
 sub _refresh_transitions {
@@ -29,6 +30,8 @@ sub _refresh_transitions {
             $self->issue->make_object( 'transition', { data => $_ } )
         } @{ $self->data->{transitions} }
     ];
+
+    return;
 }
 
 =internal_method B<find_transition_named>
@@ -39,7 +42,7 @@ Returns the transition object for the named transition provided.
 
 sub find_transition_named {
     my $self = shift;
-    my $name = shift or confess "no name specified";
+    my $name = shift or confess 'no name specified';
 
     $self->_refresh_transitions;
 
@@ -48,14 +51,12 @@ sub find_transition_named {
         return $transition;
     }
 
-    die sprintf(
-        "Unable to find transition '%s'\n"
-            . "issue status: %s\n"
-            . "transitions:  %s\n",
+    croak sprintf "Unable to find transition '%s'\n"
+        . "issue status: %s\n"
+        . "transitions:  %s\n",
         $name,
         $self->issue->status->name,
-        $self->dump( [ $self->transitions ] ),
-    );
+        $self->dump( [ $self->transitions ] );
 }
 
 =method B<block>
@@ -64,7 +65,7 @@ Blocks the issue.
 
 =cut
 
-sub block { shift->find_transition_named( "Block Issue" )->go( @_ ) }
+sub block { return shift->find_transition_named( 'Block Issue' )->go( @_ ) }
 
 =method B<close>
 
@@ -72,7 +73,9 @@ Closes the issue.
 
 =cut
 
-sub close { shift->find_transition_named( "Close Issue" )->go( @_ ) }
+## no critic (ProhibitBuiltinHomonyms ProhibitAmbiguousNames)
+sub close { return shift->find_transition_named( 'Close Issue' )->go( @_ ) }
+## use critic
 
 =method B<verify>
 
@@ -80,7 +83,7 @@ Verifies the issue.
 
 =cut
 
-sub verify { shift->find_transition_named( "Verify Issue" )->go( @_ ) }
+sub verify { return shift->find_transition_named( 'Verify Issue' )->go( @_ ) }
 
 =method B<resolve>
 
@@ -88,7 +91,7 @@ Resolves the issue.
 
 =cut
 
-sub resolve { shift->find_transition_named( "Resolve Issue" )->go( @_ ) }
+sub resolve { return shift->find_transition_named( 'Resolve Issue' )->go( @_ ) }
 
 =method B<reopen>
 
@@ -96,7 +99,7 @@ Reopens the issue.
 
 =cut
 
-sub reopen { shift->find_transition_named( "Reopen Issue" )->go( @_ ) }
+sub reopen { return shift->find_transition_named( 'Reopen Issue' )->go( @_ ) }
 
 =method B<start_progress>
 
@@ -105,7 +108,7 @@ Starts progress on the issue.
 =cut
 
 sub start_progress {
-    shift->find_transition_named( "Start Progress" )->go( @_ );
+    return shift->find_transition_named( 'Start Progress' )->go( @_ );
 }
 
 =method B<stop_progress>
@@ -114,7 +117,9 @@ Stops progress on the issue.
 
 =cut
 
-sub stop_progress { shift->find_transition_named( "Stop Progress" )->go( @_ ) }
+sub stop_progress {
+    return shift->find_transition_named( 'Stop Progress' )->go( @_ );
+}
 
 =method B<start_qa>
 
@@ -122,7 +127,7 @@ Starts QA on the issue.
 
 =cut
 
-sub start_qa { shift->find_transition_named( "Start QA" )->go( @_ ) }
+sub start_qa { return shift->find_transition_named( 'Start QA' )->go( @_ ) }
 
 =method B<transition_walk>
 
@@ -182,6 +187,8 @@ sub transition_walk {
     if ( $current_assignee ne $orig_assignee ) {
         $self->issue->set_assignee( $orig_assignee );
     }
+
+    return;
 }
 
 1;

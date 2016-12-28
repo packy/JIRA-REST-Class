@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an
 # individual JIRA issue as an object.
 
 use Carp;
@@ -104,7 +104,7 @@ sub init {
         # if we haven't defined booleans to determine whether or not this
         # issue is a particular type, define those methods now
         foreach my $type ( $jira->issue_types ) {
-            ( my $subname = lc 'is_' . $type->name ) =~ s/\s+|\-/_/g;
+            ( my $subname = lc 'is_' . $type->name ) =~ s/\s+|\-/_/xmsg;
             $self->make_subroutine(
                 $subname,
                 sub {
@@ -113,9 +113,10 @@ sub init {
             );
         }
     }
+    return;
 }
 
-sub component_count { scalar @{ shift->{components} } }
+sub component_count { return scalar @{ shift->{components} } }
 
 #
 # rather than just use the minimal information in the issue's
@@ -123,7 +124,7 @@ sub component_count { scalar @{ shift->{components} } }
 # uses the parent_accessor
 #
 
-sub has_parent { exists shift->fields->{parent} }
+sub has_parent { return exists shift->fields->{parent} }
 
 __PACKAGE__->mk_lazy_ro_accessor(
     'parent',
@@ -133,7 +134,12 @@ __PACKAGE__->mk_lazy_ro_accessor(
 
         my $parent = $self->fields->{parent}->{self};
         my $url    = $self->jira->strip_protocol_and_host( $parent );
-        $self->make_object( 'issue', { data => $self->jira->get( $url ) } );
+        return $self->make_object(
+            'issue',
+            {
+                data => $self->jira->get( $url )
+            }
+        );
     }
 );
 
@@ -141,7 +147,7 @@ __PACKAGE__->mk_lazy_ro_accessor(
     'changelog',
     sub {
         my $self = shift;
-        $self->make_object( 'changelog' );
+        return $self->make_object( 'changelog' );
     }
 );
 
@@ -150,8 +156,8 @@ __PACKAGE__->mk_lazy_ro_accessor(
     sub {
         my $self = shift;
         my $data = $self->get( '/comment' );
-        $self->{comments} = [  #
-            map {              #
+        return $self->{comments} = [  #
+            map {                     #
                 $self->make_object( 'comment', { data => $_ } );
             } @{ $data->{comments} }
         ];
@@ -162,7 +168,7 @@ __PACKAGE__->mk_lazy_ro_accessor(
     'worklog',
     sub {
         my $self = shift;
-        $self->make_object( 'worklog' );
+        return $self->make_object( 'worklog' );
     }
 );
 
@@ -170,7 +176,7 @@ __PACKAGE__->mk_lazy_ro_accessor(
     'transitions',
     sub {
         my $self = shift;
-        $self->make_object( 'transitions' );
+        return $self->make_object( 'transitions' );
     }
 );
 
@@ -178,7 +184,7 @@ __PACKAGE__->mk_lazy_ro_accessor(
     'timetracking',
     sub {
         my $self = shift;
-        $self->make_object( 'timetracking' );
+        return $self->make_object( 'timetracking' );
     }
 );
 
@@ -221,14 +227,15 @@ Accepts a list of filenames to be added to the issue as attachments.
 =cut
 
 sub add_attachments {
-    my $self = shift;
+    my ( $self, @args ) = @_;
 
-    foreach my $file ( @_ ) {
+    foreach my $file ( @args ) {
         croak "unable to find attachment $file"
             unless -f $file;
 
         $self->JIRA_REST->attach_files( $self->key, $file );
     }
+    return;
 }
 
 =method B<add_attachment>
@@ -244,7 +251,7 @@ sub add_attachment {
     croak "unable to find attachment $file"
         unless -f $file;
 
-    $self->JIRA_REST->attach_files( $self->key, $file );
+    return $self->JIRA_REST->attach_files( $self->key, $file );
 }
 
 =method B<add_data_attachment>
@@ -260,7 +267,7 @@ sub add_data_attachment {
     my $data = shift;
     my $url  = q{/} . join q{/}, 'issue', $self->key, 'attachments';
 
-    $self->jira->data_upload(
+    return $self->jira->data_upload(
         {
             url  => $url,
             name => $name,
@@ -278,7 +285,7 @@ Adds whatever is passed in as a comment on the issue.
 sub add_comment {
     my $self = shift;
     my $text = shift;
-    $self->post( "/comment", { body => $text } );
+    return $self->post( '/comment', { body => $text } );
 }
 
 =method B<add_label>
@@ -290,7 +297,7 @@ Adds whatever is passed in as a label for the issue.
 sub add_label {
     my $self  = shift;
     my $label = shift;
-    $self->update( labels => [ { add => $label } ] );
+    return $self->update( labels => [ { add => $label } ] );
 }
 
 =method B<remove_label>
@@ -302,7 +309,7 @@ Removes whatever is passed in from the labels for the issue.
 sub remove_label {
     my $self  = shift;
     my $label = shift;
-    $self->update( labels => [ { remove => $label } ] );
+    return $self->update( labels => [ { remove => $label } ] );
 }
 
 =method B<has_label>
@@ -329,7 +336,7 @@ Adds whatever is passed in as a component for the issue.
 sub add_component {
     my $self = shift;
     my $comp = shift;
-    $self->update( components => [ { add => { name => $comp } } ] );
+    return $self->update( components => [ { add => { name => $comp } } ] );
 }
 
 =method B<remove_component>
@@ -341,42 +348,45 @@ Removes whatever is passed in from the components for the issue.
 sub remove_component {
     my $self = shift;
     my $comp = shift;
-    $self->update( components => [ { remove => { name => $comp } } ] );
+    return $self->update( components => [ { remove => { name => $comp } } ] );
 }
 
 =method B<set_assignee>
 
 Sets the assignee for the issue to be the user passed in.  Can either be a
-string representing the name or a L<JIRA::REST::Class::User> object.
+string representing the name or a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =cut
 
 sub set_assignee {
-    my $self = shift;
-    my $name = $self->name_for_user( @_ );
-    $self->put_field( assignee => { name => $name } );
+    my ( $self, @args ) = @_;
+    my $name = $self->name_for_user( @args );
+    return $self->put_field( assignee => { name => $name } );
 }
 
 =method B<set_reporter>
 
 Sets the reporter for the issue to be the user passed in.  Can either be a
-string representing the name or a L<JIRA::REST::Class::User> object.
+string representing the name or a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =cut
 
 sub set_reporter {
     my $self = shift;
     my $name = $self->name_for_user( shift );
-    $self->put_field( reporter => { name => $name } );
+    return $self->put_field( reporter => { name => $name } );
 }
 
 =method B<add_issue_link>
 
 Adds a link from this issue to another one.  Accepts the link type (either a
-string representing the name or a L<JIRA::REST::Class::Issue::LinkType>), the
-issue to be linked to, and (optionally) the direction of the link
-(inward/outward).  If the direction cannot be determined from the name of the
-link type, the default direction is 'inward';
+string representing the name or a
+L<JIRA::REST::Class::Issue::LinkType|JIRA::REST::Class::Issue::LinkType>),
+the issue to be linked to, and (optionally) the direction of the link
+(inward/outward).  If the direction cannot be determined from the name of
+the link type, the default direction is 'inward';
 
 =cut
 
@@ -393,7 +403,7 @@ sub add_issue_link {
             },
         }
     ];
-    $self->update( issuelinks => $links );
+    return $self->update( issuelinks => $links );
 }
 
 =method B<add_subtask>
@@ -410,93 +420,22 @@ The remaining named parameters are passed to the create issue call as fields.
 =cut
 
 sub add_subtask {
-    my ( $summary, $desc, $fields, $issuetype );
+    my ( $self, @args ) = @_;
 
-    my $self    = shift;
-    my $project = $self->project;
-    my $parent  = $self;
-
-    if ( @_ == 1 && ref $_[0] && ref $_[0] eq 'HASH' ) {
-        $fields = $_[0];
-
-        if ( exists $fields->{project} && defined $fields->{project} ) {
-            my $proj = $fields->{project};
-            if ( $self->obj_isa( $proj, 'project' ) ) {
-
-                # we were passed an issue type object
-                $project = $proj;
-            }
-            else {
-                ( $project ) = grep {  #
-                    $_->id eq $proj || $_->name eq $proj
-                } $self->jira->projects;
-
-                unless ( $project ) {
-                    local $Carp::CarpLevel = $Carp::CarpLevel + 1;
-                    confess "add_subtask() called with unknown project '$proj'";
-                }
-            }
-        }
-
-        if ( exists $fields->{parent} && defined $fields->{parent} ) {
-            my $issue = $fields->{parent};
-            if ( $self->obj_isa( $issue, 'issue' ) ) {
-
-                # we were passed an issue type object
-                $parent = $issue;
-            }
-            else {
-                ( $parent ) = $self->jira->issues( $issue );
-
-                unless ( $parent ) {
-                    local $Carp::CarpLevel = $Carp::CarpLevel + 1;
-                    confess "add_subtask() called with unknown parent '$issue'";
-                }
-            }
-        }
-
-        if ( exists $fields->{issuetype} && defined $fields->{issuetype} ) {
-            my $type = $fields->{issuetype};
-            if ( $self->obj_isa( $type, 'issuetype' ) ) {
-
-                # we were passed an issue type object
-                $issuetype = $type;
-            }
-            else {
-                my @types = $project->issueTypes;
-                ( $issuetype ) = grep {  #
-                    $_->id eq $type || $_->name eq $type
-                } @types;
-            }
-
-            if ( $issuetype && !$issuetype->subtask ) {
-                local $Carp::CarpLevel = $Carp::CarpLevel + 1;
-                confess "add_subtask() called with a non-subtask issue type: "
-                    . "'$issuetype'";
-            }
-        }
+    my $fields;
+    if ( @args == 1 && ref $args[0] && ref $args[0] eq 'HASH' ) {
+        $fields = $args[0];
     }
     else { ## backward compatibility
-        $fields = $_[2] // {};
+        $fields = $args[2] // {};
 
-        $fields->{summary}     //= shift;
-        $fields->{description} //= shift;
+        $fields->{summary}     //= shift @args;
+        $fields->{description} //= shift @args;
     }
 
-    unless ( $issuetype ) {
-        my @subtasks = $project->subtaskIssueTypes;
-
-        if ( @subtasks == 1 ) {
-            $issuetype = $subtasks[0];
-        }
-        else {
-            local $Carp::CarpLevel = $Carp::CarpLevel + 1;
-            my $count = scalar @subtasks;
-            my $list = join q{, }, @subtasks;
-            confess "add_subtask() called without specifying a subtask type; "
-                . "there are $count subtask types: $list";
-        }
-    }
+    my $project   = $self->_get_subtask_project( $fields );
+    my $parent    = $self->_get_subtask_parent( $fields );
+    my $issuetype = $self->_get_subtask_issue_type( $project, $fields );
 
     my $data = {
         fields => {
@@ -508,7 +447,10 @@ sub add_subtask {
 
     if ( $fields ) {
         foreach my $field ( keys %$fields ) {
-            next if $field =~ /^(project|parent|issuetype)$/;
+            next
+                if $field eq 'project'
+                || $field eq 'parent'
+                || $field eq 'issuetype';
             $data->{fields}->{$field} = $fields->{$field};
         }
     }
@@ -522,6 +464,100 @@ sub add_subtask {
             data => $self->jira->get( $url )
         }
     );
+}
+
+sub _get_subtask_project {
+    my ( $self, $fields ) = @_;
+
+    return $self->project
+        unless exists $fields->{project} && defined $fields->{project};
+
+    my $proj = $fields->{project};
+
+    if ( $self->obj_isa( $proj, 'project' ) ) {
+
+        # we were passed an issue type object
+        return $proj;
+    }
+
+    my ( $project ) = grep { ##
+        $_->id eq $proj || $_->name eq $proj
+    } $self->jira->projects;
+
+    return $project if $project;
+
+    local $Carp::CarpLevel = $Carp::CarpLevel + 1;
+    confess "add_subtask() called with unknown project '$proj'";
+}
+
+sub _get_subtask_parent {
+    my ( $self, $fields ) = @_;
+
+    # if we're not passed a parent parameter, we're the parent
+    return $self
+        unless exists $fields->{parent} && defined $fields->{parent};
+
+    my $issue = $fields->{parent};
+    if ( $self->obj_isa( $issue, 'issue' ) ) {
+
+        # we were passed an issue type object
+        return $issue;
+    }
+
+    my ( $parent ) = $self->jira->issues( $issue );
+
+    return $parent if $parent;
+
+    local $Carp::CarpLevel = $Carp::CarpLevel + 2;
+    confess "add_subtask() called with unknown parent '$issue'";
+}
+
+sub _get_subtask_issue_type {
+    my ( $self, $project, $fields ) = @_;
+
+    # let's set this once in case we need to throw an exception
+    local $Carp::CarpLevel = $Carp::CarpLevel + 2;
+
+    if ( exists $fields->{issuetype} && defined $fields->{issuetype} ) {
+        my $type = $fields->{issuetype};
+
+        if ( $self->obj_isa( $type, 'issuetype' ) ) {
+
+            # we were passed an issue type object
+            return $type if $type->subtask;
+
+            confess
+                "add_subtask() called with a non-subtask issue type: '$type'";
+        }
+
+        my ( $issuetype ) = grep { ##
+            $_->id eq $type || $_->name eq $type
+        } $project->issueTypes;
+
+        return $issuetype if $issuetype && $issuetype->subtask;
+
+        if ( !defined $issuetype ) {
+            confess 'add_subtask() called with a value that does not '
+                . "correspond to a known issue type: '$type'";
+        }
+
+        confess
+            "add_subtask() called with a non-subtask issue type: '$issuetype'";
+    }
+
+    # we didn't get passed an issue type, so let's find one
+
+    my @subtasks = $self->project->subtaskIssueTypes;
+
+    if ( @subtasks == 1 ) {
+        return $subtasks[0];
+    }
+
+    my $count = scalar @subtasks;
+    my $list = join q{, } => @subtasks;
+
+    confess 'add_subtask() called without specifying a subtask type; '
+        . "there are $count subtask types: $list";
 }
 
 ###########################################################################
@@ -540,7 +576,7 @@ sub update {
         my $value = shift;
         $hash->{$field} = $value;
     }
-    $self->put(
+    return $self->put(
         {
             update => $hash,
         }
@@ -557,7 +593,7 @@ sub put_field {
     my $self  = shift;
     my $field = shift;
     my $value = shift;
-    $self->put(
+    return $self->put(
         {
             fields => { $field => $value },
         }
@@ -574,6 +610,7 @@ sub reload {
     my $self = shift;
     $self->{data} = $self->get;
     $self->init( $self->factory );
+    return;
 }
 
 ###########################################################################
@@ -586,9 +623,9 @@ defaults to this issue's URL. Allows for extra parameters to be specified.
 =cut
 
 sub get {
-    my $self = shift;
-    my $extra = shift // q{};
-    $self->jira->get( $self->url . $extra, @_ );
+    my ( $self, $extra, @args ) = @_;
+    $extra //= q{};
+    return $self->jira->get( $self->url . $extra, @args );
 }
 
 =internal_method B<post>
@@ -600,9 +637,9 @@ specified.
 =cut
 
 sub post {
-    my $self = shift;
-    my $extra = shift // q{};
-    $self->jira->post( $self->url . $extra, @_ );
+    my ( $self, $extra, @args ) = @_;
+    $extra //= q{};
+    return $self->jira->post( $self->url . $extra, @args );
 }
 
 =internal_method B<put>
@@ -613,8 +650,8 @@ defaults to this issue's URL. Allows for extra parameters to be specified.
 =cut
 
 sub put {
-    my $self = shift;
-    $self->jira->put( $self->url, @_ );
+    my ( $self, @args ) = @_;
+    return $self->jira->put( $self->url, @args );
 }
 
 =internal_method B<delete>
@@ -625,19 +662,19 @@ specified.
 
 =cut
 
-sub delete {
-    my $self = shift;
-    my $extra = shift // q{};
-    $self->jira->delete( $self->url . $extra, @_ );
+sub delete { ## no critic (ProhibitBuiltinHomonyms)
+    my ( $self, $extra, @args ) = @_;
+    $extra //= q{};
+    return $self->jira->delete( $self->url . $extra, @args );
 }
 
 =method B<sprints>
 
-Generates a list of L<JIRA::REST::Class::Sprint> objects from the fields for
-an issue.  Uses the field_name() accessor on the
-L<JIRA::REST::Class::Project|JIRA::REST::Class::Project/"field_name FIELD_KEY">
-object to determine the name of the custom sprint field. Currently, this only
-really works if you're using L<Atlassian
+Generates a list of L<JIRA::REST::Class::Sprint|JIRA::REST::Class::Sprint>
+objects from the fields for an issue.  Uses the field_name() accessor on the
+L<JIRA::REST::Class::Project|JIRA::REST::Class::Project/"field_name
+FIELD_KEY"> object to determine the name of the custom sprint
+field. Currently, this only really works if you're using L<Atlassian
 GreenHopper|https://www.atlassian.com/software/jira/agile>.
 
 =cut
@@ -697,7 +734,7 @@ sub start_progress {
     my $callback = shift;
     $callback //= sub { };
 
-    $self->transitions->transition_walk(
+    return $self->transitions->transition_walk(
         'In Progress',
         {
             'Open'     => 'In Progress',
@@ -724,7 +761,7 @@ sub start_qa {
     my $callback = shift;
     $callback //= sub { };
 
-    $self->transitions->transition_walk(
+    return $self->transitions->transition_walk(
         'In QA',
         {
             'Open'        => 'In Progress',
@@ -751,7 +788,7 @@ sub resolve {
     my $callback = shift;
     $callback //= sub { };
 
-    $self->transitions->transition_walk(
+    return $self->transitions->transition_walk(
         'Resolved',
         {
             'Open'        => 'In Progress',
@@ -772,12 +809,12 @@ Moves the status of the issue to 'Open', regardless of what the current status i
 
 =cut
 
-sub open {
+sub open { ## no critic (ProhibitBuiltinHomonyms)
     my $self     = shift;
     my $callback = shift;
     $callback //= sub { };
 
-    $self->transitions->transition_walk(
+    return $self->transitions->transition_walk(
         'Open',
         {
             'In Progress' => 'Open',
@@ -798,12 +835,12 @@ Moves the status of the issue to 'Closed', regardless of what the current status
 
 =cut
 
-sub close {
+sub close { ## no critic (ProhibitBuiltinHomonyms ProhibitAmbiguousNames)
     my $self     = shift;
     my $callback = shift;
     $callback //= sub { };
 
-    $self->transitions->transition_walk(
+    return $self->transitions->transition_walk(
         'Closed',
         {
             'Open'        => 'In Progress',
@@ -858,26 +895,28 @@ string.
 
 =accessor B<assignee>
 
-Returns the issue's assignee as a L<JIRA::REST::Class::User> object.
+Returns the issue's assignee as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<changelog>
 
-Returns the issue's change log as a L<JIRA::REST::Class::Issue::Changelog>
+Returns the issue's change log as a
+L<JIRA::REST::Class::Issue::Changelog|JIRA::REST::Class::Issue::Changelog>
 object.
 
 =accessor B<comments>
 
 Returns a list of the issue's comments as
-L<JIRA::REST::Class::Issue::Comment> objects. If called in a scalar
-context, returns an array reference to the list, not the number of elements
-in the list.
+L<JIRA::REST::Class::Issue::Comment|JIRA::REST::Class::Issue::Comment>
+objects. If called in a scalar context, returns an array reference to the
+list, not the number of elements in the list.
 
 =accessor B<components>
 
 Returns a list of the issue's components as
-L<JIRA::REST::Class::Project::Component> objects. If called in a scalar
-context, returns an array reference to the list, not the number of elements
-in the list.
+L<JIRA::REST::Class::Project::Component|JIRA::REST::Class::Project::Component>
+objects. If called in a scalar context, returns an array reference to the
+list, not the number of elements in the list.
 
 =accessor B<component_count>
 
@@ -885,11 +924,12 @@ Returns a count of the issue's components.
 
 =accessor B<created>
 
-Returns the issue's creation date as a L<DateTime> object.
+Returns the issue's creation date as a L<DateTime|DateTime> object.
 
 =accessor B<creator>
 
-Returns the issue's assignee as a L<JIRA::REST::Class::User> object.
+Returns the issue's assignee as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<description>
 
@@ -897,7 +937,7 @@ Returns the description of the issue.
 
 =accessor B<duedate>
 
-Returns the issue's due date as a L<DateTime> object.
+Returns the issue's due date as a L<DateTime|DateTime> object.
 
 =accessor B<environment>
 
@@ -919,7 +959,8 @@ TODO: Turn this into a list of objects.
 
 =accessor B<issuetype>
 
-Returns the issue type as a L<JIRA::REST::Class::Issue::Type> object.
+Returns the issue type as a
+L<JIRA::REST::Class::Issue::Type|JIRA::REST::Class::Issue::Type> object.
 
 =accessor B<labels>
 
@@ -927,11 +968,12 @@ Returns the issue's labels as an array reference.
 
 =accessor B<lastViewed>
 
-Returns the issue's last view date as a L<DateTime> object.
+Returns the issue's last view date as a L<DateTime|DateTime> object.
 
 =accessor B<parent>
 
-Returns the issue's parent as a L<JIRA::REST::Class::Issue> object.
+Returns the issue's parent as a
+L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object.
 
 =accessor B<has_parent>
 
@@ -951,11 +993,13 @@ TODO: Turn this into an object.
 
 =accessor B<project>
 
-Returns the issue's project as a L<JIRA::REST::Class::Project> object.
+Returns the issue's project as a
+L<JIRA::REST::Class::Project|JIRA::REST::Class::Project> object.
 
 =accessor B<reporter>
 
-Returns the issue's reporter as a L<JIRA::REST::Class::User> object.
+Returns the issue's reporter as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<resolution>
 
@@ -965,11 +1009,12 @@ TODO: Turn this into an object.
 
 =accessor B<resolutiondate>
 
-Returns the issue's resolution date as a L<DateTime> object.
+Returns the issue's resolution date as a L<DateTime|DateTime> object.
 
 =accessor B<status>
 
-Returns the issue's status as a L<JIRA::REST::Class::Issue::Status> object.
+Returns the issue's status as a
+L<JIRA::REST::Class::Issue::Status|JIRA::REST::Class::Issue::Status> object.
 
 =accessor B<summary>
 
@@ -995,15 +1040,19 @@ TODO: Turn this into an object that can return either seconds or a w/d/h/m/s str
 
 =accessor B<timetracking>
 
-Returns the time tracking of the issue as a L<JIRA::REST::Class::Issue::TimeTracking> object.
+Returns the time tracking of the issue as a
+L<JIRA::REST::Class::Issue::TimeTracking|JIRA::REST::Class::Issue::TimeTracking>
+object.
 
 =accessor B<transitions>
 
-Returns the valid transitions for the issue as a L<JIRA::REST::Class::Issue::Transitions> object.
+Returns the valid transitions for the issue as a
+L<JIRA::REST::Class::Issue::Transitions|JIRA::REST::Class::Issue::Transitions>
+object.
 
 =accessor B<updated>
 
-Returns the issue's updated date as a L<DateTime> object.
+Returns the issue's updated date as a L<DateTime|DateTime> object.
 
 =accessor B<versions>
 
@@ -1019,7 +1068,8 @@ watches
 
 =accessor B<worklog>
 
-Returns the issue's change log as a L<JIRA::REST::Class::Worklog> object.
+Returns the issue's change log as a
+L<JIRA::REST::Class::Worklog|JIRA::REST::Class::Worklog> object.
 
 =accessor B<workratio>
 
@@ -1040,7 +1090,7 @@ Returns the JIRA REST API's full URL for this issue.
 =accessor B<url>
 
 Returns the JIRA REST API's URL for this issue in a form used by
-L<JIRA::REST::Class>.
+L<JIRA::REST::Class|JIRA::REST::Class>.
 
 =for stopwords aggregatetimespent
 

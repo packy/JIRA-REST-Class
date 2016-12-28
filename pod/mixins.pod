@@ -1,23 +1,23 @@
 
 =internal_method B<jira>
 
-Returns a L<JIRA::REST::Class> object with credentials for the last JIRA user.
+Returns a L<JIRA::REST::Class|JIRA::REST::Class> object with credentials for the last JIRA user.
 
 =internal_method B<factory>
 
-An accessor for the L<JIRA::REST::Class::Factory>.
+An accessor for the L<JIRA::REST::Class::Factory|JIRA::REST::Class::Factory>.
 
 =internal_method B<JIRA_REST>
 
-An accessor that returns the L<JIRA::REST> object being used.
+An accessor that returns the L<JIRA::REST|JIRA::REST> object being used.
 
 =internal_method B<REST_CLIENT>
 
-An accessor that returns the L<REST::Client> object inside the L<JIRA::REST> object being used.
+An accessor that returns the L<REST::Client|REST::Client> object inside the L<JIRA::REST|JIRA::REST> object being used.
 
 =internal_method B<JSON>
 
-An accessor that returns the L<JSON> object inside the L<JIRA::REST> object being used.
+An accessor that returns the L<JSON|JSON> object inside the L<JIRA::REST|JIRA::REST> object being used.
 
 =internal_method B<make_object>
 
@@ -40,40 +40,40 @@ L<JIRA::REST::Class::Factory::get_factory_class()|JIRA::REST::Class::Factory/get
 
 =method B<name_for_user>
 
-When passed a scalar that could be a L<JIRA::REST::Class::User>
-object, returns the name of the user if it is a
-C<JIRA::REST::Class::User> object, or the unmodified scalar if it is
-not.
+When passed a scalar that could be a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object, returns the name
+of the user if it is a C<JIRA::REST::Class::User>
+object, or the unmodified scalar if it is not.
 
 =method B<key_for_issue>
 
-When passed a scalar that could be a L<JIRA::REST::Class::Issue>
-object, returns the key of the issue if it is a
-C<JIRA::REST::Class::Issue> object, or the unmodified scalar if it is
-not.
+When passed a scalar that could be a
+L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object, returns the key
+of the issue if it is a C<JIRA::REST::Class::Issue>
+object, or the unmodified scalar if it is not.
 
 =method B<find_link_name_and_direction>
 
 When passed two scalars, one that could be a
-L<JIRA::REST::Class::Issue::LinkType> object and another that is a
-direction (inward/outward), returns the name of the link type and
-direction if it is a C<JIRA::REST::Class::Issue::LinkType> object, or
-attempts to determine the link type and direction from the provided
-scalars.
+L<JIRA::REST::Class::Issue::LinkType|JIRA::REST::Class::Issue::LinkType>
+object and another that is a direction (inward/outward), returns the name of
+the link type and direction if it is a C<JIRA::REST::Class::Issue::LinkType>
+object, or attempts to determine the link type and direction from the
+provided scalars.
 
 =method B<dump>
 
 Returns a stringified representation of the object's data generated somewhat
-by L<Data::Dumper::Concise>, but not descending into any objects that might
-be part of that data.  If it finds objects in the data, it will attempt to
-represent them in some abbreviated fashion which may not display all the
-data in the object.  For instance, if the object has a
-C<JIRA::REST::Class::Issue> object in it for an issue with the key
-C<'JRC-1'>, the object would be represented as the string
-C<< 'JIRA::REST::Class::Issue->key(JRC-1)' >>.  The goal is to provide a
-gist of what the contents of the object are without exhaustively dumping
-EVERYTHING.  I use it a lot for figuring out what's in the results I'm
-getting back from the JIRA API.
+by L<Data::Dumper::Concise|Data::Dumper::Concise>, but not descending into
+any objects that might be part of that data.  If it finds objects in the
+data, it will attempt to represent them in some abbreviated fashion which
+may not display all the data in the object.  For instance, if the object has
+a C<JIRA::REST::Class::Issue> object in it for an issue with the key
+C<'JRC-1'>, the object would be represented as the string C<<
+'JIRA::REST::Class::Issue->key(JRC-1)' >>.  The goal is to provide a gist of
+what the contents of the object are without exhaustively dumping EVERYTHING.
+I use it a lot for figuring out what's in the results I'm getting back from
+the JIRA API.
 
 =internal_method B<cosmetic_copy> I<THING>
 

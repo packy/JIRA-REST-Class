@@ -1,14 +1,14 @@
 package JIRA::REST::Class::Issue::Worklog::Item;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
 use Readonly;
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual worklog item for a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual worklog item for a JIRA issue as an object.
 
 Readonly my @USERS     => qw( author updateAuthor );
 Readonly my @DATES     => qw( created updated );
@@ -30,13 +30,16 @@ sub init {
     foreach my $field ( @DATES ) {
         $self->populate_date_data( $field, $field );
     }
+
+    return;
 }
 
 1;
 
 =accessor B<author>
 
-This method returns the author of the JIRA issue's work item as a L<JIRA::REST::Class::User> object.
+This method returns the author of the JIRA issue's work item as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<comment>
 
@@ -44,7 +47,8 @@ This method returns the comment of the JIRA issue's work item as a string.
 
 =accessor B<created>
 
-This method returns the creation time of the JIRA issue's work item as a L<DateTime> object.
+This method returns the creation time of the JIRA issue's work item as a
+L<DateTime|DateTime> object.
 
 =accessor B<id>
 
@@ -56,7 +60,8 @@ This method returns the JIRA REST API URL of the work item as a string.
 
 =accessor B<started>
 
-This method returns the start time of the JIRA issue's work item as a L<DateTime> object.
+This method returns the start time of the JIRA issue's work item as a
+L<DateTime|DateTime> object.
 
 =accessor B<timeSpent>
 
@@ -64,15 +69,18 @@ This method returns the time spent on the JIRA issue's work item as a string.
 
 =accessor B<timeSpentSeconds>
 
-This method returns the time spent on the JIRA issue's work item as a number of seconds.
+This method returns the time spent on the JIRA issue's work item as a number
+of seconds.
 
 =accessor B<updateAuthor>
 
-This method returns the update author of the JIRA issue's work item as a L<JIRA::REST::Class::User> object.
+This method returns the update author of the JIRA issue's work item as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<updated>
 
-This method returns the update time of the JIRA issue's work item as a L<DateTime> object.
+This method returns the update time of the JIRA issue's work item as a
+L<DateTime|DateTime> object.
 
 =cut
 

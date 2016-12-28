@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Abstract;
-use base qw( Class::Accessor::Fast JIRA::REST::Class::Mixins );
+use parent qw( Class::Accessor::Fast JIRA::REST::Class::Mixins );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: An abstract class for L<JIRA::REST::Class> that most of the other objects are based on.
+# ABSTRACT: An abstract class for L<JIRA::REST::Class|JIRA::REST::Class> that most of the other objects are based on.
 
 use Carp;
 use Data::Dumper::Concise;
@@ -42,7 +42,7 @@ sub init {
     else {
         # if we're not passed a factory, let's complain about it
         local $Carp::CarpLevel = $Carp::CarpLevel + 1;
-        confess "factory not passed to init!";
+        confess 'factory not passed to init!';
     }
 
     # unload any lazily loaded data
@@ -71,6 +71,7 @@ sub unload_lazy {
     else {
         $self->{lazy_loaded} = {};
     }
+    return;
 }
 
 =internal_method B<populate_scalar_data>
@@ -101,6 +102,7 @@ sub populate_scalar_data {
             }
         );
     }
+    return;
 }
 
 =internal_method B<populate_date_data>
@@ -123,6 +125,7 @@ sub populate_date_data {
     if ( defined $self->data->{$field} ) {
         $self->{$name} = $self->make_date( $self->data->{$field} );
     }
+    return;
 }
 
 =internal_method B<populate_list_data>
@@ -145,15 +148,16 @@ Like L</populate_scalar_data>, it accepts three unnamed parameters:
 sub populate_list_data {
     my ( $self, $name, $type, $field ) = @_;
     if ( defined $self->data->{$field} ) {
-        $self->{$name} = [    # stop perltidy from pulling
-            map {             # these lines together
+        $self->{$name} = [  # stop perltidy from pulling
+            map {           # these lines together
                 $self->make_object( $type, { data => $_ } )
             } @{ $self->data->{$field} }
         ];
     }
     else {
-        $self->{$name} = [];    # rather than undefined, return an empty list
+        $self->{$name} = [];  # rather than undefined, return an empty list
     }
+    return;
 }
 
 =internal_method B<populate_scalar_field>
@@ -183,6 +187,7 @@ sub populate_scalar_field {
             }
         );
     }
+    return;
 }
 
 =internal_method B<populate_list_field>
@@ -205,15 +210,16 @@ Like L</populate_scalar_field>, it accepts three unnamed parameters:
 sub populate_list_field {
     my ( $self, $name, $type, $field ) = @_;
     if ( defined $self->fields->{$field} ) {
-        $self->{$name} = [    # stop perltidy from pulling
-            map {             # these lines together
+        $self->{$name} = [  # stop perltidy from pulling
+            map {           # these lines together
                 $self->make_object( $type, { data => $_ } )
             } @{ $self->fields->{$field} }
         ];
     }
     else {
-        $self->{$name} = [];    # rather than undefined, return an empty list
+        $self->{$name} = [];  # rather than undefined, return an empty list
     }
+    return;
 }
 
 ###########################################################################
@@ -228,9 +234,10 @@ if ( eval { require Sub::Name } ) {
 
 =internal_method B<mk_contextual_ro_accessors>
 
-Because I didn't want to give up L<Class::Accessor::Fast>, but wanted to be
-able to make contextual accessors when it was useful.  Accepts a list of
-accessors to make.
+Because I didn't want to give up
+L<Class::Accessor::Fast|Class::Accessor::Fast>, but wanted to be able to
+make contextual accessors when it was useful.  Accepts a list of accessors
+to make.
 
 =cut
 
@@ -349,11 +356,12 @@ Makes accessors for keys under C<< $self->{data} >>
 =cut
 
 sub mk_data_ro_accessors {
-    my $class = shift;
+    my ( $class, @args ) = @_;
 
-    foreach my $field ( @_ ) {
+    foreach my $field ( @args ) {
         $class->mk_deep_ro_accessor( qw( data ), $field );
     }
+    return;
 }
 
 =internal_method B<mk_field_ro_accessors>
@@ -363,11 +371,12 @@ Makes accessors for keys under C<< $self->{data}->{fields} >>
 =cut
 
 sub mk_field_ro_accessors {
-    my $class = shift;
+    my ( $class, @args ) = @_;
 
-    foreach my $field ( @_ ) {
+    foreach my $field ( @args ) {
         $class->mk_deep_ro_accessor( qw( data fields ), $field );
     }
+    return;
 }
 
 =internal_method B<make_subroutine>
@@ -379,8 +388,8 @@ either a class name or a blessed object reference.
 =cut
 
 {
-    # we're going some magic here
-    no strict 'refs';    ## no critic
+    # we're going some magic here, so we turn off our self-restrictions
+    no strict 'refs'; ## no critic (ProhibitNoStrict)
 
     sub make_subroutine {
         my ( $proto, $name, $sub ) = @_;
@@ -391,9 +400,10 @@ either a class name or a blessed object reference.
             subname( $fullname, $sub ) if defined &subname;
             *{$fullname} = $sub;
         }
+        return;
     }
 
-}    # end of ref no-stricture zone
+}  # end of ref no-stricture zone
 
 1;
 

@@ -1,12 +1,13 @@
+
 =head1 SEE ALSO
 
 =over
 
-=item * L<JIRA::REST>
+=item * L<JIRA::REST|JIRA::REST>
 
 C<JIRA::REST::Class> uses C<JIRA::REST> to perform all its interaction with JIRA.
 
-=item * L<REST::Client>
+=item * L<REST::Client|REST::Client>
 
 C<JIRA::REST> uses a C<REST::Client> object to perform its low-level interactions.
 

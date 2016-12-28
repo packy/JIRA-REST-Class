@@ -43,15 +43,15 @@ The username and password of a JIRA user to use for authentication.
 
 If B<anonymous> is false then, if either B<username> or B<password> isn't
 defined the module looks them up in either the C<.netrc> file or via
-L<Config::Identity> (which allows C<gpg> encrypted credentials).
+L<Config::Identity|Config::Identity> (which allows C<gpg> encrypted credentials).
 
-L<Config::Identity> will look for F<~/.jira-identity> or F<~/.jira>.
-You can change the filename stub from C<jira> to a custom stub with the
-C<JIRA_REST_IDENTITY> environment variable.
+L<Config::Identity|Config::Identity> will look for F<~/.jira-identity> or
+F<~/.jira>.  You can change the filename stub from C<jira> to a custom stub
+with the C<JIRA_REST_IDENTITY> environment variable.
 
 =item * B<rest_client_config>
 
-A JIRA::REST object uses a L<REST::Client> object to make the REST
+A JIRA::REST object uses a L<REST::Client|REST::Client> object to make the REST
 invocations. This optional argument must be a hash reference that can be fed
 to the REST::Client constructor. Note that the C<url> argument
 overwrites any value associated with the C<host> key in this hash.
@@ -70,9 +70,9 @@ describing the fully qualified URL (including port) to your network proxy.
 =item * B<ssl_verify_none>
 
 Sets the C<SSL_verify_mode> and C<verify_hostname ssl> options on the
-underlying L<REST::Client>'s user agent to 0, thus disabling them. This
-allows access to JIRA servers that have self-signed certificates that don't
-pass L<LWP::UserAgent>'s verification methods.
+underlying L<REST::Client|REST::Client>'s user agent to 0, thus disabling
+them. This allows access to JIRA servers that have self-signed certificates
+that don't pass L<LWP::UserAgent|LWP::UserAgent>'s verification methods.
 
 =item * B<anonymous>
 

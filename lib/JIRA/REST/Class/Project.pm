@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Project;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA project as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA project as an object.
 
 use Readonly;
 
@@ -45,49 +45,58 @@ for my $field ( @LAZY ) {
 #
 
 sub _do_lazy_load {
-    my $self = shift;
+    my ( $self, @fields ) = @_;
 
-    ( my $url = $self->self ) =~ s{.*/project}{/project};
+    ( my $url = $self->self ) =~ s{.*/project}{/project}x;
     my $data = $self->jira->get( $url );
 
     $self->{assigneeType} = $data->{assigneeType};
 
+    my $make_component = sub {
+        my $comp = shift;
+        return $self->make_object( 'projectcomp', { data => $comp } );
+    };
+
     $self->{components} = [ ##
-        map { ##
-            $self->make_object( 'projectcomp', { data => $_ } );
-        } @{ $data->{components} }
+        map { $make_component->( $_ ) } @{ $data->{components} }
     ];
 
     $self->{description} = $data->{description};
 
+    my $make_issue_type = sub {
+        my $type = shift;
+        return $self->make_object( 'issuetype', { data => $type } );
+    };
+
     $self->{issueTypes} = [ ##
-        map { ##
-            $self->make_object( 'issuetype', { data => $_ } );
-        } @{ $data->{issueTypes} }
+        map { $make_issue_type->( $_ ) } @{ $data->{issueTypes} }
     ];
 
     $self->{subtaskIssueTypes} = [ ##
-        grep { ##
-            $_->subtask
-        } @{ $self->{issueTypes} }
+        grep { $_->subtask } @{ $self->{issueTypes} }
     ];
 
     $self->{lead} = $self->make_object( 'user', { data => $data->{lead} } );
 
     $self->{roles} = $data->{roles};
 
+    my $make_project_version = sub {
+        my $pv = shift;
+        my $vers = $self->make_object( 'projectvers', { data => $pv } );
+        $self->{version_hash}->{ $vers->id }
+            = $self->{version_hash}->{ $vers->name } = $vers;
+        return $vers;
+    };
+
     $self->{versions} = [ ##
-        map { ##
-            my $v = $self->make_object( 'projectvers', { data => $_ } );
-            $self->{version_hash}->{ $v->id }
-                = $self->{version_hash}->{ $v->name } = $v;
-            $v;
-        } @{ $data->{versions} }
+        map { $make_project_version->( $_ ) } @{ $data->{versions} }
     ];
 
-    foreach my $field ( @_ ) {
+    foreach my $field ( @fields ) {
         $self->{lazy_loaded}->{$field} = 1;
     }
+
+    return;
 }
 
 =accessor B<assigneeType>
@@ -100,7 +109,9 @@ A hashref of the different sizes available for the project's avatar.
 
 =accessor B<components>
 
-A list of the components for the project as L<JIRA::REST::Class::Project::Component> objects.
+A list of the components for the project as
+L<JIRA::REST::Class::Project::Component|JIRA::REST::Class::Project::Component>
+objects.
 
 =accessor B<description>
 
@@ -116,11 +127,15 @@ Returns the id of the project.
 
 =accessor B<issueTypes>
 
-A list of valid issue types for the project as L<JIRA::REST::Class::Issue::Type> objects.
+A list of valid issue types for the project as
+L<JIRA::REST::Class::Issue::Type|JIRA::REST::Class::Issue::Type> objects.
 
 =accessor B<subtaskIssueTypes>
 
-Taking a page from the old SOAP interface, this accessor returns a list of all issue types (as L<JIRA::REST::Class::Issue::Type> objects) whose subtask field is true.
+Taking a page from the old SOAP interface, this accessor returns a list of
+all issue types (as
+L<JIRA::REST::Class::Issue::Type|JIRA::REST::Class::Issue::Type> objects)
+whose subtask field is true.
 
 =accessor B<key>
 
@@ -128,7 +143,8 @@ Returns the key of the project.
 
 =accessor B<lead>
 
-Returns the project lead as a L<JIRA::REST::Class::User> object.
+Returns the project lead as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<name>
 
@@ -136,7 +152,9 @@ Returns the name of the project.
 
 =accessor B<category>
 
-Returns a hashref of the category of the project as L<JIRA::REST::Class::Project::Category> objects.
+Returns a hashref of the category of the project as
+L<JIRA::REST::Class::Project::Category|JIRA::REST::Class::Project::Category>
+objects.
 
 =accessor B<self>
 
@@ -144,7 +162,9 @@ Returns the JIRA REST API URL of the project.
 
 =accessor B<versions>
 
-Returns a list of the versions of the project as L<JIRA::REST::Class::Project::Version> objects.
+Returns a list of the versions of the project as
+L<JIRA::REST::Class::Project::Version|JIRA::REST::Class::Project::Version>
+objects.
 
 =accessor B<metadata>
 
@@ -158,7 +178,7 @@ sub metadata {
     unless ( defined $self->{metadata} ) {
         my ( $first_issue ) = $self->jira->issues(
             {
-                jql        => "project = " . $self->key,
+                jql        => 'project = ' . $self->key,
                 maxResults => 1,
             }
         );
@@ -175,7 +195,9 @@ Returns a list of the allowed values for the 'components' field in the project.
 
 =cut
 
-sub allowed_components { shift->allowed_field_values( 'components', @_ ); }
+sub allowed_components {
+    return shift->allowed_field_values( 'components', @_ );
+}
 
 =accessor B<allowed_versions>
 
@@ -183,7 +205,7 @@ Returns a list of the allowed values for the 'versions' field in the project.
 
 =cut
 
-sub allowed_versions { shift->allowed_field_values( 'versions', @_ ); }
+sub allowed_versions { return shift->allowed_field_values( 'versions', @_ ); }
 
 =accessor B<allowed_fix_versions>
 
@@ -191,7 +213,9 @@ Returns a list of the allowed values for the 'fixVersions' field in the project.
 
 =cut
 
-sub allowed_fix_versions { shift->allowed_field_values( 'fixVersions', @_ ); }
+sub allowed_fix_versions {
+    return shift->allowed_field_values( 'fixVersions', @_ );
+}
 
 =accessor B<allowed_issue_types>
 
@@ -199,7 +223,9 @@ Returns a list of the allowed values for the 'issuetype' field in the project.
 
 =cut
 
-sub allowed_issue_types { shift->allowed_field_values( 'issuetype', @_ ); }
+sub allowed_issue_types {
+    return shift->allowed_field_values( 'issuetype', @_ );
+}
 
 =accessor B<allowed_priorities>
 
@@ -207,7 +233,9 @@ Returns a list of the allowed values for the 'priority' field in the project.
 
 =cut
 
-sub allowed_priorities { shift->allowed_field_values( 'priority', @_ ); }
+sub allowed_priorities {
+    return shift->allowed_field_values( 'priority', @_ );
+}
 
 =internal_method B<allowed_field_values> FIELD_NAME
 

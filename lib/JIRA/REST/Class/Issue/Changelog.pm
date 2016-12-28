@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::Changelog;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the changelog of a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the changelog of a JIRA issue as an object.
 
 __PACKAGE__->mk_contextual_ro_accessors( qw/ changes / );
 
@@ -21,11 +21,14 @@ sub init {
         push @$changes,
             $self->issue->make_object( 'change', { data => $change } );
     }
+
+    return;
 }
 
 =method B<changes>
 
-Returns a list of individual changes, as L<JIRA::REST::Class::Issue::Changelog::Change> objects.
+Returns a list of individual changes, as
+L<JIRA::REST::Class::Issue::Changelog::Change|JIRA::REST::Class::Issue::Changelog::Change> objects.
 
 =cut
 

@@ -20,3 +20,4 @@
 -it=2
 -msc=2 # minimum space to side comments
 -ssc   # static side comments (## is not indented)
+--fuzzy-line-length

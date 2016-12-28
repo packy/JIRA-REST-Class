@@ -5,14 +5,22 @@ use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: An OO Class module built atop L<JIRA::REST> for dealing with JIRA issues and their data as objects.
+# ABSTRACT: An OO Class module built atop L<JIRA::REST|JIRA::REST> for dealing with JIRA issues and their data as objects.
 
 use Carp;
 use Clone::Any qw( clone );
+use Readonly;
 
 use JIRA::REST;
 use JIRA::REST::Class::Factory;
-use base qw(JIRA::REST::Class::Mixins);
+use parent qw(JIRA::REST::Class::Mixins);
+
+#---------------------------------------------------------------------------
+# Constants
+
+Readonly my $DEFAULT_MAXRESULTS => 50;
+
+#---------------------------------------------------------------------------
 
 sub new {
     my ( $class, @arglist ) = @_;
@@ -132,20 +140,20 @@ lives_ok(
 
 The C<issues> method can be called two ways: either by providing a list of
 issue keys, or by proving a single hash reference which describes a JIRA
-query in the same format used by L<JIRA::REST> (essentially,
+query in the same format used by L<JIRA::REST|JIRA::REST> (essentially,
 C<< jql => "JQL query string" >>).
 
-The return value is an array of L<JIRA::REST::Class::Issue> objects.
+The return value is an array of L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> objects.
 
 =cut
 
 sub issues {
-    my $self = shift;
-    if ( @_ == 1 && ref $_[0] eq 'HASH' ) {
+    my ( $self, @args ) = @_;
+    if ( @args == 1 && ref $args[0] eq 'HASH' ) {
         return $self->query( shift )->issues;
     }
     else {
-        my $jql = sprintf "key in (%s)", join ',', @_;
+        my $jql = sprintf 'key in (%s)', join q{,} => @args;
         return $self->query( { jql => $jql } )->issues;
     }
 }
@@ -160,10 +168,10 @@ sub issues {
 =method B<query> QUERY
 
 The C<query> method takes a single parameter: a hash reference which
-describes a JIRA query in the same format used by L<JIRA::REST>
+describes a JIRA query in the same format used by L<JIRA::REST|JIRA::REST>
 (essentially, C<< jql => "JQL query string" >>).
 
-The return value is a single L<JIRA::REST::Class::Query> object.
+The return value is a single L<JIRA::REST::Class::Query|JIRA::REST::Class::Query> object.
 
 =cut
 
@@ -185,7 +193,7 @@ sub query {
 =method B<iterator> QUERY
 
 The C<query> method takes a single parameter: a hash reference which
-describes a JIRA query in the same format used by L<JIRA::REST>
+describes a JIRA query in the same format used by L<JIRA::REST|JIRA::REST>
 (essentially, C<< jql => "JQL query string" >>).  It accepts an additional
 field, however: C<restart_if_lt_total>.  If this field is set to a true value,
 the iterator will keep track of the number of results fetched and, if when
@@ -194,10 +202,11 @@ predicted by the query, it will restart the query.  This is particularly
 useful if you are transforming a number of issues through an iterator, and
 the transformation causes the issues to no longer match the query.
 
-The return value is a single L<JIRA::REST::Class::Iterator> object.  The
+The return value is a single
+L<JIRA::REST::Class::Iterator|JIRA::REST::Class::Iterator> object.  The
 issues returned by the query can be obtained in serial by repeatedly calling
 L<next|JIRA::REST::Class::Iterator/next> on this object, which returns a
-series of L<JIRA::REST::Class::Issue> objects.
+series of L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> objects.
 
 =cut
 
@@ -221,9 +230,8 @@ A wrapper for C<JIRA::REST>'s L<GET|JIRA::REST/"GET RESOURCE [, QUERY]"> method.
 =cut
 
 sub get {
-    my $self = shift;
-    my $url  = shift;
-    return $self->JIRA_REST->GET( $url, undef, @_ );
+    my ( $self, $url, @args ) = @_;
+    return $self->JIRA_REST->GET( $url, undef, @args );
 }
 
 #---------------------------------------------------------------------------
@@ -246,9 +254,8 @@ Wrapper around C<JIRA::REST>'s L<POST|JIRA::REST/"POST RESOURCE, QUERY, VALUE [,
 =cut
 
 sub post {
-    my $self = shift;
-    my $url  = shift;
-    $self->JIRA_REST->POST( $url, undef, @_ );
+    my ( $self, $url, @args ) = @_;
+    return $self->JIRA_REST->POST( $url, undef, @args );
 }
 
 #---------------------------------------------------------------------------
@@ -271,9 +278,8 @@ Wrapper around C<JIRA::REST>'s L<PUT|JIRA::REST/"PUT RESOURCE, QUERY, VALUE [, H
 =cut
 
 sub put {
-    my $self = shift;
-    my $url  = shift;
-    $self->JIRA_REST->PUT( $url, undef, @_ );
+    my ( $self, $url, @args ) = @_;
+    return $self->JIRA_REST->PUT( $url, undef, @args );
 }
 
 #---------------------------------------------------------------------------
@@ -295,10 +301,9 @@ Wrapper around C<JIRA::REST>'s L<DELETE|JIRA::REST/"DELETE RESOURCE [, QUERY]"> 
 
 =cut
 
-sub delete {
-    my $self = shift;
-    my $url  = shift;
-    $self->JIRA_REST->DELETE( $url, @_ );
+sub delete { ## no critic (ProhibitBuiltinHomonyms)
+    my ( $self, $url, @args ) = @_;
+    return $self->JIRA_REST->DELETE( $url, @args );
 }
 
 #---------------------------------------------------------------------------
@@ -316,10 +321,11 @@ validate_wrapper_method( sub { get_test_client()->delete('/test'); },
 
 =internal_method B<data_upload>
 
-Similar to L<< JIRA::REST->attach_files|JIRA::REST/"attach_files ISSUE FILE..." >>,
+Similar to
+L<< JIRA::REST->attach_files|JIRA::REST/"attach_files ISSUE FILE..." >>,
 but entirely from memory and only attaches one file at a time. Returns the
-L<HTTP::Response> object from the post request.  Takes the following named
-parameters:
+L<HTTP::Response|HTTP::Response> object from the post request.  Takes the
+following named parameters:
 
 =over 4
 
@@ -348,13 +354,13 @@ C<< JIRA::REST->attach_files >>...
 =cut
 
 sub data_upload {
-    my $self = shift;
-    my $args = $self->_get_known_args( \@_, qw/ url name data / );
+    my ( $self, @args ) = @_;
+    my $args = $self->_get_known_args( \@args, qw/ url name data / );
     $self->_check_required_args(
         $args,
-        url  => "you must specify a URL to upload to",
-        name => "you must specify a name for the file data",
-        data => "you must specify the file data",
+        url  => 'you must specify a URL to upload to',
+        name => 'you must specify a name for the file data',
+        data => 'you must specify the file data',
     );
 
     my $name = $args->{name};
@@ -375,7 +381,7 @@ sub data_upload {
 
     #<<< perltidy should ignore these lines
     $response->is_success
-        or croak $self->JIRA_REST->_error(
+        or croak $self->JIRA_REST->_error( ## no critic (ProtectPrivateSubs)
             $self->_croakmsg( $response->status_line, $name )
         );
     #>>>
@@ -390,7 +396,7 @@ sub data_upload {
 my $expected = {
   "Content-Disposition" => "form-data; name=\"file\"; filename=\"file.txt\"",
   POST => "SUCCESS",
-  data => "An OO Class module built atop L<JIRA::REST> for dealing with "
+  data => "An OO Class module built atop L<JIRA::REST|JIRA::REST> for dealing with "
        .  "JIRA issues and their data as objects.",
   name => "file.txt"
 };
@@ -443,15 +449,16 @@ sub maxResults {
         $self->{maxResults} = shift;
     }
     unless ( exists $self->{maxResults} && defined $self->{maxResults} ) {
-        $self->{maxResults} = 50;
+        $self->{maxResults} = $DEFAULT_MAXRESULTS;
     }
     return $self->{maxResults};
 }
 
 =method B<issue_types>
 
-Returns a list of defined issue types (as L<JIRA::REST::Class::Issue::Type>
-objects) for this server.
+Returns a list of defined issue types (as
+L<JIRA::REST::Class::Issue::Type|JIRA::REST::Class::Issue::Type> objects)
+for this server.
 
 =cut
 
@@ -460,8 +467,8 @@ sub issue_types {
 
     unless ( $self->{issue_types} ) {
         my $types = $self->get( '/issuetype' );
-        $self->{issue_types} = [    # stop perltidy from pulling
-            map {                   # these lines together
+        $self->{issue_types} = [  # stop perltidy from pulling
+            map {                 # these lines together
                 $self->make_object( 'issuetype', { data => $_ } );
             } @$types
         ];
@@ -512,8 +519,9 @@ try {
 
 =method B<projects>
 
-Returns a list of projects (as L<JIRA::REST::Class::Project> objects) for
-this server.
+Returns a list of projects (as
+L<JIRA::REST::Class::Project|JIRA::REST::Class::Project> objects) for this
+server.
 
 =cut
 
@@ -529,12 +537,18 @@ sub projects {
         # grab projects later by id, key, or name.
 
         my $list = $self->{project_list} = [];
-        $self->{project_hash} = {
-            map {
-                my $p = $self->make_object( 'project', { data => $_ } );
-                push @$list, $p;
-                ( $p->id => $p, $p->key => $p, $p->name => $p )
-            } @$projects
+
+        my $make_project_hash_entry = sub {
+            my $prj = shift;
+            my $obj = $self->make_object( 'project', { data => $prj } );
+
+            push @$list, $obj;
+
+            return $obj->id => $obj, $obj->key => $obj, $obj->name => $obj;
+        };
+
+        $self->{project_hash} = { ##
+            map { $make_project_hash_entry->( $_ ) } @$projects
         };
     }
 
@@ -564,19 +578,19 @@ try {
 
 =method B<project> PROJECT_ID || PROJECT_KEY || PROJECT_NAME
 
-Returns a L<JIRA::REST::Class::Project> object for the project
-specified. Returns undef if the project doesn't exist.
+Returns a L<JIRA::REST::Class::Project|JIRA::REST::Class::Project> object
+for the project specified. Returns undef if the project doesn't exist.
 
 =cut
 
 sub project {
     my $self = shift;
-    my $proj = shift || return;    # if nothing was passed, we return nothing
+    my $proj = shift || return;  # if nothing was passed, we return nothing
 
     # if we were passed a project object, just return it
     return $proj if $self->obj_isa( $proj, 'project' );
 
-    $self->projects;    # load the project hash if it hasn't been loaded
+    $self->projects;  # load the project hash if it hasn't been loaded
 
     return unless exists $self->{project_hash}->{$proj};
     return $self->{project_hash}->{$proj};
@@ -633,14 +647,16 @@ try {
 
 =method B<SSL_verify_none>
 
-Sets to false the SSL options C<SSL_verify_mode> and C<verify_hostname> on the
-L<LWP::UserAgent> object that is used by L<REST::Client> (which, in turn, is used by L<JIRA::REST>, which is used by this module).
+Sets to false the SSL options C<SSL_verify_mode> and C<verify_hostname> on
+the L<LWP::UserAgent|LWP::UserAgent> object that is used by
+L<REST::Client|REST::Client> (which, in turn, is used by
+L<JIRA::REST|JIRA::REST>, which is used by this module).
 
 =cut
 
-sub SSL_verify_none {
+sub SSL_verify_none { ## no critic (NamingConventions::Capitalization)
     my $self = shift;
-    $self->REST_CLIENT->getUseragent()->ssl_opts(
+    return $self->REST_CLIENT->getUseragent()->ssl_opts(
         SSL_verify_mode => 0,
         verify_hostname => 0
     );
@@ -655,12 +671,13 @@ Returns the base URL for this JIRA server's REST API.  For example, if your JIRA
 sub rest_api_url_base {
     my $self = shift;
     if ( $self->_JIRA_REST_version_has_separate_path ) {
-        ( my $host = $self->REST_CLIENT->getHost ) =~ s{/$}{};
+        ( my $host = $self->REST_CLIENT->getHost ) =~ s{/$}{}xms;
         my $path = $self->JIRA_REST->{path};
         return $host . $path;
     }
     else {
-        my ( $base ) = $self->REST_CLIENT->getHost =~ m{^(.+?rest/api/[^/]+)/?};
+        my ( $base )
+            = $self->REST_CLIENT->getHost =~ m{^(.+?rest/api/[^/]+)/?}xms;
         return $base;
     }
 }
@@ -674,49 +691,56 @@ A method to take the provided URL and strip the protocol and host from it.  For 
 sub strip_protocol_and_host {
     my $self = shift;
     my $host = $self->REST_CLIENT->getHost;
-    ( my $url = shift ) =~ s{^$host}{};
+    ( my $url = shift ) =~ s{^$host}{}xms;
     return $url;
 }
 
 =accessor B<args>
 
-An accessor that returns a copy of the arguments passed to the constructor. Useful for passing around to utility objects.
+An accessor that returns a copy of the arguments passed to the
+constructor. Useful for passing around to utility objects.
 
 =cut
 
-sub args { shift->{args} }
+sub args { return shift->{args} }
 
 =accessor B<url>
 
-An accessor that returns the C<url> parameter passed to this object's constructor.
+An accessor that returns the C<url> parameter passed to this object's
+constructor.
 
 =cut
 
-sub url { shift->args->{url} }
+sub url { return shift->args->{url} }
 
 =accessor B<username>
 
-An accessor that returns the username used to connect to the JIRA server, even if the username was read from a C<.netrc> or L<Config::Identity> file.
+An accessor that returns the username used to connect to the JIRA server,
+even if the username was read from a C<.netrc> or
+L<Config::Identity|Config::Identity> file.
 
 =cut
 
-sub username { shift->args->{username} }
+sub username { return shift->args->{username} }
 
 =accessor B<password>
 
-An accessor that returns the password used to connect to the JIRA server, even if the password was read from a C<.netrc> or L<Config::Identity> file.
+An accessor that returns the password used to connect to the JIRA server,
+even if the password was read from a C<.netrc> or
+L<Config::Identity|Config::Identity> file.
 
 =cut
 
-sub password { shift->args->{password} }
+sub password { return shift->args->{password} }
 
 =accessor B<rest_client_config>
 
-An accessor that returns the C<rest_client_config> parameter passed to this object's constructor.
+An accessor that returns the C<rest_client_config> parameter passed to this
+object's constructor.
 
 =cut
 
-sub rest_client_config { shift->args->{rest_client_config} }
+sub rest_client_config { return shift->args->{rest_client_config} }
 
 =accessor B<anonymous>
 
@@ -724,7 +748,7 @@ An accessor that returns the C<anonymous> parameter passed to this object's cons
 
 =cut
 
-sub anonymous { shift->args->{anonymous} }
+sub anonymous { return shift->args->{anonymous} }
 
 =accessor B<proxy>
 
@@ -732,11 +756,11 @@ An accessor that returns the C<proxy> parameter passed to this object's construc
 
 =cut
 
-sub proxy { shift->args->{proxy} }
+sub proxy { return shift->args->{proxy} }
 
 #---------------------------------------------------------------------------
 
-=begin testing parameter_accessors 7
+=begin testing parameter_accessors 8
 
 try{
     my $test = get_test_client();

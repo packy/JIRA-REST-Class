@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Issue::Changelog::Change;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual change to a JIRA issue as an object.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual change to a JIRA issue as an object.
 
 __PACKAGE__->mk_ro_accessors( qw/ author created / );
 __PACKAGE__->mk_data_ro_accessors( qw/ id / );
@@ -24,17 +24,21 @@ sub init {
 
     # make list of changed items
     $self->populate_list_data( 'items', 'changeitem', 'items' );
+
+    return;
 }
 
 1;
 
 =accessor B<author>
 
-Returns the author of a JIRA issue's change as a L<JIRA::REST::Class::User> object.
+Returns the author of a JIRA issue's change as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object.
 
 =accessor B<created>
 
-Returns the creation time of a JIRA issue's change as a L<DateTime> object.
+Returns the creation time of a JIRA issue's change as a L<DateTime|DateTime>
+object.
 
 =accessor B<id>
 
@@ -42,7 +46,9 @@ Returns the id of a JIRA issue's change.
 
 =accessor B<items>
 
-Returns the list of items modified by a JIRA issue's change as a list of L<JIRA::REST::Class::Issue::Changelog::Change::Item> objects.
+Returns the list of items modified by a JIRA issue's change as a list of
+L<JIRA::REST::Class::Issue::Changelog::Change::Item|JIRA::REST::Class::Issue::Changelog::Change::Item>
+objects.
 
 =cut
 

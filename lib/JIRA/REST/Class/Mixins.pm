@@ -1,17 +1,19 @@
 package JIRA::REST::Class::Mixins;
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: An mixin class for L<JIRA::REST::Class> that other objects can inherit methods from.
+# ABSTRACT: An mixin class for L<JIRA::REST::Class|JIRA::REST::Class> that other objects can inherit methods from.
 
 use Carp;
 use Clone::Any qw( clone );
 use Data::Dumper::Concise;
 use MIME::Base64;
+use Readonly;
 use Scalar::Util qw( blessed reftype );
+use Try::Tiny;
 
 sub jira {
     my $self  = shift;
@@ -119,7 +121,7 @@ ok(JIRA::REST::Class::Mixins->obj_isa($factory, 'factory'),
 
 #---------------------------------------------------------------------------
 
-sub JIRA_REST {
+sub JIRA_REST { ## no critic (Capitalization)
     my $self  = shift;
     my $args  = shift;
     my $class = ref $self ? ref( $self ) : $self;
@@ -165,38 +167,49 @@ sub JIRA_REST {
     return $jira_rest;
 }
 
-sub _JIRA_REST_version {
+## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
+## these are private to the whole module, not just this package
+sub _JIRA_REST_version { ## no critic (Capitalization)
     my $version = shift;
-    eval {
+    my $has_version;
+    try {
         # we don't want SIGDIE taking us someplace
         # if VERSION throws an exception
         local $SIG{__DIE__} = undef;
 
-        JIRA::REST->VERSION && JIRA::REST->VERSION( $version );
+        $has_version = JIRA::REST->VERSION && JIRA::REST->VERSION( $version );
     };
+    return $has_version;
 }
 
-sub _JIRA_REST_version_has_named_parameters {
+sub _JIRA_REST_version_has_named_parameters { ## no critic (Capitalization)
+    ## no critic (ProhibitMagicNumbers)
     state $retval = _JIRA_REST_version( 0.017 );
+    ## use critic
     return $retval;
 }
 
-sub _JIRA_REST_version_has_separate_path {
+sub _JIRA_REST_version_has_separate_path { ## no critic (Capitalization)
+    ## no critic (ProhibitMagicNumbers)
     state $retval = _JIRA_REST_version( 0.015 );
+    ## use critic
     return $retval;
 }
+## use critic
 
-sub REST_CLIENT { shift->JIRA_REST->{rest} }
-sub JSON        { shift->JIRA_REST->{json} }
-sub make_object { shift->factory->make_object( @_ ) }
-sub make_date   { shift->factory->make_date( @_ ) }
-sub class_for   { shift->factory->get_factory_class( @_ ) }
+## no critic (Capitalization)
+sub REST_CLIENT { return shift->JIRA_REST->{rest} }
+sub JSON        { return shift->JIRA_REST->{json} }
+## use critic
+sub make_object { return shift->factory->make_object( @_ ) }
+sub make_date   { return shift->factory->make_date( @_ ) }
+sub class_for   { return shift->factory->get_factory_class( @_ ) }
 
 sub obj_isa {
     my ( $self, $obj, $type ) = @_;
     return unless blessed $obj;
     my $class = $self->class_for( $type );
-    $obj->isa( $class );
+    return $obj->isa( $class );
 }
 
 sub name_for_user {
@@ -215,7 +228,7 @@ sub find_link_name_and_direction {
     return unless defined $link;
 
     # determine the link directon, if provided. defaults to inward.
-    $dir = ( $dir && $dir =~ /out(?:ward)?/ ) ? 'outward' : 'inward';
+    $dir = ( $dir && $dir =~ /out(?:ward)?/x ) ? 'outward' : 'inward';
 
     # if we were passed a link type object, return
     # the name and the direction we were given
@@ -244,11 +257,11 @@ sub find_link_name_and_direction {
 
 ###########################################################################
 
-sub dump {
-    my $self = shift;
+sub dump { ## no critic (ProhibitBuiltinHomonyms)
+    my ( $self, @args ) = @_;
     my $result;
-    if ( @_ ) {
-        $result = $self->cosmetic_copy( @_ );
+    if ( @args ) {
+        $result = $self->cosmetic_copy( @args );
     }
     else {
         $result = $self->cosmetic_copy( $self );
@@ -307,21 +320,21 @@ sub __cosmetic_copy {
         if ( $class eq 'JSON::PP::Boolean' ) {
             return $thing ? 'JSON::PP::true' : 'JSON::PP::false';
         }
-        elsif ( $class eq 'JSON' ) {
+        if ( $class eq 'JSON' ) {
             return "$thing";
         }
-        elsif ( $class eq 'REST::Client' ) {
+        if ( $class eq 'REST::Client' ) {
             return '%s->host(%s)', $class, $thing->getHost;
         }
-        elsif ( $class eq 'DateTime' ) {
+        if ( $class eq 'DateTime' ) {
             return "DateTime(  $thing  )";
         }
-        elsif ( $top ) {
+        if ( $top ) {
             if ( reftype $thing eq 'ARRAY' ) {
                 chomp( my $data = Dumper( __array_copy( $thing ) ) );
                 return "bless( $data => $class )";
             }
-            elsif ( reftype $thing eq 'HASH' ) {
+            if ( reftype $thing eq 'HASH' ) {
                 chomp( my $data = Dumper( __hash_copy( $thing ) ) );
                 return "bless( $data => $class )";
             }
@@ -389,20 +402,20 @@ sub __hash_copy {
 #
 # In either case, the result hashref is returned.
 
+## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
 sub _get_known_args {
-    my $self = shift;
-    my $in   = shift;
-    my $out  = {};
-    my @args = @_;
+## use critic
+    my ( $self, $in, @args ) = @_;
+    my $out = {};
 
     # get the package->name of the sub that called US
-    my $sub = $self->__subname( caller( 1 ) );
+    my $sub = $self->__subname( caller 1 );
 
     # if we croak, croak from the perspective of our CALLER's caller
     local $Carp::CarpLevel = $Carp::CarpLevel + 2;
 
     # $in is an arrayref with a single hashref in it
-    if ( @$in == 1 && ref $$in[0] && ref $$in[0] eq 'HASH' ) {
+    if ( @$in == 1 && ref $in->[0] && ref $in->[0] eq 'HASH' ) {
 
         # copy that hashref into $in
         $in = clone( $in->[0] );
@@ -520,10 +533,10 @@ is_deeply( test_named_args(), \%expected,
 
 # accepts a hashref and a list of required arguments
 
+## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
 sub _check_required_args {
-    my $self = shift;
-    my $args = shift;
-    my @args = @_;
+## use critic
+    my ( $self, $args, @args ) = @_;
 
     while ( my ( $arg, $err ) = splice @args, 0, 2 ) {
         next
@@ -532,13 +545,14 @@ sub _check_required_args {
             && length $args->{$arg};
 
         # get the package->name of the sub that called US
-        my $sub = $self->__subname( caller( 1 ) );
+        my $sub = $self->__subname( caller 1 );
 
         # croak from the perspective of our CALLER's caller
         local $Carp::CarpLevel = $Carp::CarpLevel + 2;
 
         croak "$sub: " . $err;
     }
+    return;
 }
 
 #---------------------------------------------------------------------------
@@ -569,13 +583,14 @@ throws_ok( sub { test_missing_req_args() },
 # internal function so I don't have to build a "Package->subroutine:" prefix
 # whenever I want to croak
 
+## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
 sub _croakmsg {
-    my $self = shift;
-    my $msg  = shift;
-    my $args = @_ ? q{(} . join( q{, }, @_ ) . q{)} : q{};
+## use critic
+    my ( $self, $msg, @args ) = @_;
+    my $args = @args ? q{(} . join( q{, }, @args ) . q{)} : q{};
 
     # get the package->name of the sub that called US
-    my $sub = $self->__subname( caller( 1 ) );
+    my $sub = $self->__subname( caller 1 );
 
     return join q{ }, "$sub$args:", $msg;
 }
@@ -625,8 +640,9 @@ sub _quoted_list {
 #   returns 'Some::Pkg->subname'
 #
 sub __subname {
-    my ( $self, @callerN ) = @_;
-    ( my $sub = $callerN[3] ) =~ s/(.*)::([^:]+)$/$1->$2/;
+    my ( $self, @caller_n ) = @_;
+    Readonly my $OUR_CALLERS_CALLER => 3;
+    ( my $sub = $caller_n[$OUR_CALLERS_CALLER] ) =~ s/(.*)::([^:]+)$/$1->$2/xs;
     return $sub;
 }
 

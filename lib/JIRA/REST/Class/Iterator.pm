@@ -1,12 +1,12 @@
 package JIRA::REST::Class::Iterator;
-use base qw( JIRA::REST::Class::Abstract );
+use parent qw( JIRA::REST::Class::Abstract );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.  Wraps L<JIRA::REST>'s L<set_search_iterator|JIRA::REST/"set_search_iterator PARAMS"> and L<next_issue|JIRA::REST/next_issue> methods to make them a bit more object-like.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.  Wraps L<JIRA::REST|JIRA::REST>'s L<set_search_iterator|JIRA::REST/"set_search_iterator PARAMS"> and L<next_issue|JIRA::REST/next_issue> methods to make them a bit more object-like.
 
 use Readonly;
 
@@ -33,7 +33,8 @@ sub init {
 
     $self->seen_cache( {} );
     $self->fetched( 0 );
-    $self->set_search_iterator;    # fetch the first bunch of issues
+    $self->set_search_iterator;  # fetch the first bunch of issues
+    return;
 }
 
 =method B<issue_count>
@@ -42,17 +43,24 @@ A count of the number of issues matched by the query.
 
 =cut
 
-sub issue_count { shift->total }
+sub issue_count { return shift->total }
 
 =method B<next>
 
-The next issue returned by the query, as a L<JIRA::REST::Class::Issue> object.  If there are no more issues matched by the query, this method returns an undefined value.
+The next issue returned by the query, as a
+L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object.  If there are
+no more issues matched by the query, this method returns an undefined value.
 
-If the L</restart_if_lt_total> method is set to true and the number of issues fetched is less than the total number of issues matched by the query (see the L</issue_count> method), this method will rerun the query and keep returning issues. This is particularly useful if you are transforming a number of issues through an iterator, and the transformation causes the issues to no longer match the query.
+If the L</restart_if_lt_total> method is set to true and the number of
+issues fetched is less than the total number of issues matched by the query
+(see the L</issue_count> method), this method will rerun the query and keep
+returning issues. This is particularly useful if you are transforming a
+number of issues through an iterator, and the transformation causes the
+issues to no longer match the query.
 
 =cut
 
-sub next {
+sub next { ## no critic (ProhibitBuiltinHomonyms)
     my $self = shift;
 
     my $issue = $self->_get_next_unseen_issue;
@@ -123,6 +131,7 @@ sub set_search_iterator {
     # search, let's track how many we get so we can re-search if necessary
     $self->{total}   = $self->JIRA_REST->{iter}->{results}->{total};
     $self->{fetched} = 0;
+    return;
 }
 
 1;

@@ -1,7 +1,7 @@
 package PodUtil;
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use lib 'lib';
 use Data::Dumper::Concise;
@@ -11,7 +11,7 @@ use Path::Tiny;
 sub include_stopwords {
     my $OUT = q{=for stopwords};
 
-    for my $word ( sort( path("stopwords.ini")->lines( { chomp => 1 } ) ) ) {
+    for my $word ( sort( path( 'stopwords.ini' )->lines( { chomp => 1 } ) ) ) {
         $OUT .= qq{ $word};
     }
     $OUT .= qq{\n};
@@ -20,33 +20,34 @@ sub include_stopwords {
 }
 
 sub related_classes {
-    my ($plugin) = @_;
-    my $base = 'JIRA::REST::Class';
-    my $classes = qr/${base}[:a-z0-9]*/i;
+    my ( $plugin ) = @_;
+    my $base       = 'JIRA::REST::Class';
+    my $classes    = qr/${base}[:\w]*/ix;
 
     my $file = $plugin->tt_file;
 
-    $plugin->log("processing ".$file->name);
+    $plugin->log( 'processing ' . $file->name );
 
     my $content = $file->content;
-    my($pkg) = $content =~ /package\s+($classes)/;
-    $plugin->log("  package $pkg");
+    my ( $pkg ) = $content =~ /package\s+($classes)/x;
+    $plugin->log( "  package $pkg" );
 
     my %related;
-    foreach my $class ( $content =~ /($classes)/g ) {
+    foreach my $class ( $content =~ /($classes)/gx ) {
         next if $class eq $pkg;
-        $plugin->log("    found $class ");
+        $plugin->log( "    found $class " );
         $related{$class} = 1;
     }
 
-    foreach my $nickname ( $content =~ /make_object\(([^,]+)/g ) {
+    foreach my $nickname ( $content =~ /make_object[(]([^,]+)/gx ) {
+
         # the first argument to make_object() is a perl string,
         # so let's just use eval to find the value of that string.
-        eval { $nickname = eval $nickname; };
+        $nickname = eval $nickname; ## no critic ( ProhibitStringyEval )
         next unless $nickname && exists $TYPES{$nickname};
         my $class = $TYPES{$nickname};
         next if $class eq $pkg;
-        $plugin->log("    found $class from make_object($nickname)");
+        $plugin->log( "    found $class from make_object($nickname)" );
         $related{$class} = 1;
     }
 
@@ -54,8 +55,10 @@ sub related_classes {
     return q{} unless @list;
 
     my $OUT = "\n=head1 RELATED CLASSES\n\n=over 2\n\n";
-    $OUT .= "=item * L<" . join ">\n\n=item * L<", @list;
-    $OUT .= ">\n\n=back\n\n";
+    foreach my $item ( @list ) {
+        $OUT .= sprintf qq{=item * L<%s|%s>\n\n}, $item, $item;
+    }
+    $OUT .= "=back\n\n";
     return $OUT;
 }
 
