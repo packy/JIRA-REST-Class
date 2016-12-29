@@ -768,7 +768,7 @@ try{
     is($test->rest_api_url_base($url . "/rest/api/latest/foo"),
        $url . "/rest/api/latest", q{rest_api_url_base() works as expected});
 
-    is($test->strip_protocol_and_host($url . "/foo"),
+    is($test->strip_protocol_and_host($test->REST_CLIENT->getHost . "/foo"),
        "/foo", q{strip_protocol_and_host() works as expected});
 
     is($test->maxResults, 50, q{maxResults() default is correct});
@@ -777,6 +777,9 @@ try{
 
     is($test->maxResults, 10,
        q{maxResults() was successfully set by previous call});
+
+    is($url, $test->REST_CLIENT->getHost,
+       'REST_CLIENT->getHost() returns expected value');
 };
 
 =end testing
