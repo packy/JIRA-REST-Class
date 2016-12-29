@@ -91,7 +91,7 @@ sub TestServer_stop {
 sub TestServer_log {
     state $log;
     unless (defined $log) {
-        $log = TestServer->get_logger->clone( prefix => "[pid $$] " );
+        $log = TestServer->get_logger( prefix => "[pid $$] " );
     }
     return $log;
 }

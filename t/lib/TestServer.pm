@@ -24,7 +24,7 @@ TestServer::Plugin->register_dispatch(
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
-    $self->{logger} = get_logger()->clone( prefix => "[pid $$] $class: " );
+    $self->{logger} = $class->get_logger;
     return $self;
 }
 
@@ -33,9 +33,20 @@ sub logfile { $ENV{JIRA_REST_CLASS_TESTLOG} }
 sub log { shift->{logger} }
 
 sub get_logger {
-    if (logfile()) {
+    my $class = shift; # remove the class we're invoked from
+    $class = ref $class ? ref $class : $class;
+
+    my %args = (@_ % 2) ? () : @_; # no exceptions for odd # of params
+    my $class  = exists $args{class} ? $args{class} : $class;
+    my $prefix = exists $args{prefix} ? $args{prefix}
+               : $class               ? "[pid $$] $class: "
+               :                        "[pid $$] ";
+
+    if ( logfile() ) {
         Log::Any::Adapter->set( File => logfile() );
+        return Log::Any->get_logger()->clone( prefix => $prefix );
     }
+
     return Log::Any->get_logger()
 }
 
