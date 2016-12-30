@@ -8,22 +8,22 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual change to a JIRA issue as an object.
 
-__PACKAGE__->mk_ro_accessors(qw/ author created /);
-__PACKAGE__->mk_data_ro_accessors(qw/ id /);
-__PACKAGE__->mk_contextual_ro_accessors(qw/ items /);
+__PACKAGE__->mk_ro_accessors( qw/ author created / );
+__PACKAGE__->mk_data_ro_accessors( qw/ id / );
+__PACKAGE__->mk_contextual_ro_accessors( qw/ items / );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
     # make user object
-    $self->populate_scalar_data('author', 'user', 'author');
+    $self->populate_scalar_data( 'author', 'user', 'author' );
 
     # make date object
-    $self->populate_date_data('created', 'created');
+    $self->populate_date_data( 'created', 'created' );
 
     # make list of changed items
-    $self->populate_list_data('items', 'changeitem', 'items');
+    $self->populate_list_data( 'items', 'changeitem', 'items' );
 }
 
 1;

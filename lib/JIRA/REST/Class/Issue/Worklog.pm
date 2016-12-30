@@ -8,17 +8,18 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the worklog of a JIRA issue as an object.
 
-__PACKAGE__->mk_contextual_ro_accessors(qw/ items /);
+__PACKAGE__->mk_contextual_ro_accessors( qw/ items / );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
-    $self->{data} = $self->issue->get('/worklog');
+    $self->{data} = $self->issue->get( '/worklog' );
     my $items = $self->{items} = [];
 
     foreach my $item ( @{ $self->data->{worklogs} } ) {
-        push @$items,  $self->issue->make_object('workitem', { data => $item });
+        push @$items,
+            $self->issue->make_object( 'workitem', { data => $item } );
     }
 }
 

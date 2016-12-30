@@ -10,22 +10,25 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
 
-__PACKAGE__->mk_contextual_ro_accessors(qw/ transitions /);
+__PACKAGE__->mk_contextual_ro_accessors( qw/ transitions / );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
     $self->_refresh_transitions;
 }
 
 sub _refresh_transitions {
     my $self = shift;
 
-    $self->{data} = $self->issue->get('/transitions?expand=transitions.fields');
+    $self->{data}
+        = $self->issue->get( '/transitions?expand=transitions.fields' );
 
-    $self->{transitions} = [ map {
-        $self->issue->make_object('transition', { data => $_ })
-    } @{ $self->data->{transitions} } ];
+    $self->{transitions} = [  #
+        map {                 #
+            $self->issue->make_object( 'transition', { data => $_ } )
+        } @{ $self->data->{transitions} }
+    ];
 }
 
 =internal_method B<find_transition_named>
@@ -46,11 +49,12 @@ sub find_transition_named {
     }
 
     die sprintf(
-        "Unable to find transition '%s'\n".
-        "issue status: %s\n".
-        "transitions:  %s\n",
-        $name, $self->issue->status->name,
-        $self->dump([ $self->transitions ]),
+        "Unable to find transition '%s'\n"
+            . "issue status: %s\n"
+            . "transitions:  %s\n",
+        $name,
+        $self->issue->status->name,
+        $self->dump( [ $self->transitions ] ),
     );
 }
 
@@ -60,7 +64,7 @@ Blocks the issue.
 
 =cut
 
-sub block { shift->find_transition_named("Block Issue")->go(@_) }
+sub block { shift->find_transition_named( "Block Issue" )->go( @_ ) }
 
 =method B<close>
 
@@ -68,7 +72,7 @@ Closes the issue.
 
 =cut
 
-sub close { shift->find_transition_named("Close Issue")->go(@_) }
+sub close { shift->find_transition_named( "Close Issue" )->go( @_ ) }
 
 =method B<verify>
 
@@ -76,7 +80,7 @@ Verifies the issue.
 
 =cut
 
-sub verify { shift->find_transition_named("Verify Issue")->go(@_) }
+sub verify { shift->find_transition_named( "Verify Issue" )->go( @_ ) }
 
 =method B<resolve>
 
@@ -84,7 +88,7 @@ Resolves the issue.
 
 =cut
 
-sub resolve { shift->find_transition_named("Resolve Issue")->go(@_) }
+sub resolve { shift->find_transition_named( "Resolve Issue" )->go( @_ ) }
 
 =method B<reopen>
 
@@ -92,7 +96,7 @@ Reopens the issue.
 
 =cut
 
-sub reopen { shift->find_transition_named("Reopen Issue")->go(@_) }
+sub reopen { shift->find_transition_named( "Reopen Issue" )->go( @_ ) }
 
 =method B<start_progress>
 
@@ -100,7 +104,9 @@ Starts progress on the issue.
 
 =cut
 
-sub start_progress { shift->find_transition_named("Start Progress")->go(@_) }
+sub start_progress {
+    shift->find_transition_named( "Start Progress" )->go( @_ );
+}
 
 =method B<stop_progress>
 
@@ -108,7 +114,7 @@ Stops progress on the issue.
 
 =cut
 
-sub stop_progress { shift->find_transition_named("Stop Progress")->go(@_) }
+sub stop_progress { shift->find_transition_named( "Stop Progress" )->go( @_ ) }
 
 =method B<start_qa>
 
@@ -116,7 +122,7 @@ Starts QA on the issue.
 
 =cut
 
-sub start_qa { shift->find_transition_named("Start QA")->go(@_) }
+sub start_qa { shift->find_transition_named( "Start QA" )->go( @_ ) }
 
 =method B<transition_walk>
 
@@ -146,20 +152,20 @@ sub transition_walk {
     my $self     = shift;
     my $target   = shift;
     my $map      = shift;
-    my $callback = shift // sub {};
+    my $callback = shift // sub { };
     my $name     = $self->issue->status->name;
 
     my $orig_assignee = $self->issue->assignee // q{};
 
-    until ($name eq $target) {
-        if (exists $map->{$name} ) {
+    until ( $name eq $target ) {
+        if ( exists $map->{$name} ) {
             my $to = $map->{$name};
             unless ( exists $state_to_transition{$to} ) {
                 die "Unknown target state '$to'!\n";
             }
-            my $trans =
-                $self->find_transition_named( $state_to_transition{$to} );
-            $callback->($name, $to);
+            my $trans
+                = $self->find_transition_named( $state_to_transition{$to} );
+            $callback->( $name, $to );
             $trans->go;
         }
         else {
@@ -173,8 +179,8 @@ sub transition_walk {
     # put the owner back to who it's supposed
     # to be if it changed during our walk
     my $current_assignee = $self->issue->assignee // q{};
-    if ($current_assignee ne $orig_assignee) {
-        $self->issue->set_assignee($orig_assignee);
+    if ( $current_assignee ne $orig_assignee ) {
+        $self->issue->set_assignee( $orig_assignee );
     }
 }
 

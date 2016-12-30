@@ -49,8 +49,9 @@ last tagged release, due to the actions of L<BumpVersionAfterRelease|Dist::Zilla
 =cut
 
 our $SOURCE = 'CPAN';
+
 # the following line will be commented out by Dist::Zilla
-$SOURCE = 'GitHub'; # COMMENT
+$SOURCE = 'GitHub';    # COMMENT
 
 1;
 

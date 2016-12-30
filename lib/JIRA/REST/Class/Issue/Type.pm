@@ -8,7 +8,11 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA issue type as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw/ description iconUrl id name self subtask /);
+use Readonly;
+
+Readonly my @ACCESSORS => qw( description iconUrl id name self subtask );
+
+__PACKAGE__->mk_data_ro_accessors( @ACCESSORS );
 
 =head1 DESCRIPTION
 
@@ -22,25 +26,26 @@ issue types.
 
 =cut
 
+#<<<
 use overload
     '""'   => sub { shift->name    },
     '0+'   => sub { shift->id      },
     'bool' => sub { shift->subtask },
     '<=>'  => sub {
-        my($A, $B) = @_;
+        my( $A, $B ) = @_;
         my $AA = ref $A ? $A->id : $A;
         my $BB = ref $B ? $B->id : $B;
         $AA <=> $BB
     },
     'cmp'  => sub {
-        my($A, $B) = @_;
+        my( $A, $B ) = @_;
         my $AA = ref $A ? $A->name : $A;
         my $BB = ref $B ? $B->name : $B;
         $AA cmp $BB
     };
+#>>>
 
 1;
-
 
 =accessor B<description>
 

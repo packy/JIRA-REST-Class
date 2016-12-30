@@ -12,7 +12,7 @@ use Carp;
 use Data::Dumper::Concise;
 use Scalar::Util qw( weaken blessed reftype refaddr);
 
-__PACKAGE__->mk_ro_accessors(qw( data issue lazy_loaded ));
+__PACKAGE__->mk_ro_accessors( qw( data issue lazy_loaded ) );
 
 =internal_method B<init>
 
@@ -28,15 +28,16 @@ sub init {
     my $factory = shift;
 
     # the first thing we're passed is supposed to be the factory object
-    if (blessed $factory && blessed $factory eq 'JIRA::REST::Class::Factory') {
+    if (   blessed $factory
+        && blessed $factory eq 'JIRA::REST::Class::Factory' ) {
 
         # grab the arguments that the class was called with from the factory
         # and make new factory and class objects with the same aguments so we
         # don't have circular dependency issues
 
         my $args = $factory->{args};
-        $self->factory($args);
-        $self->jira($args);
+        $self->factory( $args );
+        $self->jira( $args );
     }
     else {
         # if we're not passed a factory, let's complain about it
@@ -68,7 +69,7 @@ sub unload_lazy {
         }
     }
     else {
-        $self->{lazy_loaded} = { };
+        $self->{lazy_loaded} = {};
     }
 }
 
@@ -90,12 +91,15 @@ three unnamed parameters:
 =cut
 
 sub populate_scalar_data {
-    my ($self, $name, $type, $field) = @_;
+    my ( $self, $name, $type, $field ) = @_;
 
-    if (defined $self->data->{$field}) {
-        $self->{$name} = $self->make_object($type, {
-            data => $self->data->{$field}
-        });
+    if ( defined $self->data->{$field} ) {
+        $self->{$name} = $self->make_object(
+            $type,
+            {
+                data => $self->data->{$field}
+            }
+        );
     }
 }
 
@@ -115,8 +119,8 @@ Accepts two unnamed parameters:
 =cut
 
 sub populate_date_data {
-    my ($self, $name, $field) = @_;
-    if (defined $self->data->{$field}) {
+    my ( $self, $name, $field ) = @_;
+    if ( defined $self->data->{$field} ) {
         $self->{$name} = $self->make_date( $self->data->{$field} );
     }
 }
@@ -139,16 +143,16 @@ Like L</populate_scalar_data>, it accepts three unnamed parameters:
 =cut
 
 sub populate_list_data {
-    my ($self, $name, $type, $field) = @_;
-    if (defined $self->data->{$field}) {
-        $self->{$name} = [
-            map {
-                $self->make_object($type, { data => $_ })
+    my ( $self, $name, $type, $field ) = @_;
+    if ( defined $self->data->{$field} ) {
+        $self->{$name} = [    # stop perltidy from pulling
+            map {             # these lines together
+                $self->make_object( $type, { data => $_ } )
             } @{ $self->data->{$field} }
         ];
     }
     else {
-        $self->{$name} = []; # rather than undefined, return an empty list
+        $self->{$name} = [];    # rather than undefined, return an empty list
     }
 }
 
@@ -170,11 +174,14 @@ three unnamed parameters:
 =cut
 
 sub populate_scalar_field {
-    my ($self, $name, $type, $field) = @_;
-    if (defined $self->fields->{$field}) {
-        $self->{$name} = $self->make_object($type, {
-            data => $self->fields->{$field}
-        });
+    my ( $self, $name, $type, $field ) = @_;
+    if ( defined $self->fields->{$field} ) {
+        $self->{$name} = $self->make_object(
+            $type,
+            {
+                data => $self->fields->{$field}
+            }
+        );
     }
 }
 
@@ -196,16 +203,16 @@ Like L</populate_scalar_field>, it accepts three unnamed parameters:
 =cut
 
 sub populate_list_field {
-    my ($self, $name, $type, $field) = @_;
-    if (defined $self->fields->{$field}) {
-        $self->{$name} = [
-            map {
-                $self->make_object($type, { data => $_ })
+    my ( $self, $name, $type, $field ) = @_;
+    if ( defined $self->fields->{$field} ) {
+        $self->{$name} = [    # stop perltidy from pulling
+            map {             # these lines together
+                $self->make_object( $type, { data => $_ } )
             } @{ $self->fields->{$field} }
         ];
     }
     else {
-        $self->{$name} = []; # rather than undefined, return an empty list
+        $self->{$name} = [];    # rather than undefined, return an empty list
     }
 }
 
@@ -215,7 +222,7 @@ sub populate_list_field {
 # Class::Accessor, Class::Accessor::Fast, and Class::Accessor::Contextual
 #
 
-if (eval { require Sub::Name }) {
+if ( eval { require Sub::Name } ) {
     Sub::Name->import;
 }
 
@@ -228,28 +235,29 @@ accessors to make.
 =cut
 
 sub mk_contextual_ro_accessors {
-    my($class, @fields) = @_;
+    my ( $class, @fields ) = @_;
 
     foreach my $field ( @fields ) {
         my $accessor = sub {
-            if (@_ == 1) {
-                return $_[0]->{$field} unless wantarray;
-                return @{ $_[0]->{$field} } if ref($_[0]->{$field}) eq 'ARRAY';
-                return %{ $_[0]->{$field} } if ref($_[0]->{$field}) eq 'HASH';
-                return $_[0]->{$field};
+            if ( @_ == 1 ) {
+                my $ptr = $_[0];
+                return $ptr->{$field} unless wantarray;
+                return @{ $ptr->{$field} } if ref( $ptr->{$field} ) eq 'ARRAY';
+                return %{ $ptr->{$field} } if ref( $ptr->{$field} ) eq 'HASH';
+                return $ptr->{$field};
             }
             else {
                 my $caller = caller;
-                $_[0]->_croak("'$caller' cannot alter the value of '$field' " .
-                              "on objects of class '$class'");
+                $_[0]->_croak( "'$caller' cannot alter the value of '$field' "
+                        . "on objects of class '$class'" );
             }
         };
 
-        $class->make_subroutine($field, $accessor);
+        $class->make_subroutine( $field, $accessor );
     }
 
     return $class;
-};
+}
 
 =internal_method B<mk_deep_ro_accessor>
 
@@ -264,30 +272,30 @@ deeper than just the first level.
 =cut
 
 sub mk_deep_ro_accessor {
-    my($class, @field) = @_;
+    my ( $class, @field ) = @_;
 
     my $accessor = sub {
-        if (@_ == 1) {
+        if ( @_ == 1 ) {
             my $ptr = $_[0];
-            foreach my $f (@field) {
+            foreach my $f ( @field ) {
                 $ptr = $ptr->{$f};
             }
             return $ptr unless wantarray;
-            return @$ptr if ref($ptr) eq 'ARRAY';
-            return %$ptr if ref($ptr) eq 'HASH';
+            return @$ptr if ref( $ptr ) eq 'ARRAY';
+            return %$ptr if ref( $ptr ) eq 'HASH';
             return $ptr;
         }
         else {
             my $caller = caller;
-            $_[0]->_croak("'$caller' cannot alter the value of '$field[-1]' " .
-                          "on objects of class '$class'");
+            $_[0]->_croak( "'$caller' cannot alter the value of '$field[-1]' "
+                    . "on objects of class '$class'" );
         }
     };
 
-    $class->make_subroutine($field[-1], $accessor);
+    $class->make_subroutine( $field[-1], $accessor );
 
     return $class;
-};
+}
 
 =internal_method B<mk_lazy_ro_accessor>
 
@@ -309,30 +317,30 @@ Especially good for loading values that are objects populated by REST calls.
 =cut
 
 sub mk_lazy_ro_accessor {
-    my($class, $field, $constructor) = @_;
+    my ( $class, $field, $constructor ) = @_;
 
     my $accessor = sub {
-        if (@_ == 1) {
-            unless ($_[0]->{lazy_loaded}->{$field}) {
-                $_[0]->{$field} = $constructor->(@_);
+        if ( @_ == 1 ) {
+            unless ( $_[0]->{lazy_loaded}->{$field} ) {
+                $_[0]->{$field} = $constructor->( @_ );
                 $_[0]->{lazy_loaded}->{$field} = 1;
             }
             return $_[0]->{$field} unless wantarray;
-            return @{ $_[0]->{$field} } if ref($_[0]->{$field}) eq 'ARRAY';
-            return %{ $_[0]->{$field} } if ref($_[0]->{$field}) eq 'HASH';
+            return @{ $_[0]->{$field} } if ref( $_[0]->{$field} ) eq 'ARRAY';
+            return %{ $_[0]->{$field} } if ref( $_[0]->{$field} ) eq 'HASH';
             return $_[0]->{$field};
         }
         else {
             my $caller = caller;
-            $_[0]->_croak("'$caller' cannot alter the value of '$field' " .
-                          "on objects of class '$class'");
+            $_[0]->_croak( "'$caller' cannot alter the value of '$field' "
+                    . "on objects of class '$class'" );
         }
     };
 
-    $class->make_subroutine($field, $accessor);
+    $class->make_subroutine( $field, $accessor );
 
     return $class;
-};
+}
 
 =internal_method B<mk_data_ro_accessors>
 
@@ -344,7 +352,7 @@ sub mk_data_ro_accessors {
     my $class = shift;
 
     foreach my $field ( @_ ) {
-        $class->mk_deep_ro_accessor(qw( data ), $field);
+        $class->mk_deep_ro_accessor( qw( data ), $field );
     }
 }
 
@@ -358,7 +366,7 @@ sub mk_field_ro_accessors {
     my $class = shift;
 
     foreach my $field ( @_ ) {
-        $class->mk_deep_ro_accessor(qw( data fields ), $field);
+        $class->mk_deep_ro_accessor( qw( data fields ), $field );
     }
 }
 
@@ -370,22 +378,22 @@ either a class name or a blessed object reference.
 
 =cut
 
-{   # we're going some magic here
-    no strict 'refs'; ## no critic
+{
+    # we're going some magic here
+    no strict 'refs';    ## no critic
 
     sub make_subroutine {
-        my($proto, $name, $sub) = @_;
-        my($class) = ref $proto || $proto;
+        my ( $proto, $name, $sub ) = @_;
+        my ( $class ) = ref $proto || $proto;
 
         my $fullname = "${class}::$name";
-        unless (defined &{$fullname}) {
-            subname($fullname, $sub) if defined &subname;
+        unless ( defined &{$fullname} ) {
+            subname( $fullname, $sub ) if defined &subname;
             *{$fullname} = $sub;
         }
     }
 
-} # end of ref no-stricture zone
-
+}    # end of ref no-stricture zone
 
 1;
 

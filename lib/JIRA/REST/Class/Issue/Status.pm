@@ -8,17 +8,20 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the status of a JIRA issue as an object.
 
-__PACKAGE__->mk_ro_accessors(qw/ category /);
-__PACKAGE__->mk_data_ro_accessors(qw/ description iconUrl id name self /);
-__PACKAGE__->mk_contextual_ro_accessors(qw/ transitions /);
+__PACKAGE__->mk_ro_accessors( qw/ category / );
+__PACKAGE__->mk_data_ro_accessors( qw/ description iconUrl id name self / );
+__PACKAGE__->mk_contextual_ro_accessors( qw/ transitions / );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
-    $self->{category} = $self->make_object('statuscat', {
-        data => $self->data->{statusCategory}
-    });
+    $self->{category} = $self->make_object(
+        'statuscat',
+        {
+            data => $self->data->{statusCategory}
+        }
+    );
 }
 
 1;

@@ -8,7 +8,7 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA link type as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw( id name inward outward self ));
+__PACKAGE__->mk_data_ro_accessors( qw( id name inward outward self ) );
 
 1;
 

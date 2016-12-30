@@ -10,24 +10,25 @@ use Readonly;
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual worklog item for a JIRA issue as an object.
 
-Readonly my @USERS => qw( author updateAuthor );
-Readonly my @DATES => qw( created updated );
-__PACKAGE__->mk_ro_accessors(@USERS, @DATES);
-__PACKAGE__->mk_data_ro_accessors(qw/ comment id self
-                                      timeSpent timeSpentSeconds /);
+Readonly my @USERS     => qw( author updateAuthor );
+Readonly my @DATES     => qw( created updated );
+Readonly my @ACCESSORS => qw( comment id self timeSpent timeSpentSeconds );
+
+__PACKAGE__->mk_ro_accessors( @USERS, @DATES );
+__PACKAGE__->mk_data_ro_accessors( @ACCESSORS );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
     # make user objects
-    foreach my $field (@USERS) {
-        $self->populate_scalar_data($field, 'user', $field);
+    foreach my $field ( @USERS ) {
+        $self->populate_scalar_data( $field, 'user', $field );
     }
 
     # make date objects
-    foreach my $field (@DATES) {
-        $self->populate_date_data($field, $field);
+    foreach my $field ( @DATES ) {
+        $self->populate_date_data( $field, $field );
     }
 }
 

@@ -16,19 +16,19 @@ Readonly my @USERS => qw( author updateAuthor );
 # fields that will be turned into DateTime objects
 Readonly my @DATES => qw( created updated );
 
-__PACKAGE__->mk_ro_accessors(@USERS, @DATES);
+__PACKAGE__->mk_ro_accessors( @USERS, @DATES );
 
-__PACKAGE__->mk_data_ro_accessors(qw/ body id self visibility /);
+__PACKAGE__->mk_data_ro_accessors( qw/ body id self visibility / );
 
 __PACKAGE__->mk_contextual_ro_accessors();
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
     # make user objects
     foreach my $field ( @USERS ) {
-        $self->populate_scalar_data($field, 'user', $field);
+        $self->populate_scalar_data( $field, 'user', $field );
     }
 
     # make date objects
@@ -45,7 +45,7 @@ Deletes the comment from the issue. Returns nothing.
 
 sub delete {
     my $self = shift;
-    $self->issue->delete('/comment/' . $self->id);
+    $self->issue->delete( '/comment/' . $self->id );
 
     # now that we've deleted this comment, the
     # lazy accessor will need to be reloaded

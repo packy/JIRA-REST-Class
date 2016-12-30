@@ -8,7 +8,9 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a version of a JIRA project as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw/ archived id name projectId released self /);
+Readonly my @ACCESSORS => qw( archived id name projectId released self );
+
+__PACKAGE__->mk_data_ro_accessors( @ACCESSORS );
 
 =head1 DESCRIPTION
 
@@ -22,6 +24,7 @@ comparison will compare the C<id>s of the project versions.
 
 =cut
 
+#<<<
 use overload
     '""'   => sub { shift->name    },
     '0+'   => sub { shift->id      },
@@ -38,6 +41,7 @@ use overload
         my $BB = ref $B ? $B->name : $B;
         $AA cmp $BB
     };
+#>>>
 
 1;
 

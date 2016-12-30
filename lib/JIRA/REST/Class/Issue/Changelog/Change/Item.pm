@@ -8,8 +8,9 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents an individual item in an individual change to a JIRA issue as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw/ field fieldtype from fromString to
-                                      toString /);
+__PACKAGE__->mk_data_ro_accessors(
+    qw/ field fieldtype from fromString to toString /    #
+);
 
 1;
 

@@ -8,33 +8,33 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.  Wraps L<JIRA::REST>'s L<set_search_iterator|JIRA::REST/"set_search_iterator PARAMS"> and L<next_issue|JIRA::REST/next_issue> methods to make them a bit more object-like.
 
-__PACKAGE__->mk_accessors(qw( total
-                              fetched
-                              iterator_args
-                              restart_if_lt_total
-                              seen_cache ));
+use Readonly;
+
+Readonly my @ACCESSORS => qw( total fetched iterator_args
+                              restart_if_lt_total seen_cache );
+
+__PACKAGE__->mk_accessors( @ACCESSORS );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
     my $args = $self->iterator_args;
 
     # if we weren't passed a maxResults, use the default for the class object
-    unless (exists $args->{maxResults}) {
+    unless ( exists $args->{maxResults} ) {
         $args->{maxResults} = $self->jira->maxResults;
     }
 
-    if (exists $args->{restart_if_lt_total}) {
-        $self->restart_if_lt_total($args->{restart_if_lt_total});
+    if ( exists $args->{restart_if_lt_total} ) {
+        $self->restart_if_lt_total( $args->{restart_if_lt_total} );
         delete $args->{restart_if_lt_total};
     }
 
-    $self->seen_cache({});
-    $self->fetched(0);
-    $self->set_search_iterator; # fetch the first bunch of issues
+    $self->seen_cache( {} );
+    $self->fetched( 0 );
+    $self->set_search_iterator;    # fetch the first bunch of issues
 }
-
 
 =method B<issue_count>
 
@@ -57,8 +57,9 @@ sub next {
 
     my $issue = $self->_get_next_unseen_issue;
 
-    if (! $issue && $self->fetched < $self->total &&
-        $self->restart_if_lt_total) {
+    if (  !$issue
+        && $self->fetched < $self->total
+        && $self->restart_if_lt_total ) {
 
         # ok, we didn't get as many results as we were promised,
         # so let's try the search again
@@ -67,13 +68,12 @@ sub next {
     }
 
     if ( $issue ) {
-        $self->fetched($self->fetched + 1);
-        return $self->factory->make_object('issue', { data => $issue });
+        $self->fetched( $self->fetched + 1 );
+        return $self->factory->make_object( 'issue', { data => $issue } );
     }
 
     return;
 }
-
 
 =internal_method B<_get_next_unseen_issue>
 
@@ -101,7 +101,6 @@ initial search.
 
 =cut
 
-
 =internal_method B<set_search_iterator>
 
 Method that is used to restart a query that has run out of results prematurely.
@@ -112,17 +111,17 @@ sub set_search_iterator {
     my $self = shift;
     my $args = shift || $self->iterator_args;
 
-    $self->JIRA_REST->set_search_iterator($args);
+    $self->JIRA_REST->set_search_iterator( $args );
 
     # fetch results using code borrowed from JIRA::REST
     my $iter = $self->JIRA_REST->{iter};
     $iter->{params}{startAt} = $iter->{offset};
-    $iter->{results}         = $self->JIRA_REST->POST('/search', undef,
-                                                      $iter->{params});
+    $iter->{results}
+        = $self->JIRA_REST->POST( '/search', undef, $iter->{params} );
 
     # since there seems to be a problem with getting all the results in one
     # search, let's track how many we get so we can re-search if necessary
-    $self->{total} = $self->JIRA_REST->{iter}->{results}->{total};
+    $self->{total}   = $self->JIRA_REST->{iter}->{results}->{total};
     $self->{fetched} = 0;
 }
 

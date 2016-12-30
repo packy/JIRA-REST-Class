@@ -8,20 +8,24 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the sprint of a JIRA issue as an object (if you're using L<Atlassian GreenHopper|https://www.atlassian.com/software/jira/agile>).
 
-__PACKAGE__->mk_ro_accessors(qw/ id rapidViewId state name startDate endDate
-                                 completeDate sequence /);
+use Readonly;
+
+Readonly my @ACCESSORS => qw( id rapidViewId state name startDate endDate
+                              completeDate sequence );
+
+__PACKAGE__->mk_ro_accessors( @ACCESORS );
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
     my $data = $self->data;
     $data =~ s{com\.atlassian\.greenhopper\.service\.sprint\.Sprint[^\[]+\[}{};
     $data =~ s{\]$}{};
     my @fields = split /,/, $data;
-    foreach my $field (@fields) {
-        my ($k, $v) = split /=/, $field;
-        if ($v && $v eq '<null>') {
+    foreach my $field ( @fields ) {
+        my ( $k, $v ) = split /=/, $field;
+        if ( $v && $v eq '<null>' ) {
             undef $v;
         }
         $self->{$k} = $v;

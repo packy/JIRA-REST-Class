@@ -12,9 +12,9 @@ use Contextual::Return;
 
 sub init {
     my $self = shift;
-    $self->SUPER::init(@_);
+    $self->SUPER::init( @_ );
 
-    my $data = $self->issue->get(q{}, { fields => 'timetracking' });
+    my $data = $self->issue->get( q{}, { fields => 'timetracking' } );
     $self->{data} = $data->{fields}->{timetracking};
 }
 
@@ -26,10 +26,12 @@ Returns the original estimate as a number of seconds in numeric context, and as 
 
 sub originalEstimate {
     my $self = shift;
+    #<<<
     return
         NUM { $self->data->{originalEstimateSeconds} }
         STR { $self->data->{originalEstimate} }
     ;
+    #>>>
 }
 
 =accessor B<remainingEstimate>
@@ -40,10 +42,12 @@ Returns the remaining estimate as a number of seconds in numeric context, and as
 
 sub remainingEstimate {
     my $self = shift;
+    #<<<
     return
         NUM { $self->data->{remainingEstimateSeconds} }
         STR { $self->data->{remainingEstimate} }
     ;
+    #>>>
 }
 
 =accessor B<timeSpent>
@@ -54,10 +58,12 @@ Returns the time spent as a number of seconds in numeric context, and as a w/d/h
 
 sub timeSpent {
     my $self = shift;
+    #<<<
     return
         NUM { $self->data->{timeSpentSeconds} }
         STR { $self->data->{timeSpent} }
     ;
+    #>>>
 }
 
 =method B<set_originalEstimate>
@@ -94,14 +100,15 @@ sub update {
     my $self   = shift;
     my $update = shift;
 
-    foreach my $key (qw/ originalEstimate remainingEstimate /) {
+    foreach my $key ( qw/ originalEstimate remainingEstimate / ) {
+
         # if we're updating the key, don't change it
         next if exists $update->{$key};
 
         # since we're not updating the key, copy the original value
         # into the update, because the REST interface has an annoying
         # tendency to reset those values if you don't explicitly set them
-        if (defined $self->data->{$key}) {
+        if ( defined $self->data->{$key} ) {
             $update->{$key} = $self->data->{$key};
         }
     }

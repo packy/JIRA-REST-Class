@@ -1,7 +1,7 @@
 package JIRA::REST::Class;
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
@@ -15,17 +15,18 @@ use JIRA::REST::Class::Factory;
 use base qw(JIRA::REST::Class::Mixins);
 
 sub new {
-    my $class = shift;
+    my ( $class, @arglist ) = @_;
 
     my $args = $class->_get_known_args(
-        \@_, qw/url username password rest_client_config
-                proxy ssl_verify_none anonymous/
+        \@arglist,
+        qw/ url username password rest_client_config
+            proxy ssl_verify_none anonymous /
     );
 
     return bless {
-        jira_rest => $class->JIRA_REST(clone($args)),
-        factory   => $class->factory(clone($args)),
-        args      => clone($args),
+        jira_rest => $class->JIRA_REST( clone( $args ) ),
+        factory   => $class->factory( clone( $args ) ),
+        args      => clone( $args ),
     }, $class;
 }
 
@@ -140,13 +141,12 @@ The return value is an array of L<JIRA::REST::Class::Issue> objects.
 
 sub issues {
     my $self = shift;
-    if (@_ == 1 && ref $_[0] eq 'HASH') {
-        return $self->query(shift)->issues;
+    if ( @_ == 1 && ref $_[0] eq 'HASH' ) {
+        return $self->query( shift )->issues;
     }
     else {
-        my $list = join(',', @_);
-        my $jql  = "key in ($list)";
-        return $self->query({ jql => $jql })->issues;
+        my $jql = sprintf "key in (%s)", join ',', @_;
+        return $self->query( { jql => $jql } )->issues;
     }
 }
 
@@ -171,8 +171,8 @@ sub query {
     my $self = shift;
     my $args = shift;
 
-    my $query = $self->post('/search', $args);
-    return $self->make_object('query', { data => $query });
+    my $query = $self->post( '/search', $args );
+    return $self->make_object( 'query', { data => $query } );
 }
 
 #---------------------------------------------------------------------------
@@ -204,7 +204,7 @@ series of L<JIRA::REST::Class::Issue> objects.
 sub iterator {
     my $self = shift;
     my $args = shift;
-    return $self->make_object('iterator', { iterator_args => $args });
+    return $self->make_object( 'iterator', { iterator_args => $args } );
 }
 
 #---------------------------------------------------------------------------
@@ -223,7 +223,7 @@ A wrapper for C<JIRA::REST>'s L<GET|JIRA::REST/"GET RESOURCE [, QUERY]"> method.
 sub get {
     my $self = shift;
     my $url  = shift;
-    return $self->JIRA_REST->GET($url, undef, @_);
+    return $self->JIRA_REST->GET( $url, undef, @_ );
 }
 
 #---------------------------------------------------------------------------
@@ -248,7 +248,7 @@ Wrapper around C<JIRA::REST>'s L<POST|JIRA::REST/"POST RESOURCE, QUERY, VALUE [,
 sub post {
     my $self = shift;
     my $url  = shift;
-    $self->JIRA_REST->POST($url, undef, @_);
+    $self->JIRA_REST->POST( $url, undef, @_ );
 }
 
 #---------------------------------------------------------------------------
@@ -273,7 +273,7 @@ Wrapper around C<JIRA::REST>'s L<PUT|JIRA::REST/"PUT RESOURCE, QUERY, VALUE [, H
 sub put {
     my $self = shift;
     my $url  = shift;
-    $self->JIRA_REST->PUT($url, undef, @_);
+    $self->JIRA_REST->PUT( $url, undef, @_ );
 }
 
 #---------------------------------------------------------------------------
@@ -298,7 +298,7 @@ Wrapper around C<JIRA::REST>'s L<DELETE|JIRA::REST/"DELETE RESOURCE [, QUERY]"> 
 sub delete {
     my $self = shift;
     my $url  = shift;
-    $self->JIRA_REST->DELETE($url, @_);
+    $self->JIRA_REST->DELETE( $url, @_ );
 }
 
 #---------------------------------------------------------------------------
@@ -349,8 +349,9 @@ C<< JIRA::REST->attach_files >>...
 
 sub data_upload {
     my $self = shift;
-    my $args = $self->_get_known_args(\@_, qw/ url name data /);
-    $self->_check_required_args($args,
+    my $args = $self->_get_known_args( \@_, qw/ url name data / );
+    $self->_check_required_args(
+        $args,
         url  => "you must specify a URL to upload to",
         name => "you must specify a name for the file data",
         data => "you must specify the file data",
@@ -361,25 +362,23 @@ sub data_upload {
 
     # code cribbed from JIRA::REST
     #
-    my $rest = $self->REST_CLIENT;
+    my $rest     = $self->REST_CLIENT;
     my $response = $rest->getUseragent()->post(
         $self->rest_api_url_base . $args->{url},
         %{ $rest->{_headers} },
         'X-Atlassian-Token' => 'nocheck',
         'Content-Type'      => 'form-data',
         'Content'           => [
-            file => [
-                undef,
-                $name,
-                Content => $data,
-            ],
+            file => [ undef, $name, Content => $data ],
         ],
     );
 
+    #<<< perltidy should ignore these lines
     $response->is_success
         or croak $self->JIRA_REST->_error(
-            $self->_croakmsg($response->status_line, $name)
+            $self->_croakmsg( $response->status_line, $name )
         );
+    #>>>
 
     return $response;
 }
@@ -440,10 +439,10 @@ Defaults to 50.
 
 sub maxResults {
     my $self = shift;
-    if (@_) {
+    if ( @_ ) {
         $self->{maxResults} = shift;
     }
-    unless (exists $self->{maxResults} && defined $self->{maxResults}) {
+    unless ( exists $self->{maxResults} && defined $self->{maxResults} ) {
         $self->{maxResults} = 50;
     }
     return $self->{maxResults};
@@ -459,11 +458,13 @@ objects) for this server.
 sub issue_types {
     my $self = shift;
 
-    unless ($self->{issue_types}) {
-        my $types = $self->get('/issuetype');
-        $self->{issue_types} = [ map {
-            $self->make_object('issuetype', { data => $_ });
-        } @$types ];
+    unless ( $self->{issue_types} ) {
+        my $types = $self->get( '/issuetype' );
+        $self->{issue_types} = [    # stop perltidy from pulling
+            map {                   # these lines together
+                $self->make_object( 'issuetype', { data => $_ } );
+            } @$types
+        ];
     }
 
     return @{ $self->{issue_types} } if wantarray;
@@ -519,19 +520,22 @@ this server.
 sub projects {
     my $self = shift;
 
-    unless ($self->{project_list}) {
+    unless ( $self->{project_list} ) {
+
         # get the project list from JIRA
-        my $projects = $self->get('/project');
+        my $projects = $self->get( '/project' );
 
         # build a list, and make a hash so we can
         # grab projects later by id, key, or name.
 
         my $list = $self->{project_list} = [];
-        $self->{project_hash} = { map {
-            my $p = $self->make_object('project', { data => $_ });
-            push @$list, $p;
-            $p->id => $p, $p->key => $p, $p->name => $p
-        } @$projects };
+        $self->{project_hash} = {
+            map {
+                my $p = $self->make_object( 'project', { data => $_ } );
+                push @$list, $p;
+                ( $p->id => $p, $p->key => $p, $p->name => $p )
+            } @$projects
+        };
     }
 
     return @{ $self->{project_list} } if wantarray;
@@ -567,12 +571,12 @@ specified. Returns undef if the project doesn't exist.
 
 sub project {
     my $self = shift;
-    my $proj = shift || return; # if nothing was passed, we return nothing
+    my $proj = shift || return;    # if nothing was passed, we return nothing
 
     # if we were passed a project object, just return it
-    return $proj if $self->obj_isa($proj, 'project');
+    return $proj if $self->obj_isa( $proj, 'project' );
 
-    $self->projects; # load the project hash if it hasn't been loaded
+    $self->projects;    # load the project hash if it hasn't been loaded
 
     return unless exists $self->{project_hash}->{$proj};
     return $self->{project_hash}->{$proj};
@@ -636,8 +640,10 @@ L<LWP::UserAgent> object that is used by L<REST::Client> (which, in turn, is use
 
 sub SSL_verify_none {
     my $self = shift;
-    $self->REST_CLIENT->getUseragent()->ssl_opts( SSL_verify_mode => 0,
-                                                  verify_hostname => 0 );
+    $self->REST_CLIENT->getUseragent()->ssl_opts(
+        SSL_verify_mode => 0,
+        verify_hostname => 0
+    );
 }
 
 =internal_method B<rest_api_url_base>
@@ -648,13 +654,13 @@ Returns the base URL for this JIRA server's REST API.  For example, if your JIRA
 
 sub rest_api_url_base {
     my $self = shift;
-    if ($self->_JIRA_REST_version_has_separate_path) {
-        (my $host = $self->REST_CLIENT->getHost) =~ s{/$}{};
+    if ( $self->_JIRA_REST_version_has_separate_path ) {
+        ( my $host = $self->REST_CLIENT->getHost ) =~ s{/$}{};
         my $path = $self->JIRA_REST->{path};
         return $host . $path;
     }
     else {
-        my ($base) = $self->REST_CLIENT->getHost =~ m{^(.+?rest/api/[^/]+)/?};
+        my ( $base ) = $self->REST_CLIENT->getHost =~ m{^(.+?rest/api/[^/]+)/?};
         return $base;
     }
 }
@@ -668,7 +674,7 @@ A method to take the provided URL and strip the protocol and host from it.  For 
 sub strip_protocol_and_host {
     my $self = shift;
     my $host = $self->REST_CLIENT->getHost;
-    (my $url = shift) =~ s{^$host}{};
+    ( my $url = shift ) =~ s{^$host}{};
     return $url;
 }
 

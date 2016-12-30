@@ -47,10 +47,10 @@ A tweaked version of C<make_object_for_type> from L<Class::Factory::Enhanced|Cla
 =cut
 
 sub make_object {
-    my ($self, $object_type, @args) = @_;
-    my $class = $self->get_factory_class($object_type);
-    my $obj = $class->new(@args);
-    $obj->init($self); # make sure we pass the factory into init()
+    my ( $self, $object_type, @args ) = @_;
+    my $class = $self->get_factory_class( $object_type );
+    my $obj   = $class->new( @args );
+    $obj->init( $self );    # make sure we pass the factory into init()
     return $obj;
 }
 
@@ -63,12 +63,15 @@ L<DateTime::Format::Strptime> pattern C<%FT%T.%N%z>
 =cut
 
 sub make_date {
-    my ($self, $date) = @_;
+    my ( $self, $date ) = @_;
     return unless $date;
     my $pattern = '%FT%T.%N%z';
     state $parser = DateTime::Format::Strptime->new( pattern => $pattern );
-    return( $parser->parse_datetime($date) or
-        confess qq{Unable to parse date "$date" using pattern "$pattern"} );
+    return (
+        $parser->parse_datetime( $date )
+            or
+            confess qq{Unable to parse date "$date" using pattern "$pattern"}
+    );
 }
 
 =internal_method B<factory_error>
@@ -80,8 +83,9 @@ Throws errors from the factory with stack traces
 sub factory_error {
     my $class = shift;
     my $err   = shift;
+
     # start the stacktrace where we called make_object()
-    local $Carp::CarpLevel = $Carp::CarpLevel+2;
+    local $Carp::CarpLevel = $Carp::CarpLevel + 2;
     Carp::confess "$err\n", @_;
 }
 

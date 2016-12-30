@@ -8,7 +8,12 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA user as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw( active avatarUrls displayName emailAddress key name self timeZone));
+use Readonly;
+
+Readonly my @ACCESSORS = qw( active avatarUrls displayName emailAddress key
+                             name self timeZone );
+
+__PACKAGE__->mk_data_ro_accessors( @ACCESSORS );
 
 1;
 

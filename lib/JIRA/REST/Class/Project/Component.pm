@@ -8,7 +8,7 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a component of a JIRA project as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw( id isAssigneeTypeValid name self ));
+__PACKAGE__->mk_data_ro_accessors( qw( id isAssigneeTypeValid name self ) );
 
 1;
 

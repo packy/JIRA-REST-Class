@@ -8,16 +8,24 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents a JIRA project as an object.
 
-__PACKAGE__->mk_data_ro_accessors(qw( avatarUrls expand id key name
-                                      projectTypeKey self ));
+use Readonly;
 
-for my $field (qw/ category assigneeType components description
-                   issueTypes subtaskIssueTypes lead roles versions /) {
-    __PACKAGE__->mk_lazy_ro_accessor($field, sub {
-                                         my $self = shift;
-                                         $self->_do_lazy_load(@_);
-                                         $self->{$field};
-                                     });
+Readonly my @DATA => qw( avatarUrls expand id key name projectTypeKey self );
+
+__PACKAGE__->mk_data_ro_accessors( @DATA );
+
+Readonly my @LAZY => qw( category assigneeType components description
+                         issueTypes subtaskIssueTypes lead roles versions );
+
+for my $field ( @LAZY ) {
+    __PACKAGE__->mk_lazy_ro_accessor(
+        $field,
+        sub {
+            my $self = shift;
+            $self->_do_lazy_load( @_ );
+            $self->{$field};
+        }
+    );
 }
 
 #
@@ -37,36 +45,45 @@ for my $field (qw/ category assigneeType components description
 #
 
 sub _do_lazy_load {
-    my $self  = shift;
+    my $self = shift;
 
-    (my $url = $self->self) =~ s{.*/project}{/project};
-    my $data = $self->jira->get($url);
+    ( my $url = $self->self ) =~ s{.*/project}{/project};
+    my $data = $self->jira->get( $url );
 
     $self->{assigneeType} = $data->{assigneeType};
 
-    $self->{components} = [ map {
-        $self->make_object('projectcomp', { data => $_ });
-    } @{ $data->{components} } ];
+    $self->{components} = [ ##
+        map { ##
+            $self->make_object( 'projectcomp', { data => $_ } );
+        } @{ $data->{components} }
+    ];
 
     $self->{description} = $data->{description};
 
-    $self->{issueTypes} = [ map {
-        $self->make_object('issuetype', { data => $_ });
-    } @{ $data->{issueTypes} } ];
+    $self->{issueTypes} = [ ##
+        map { ##
+            $self->make_object( 'issuetype', { data => $_ } );
+        } @{ $data->{issueTypes} }
+    ];
 
-    $self->{subtaskIssueTypes} = [ grep {
-        $_->subtask
-    } @{ $self->{issueTypes} } ];
+    $self->{subtaskIssueTypes} = [ ##
+        grep { ##
+            $_->subtask
+        } @{ $self->{issueTypes} }
+    ];
 
-    $self->{lead} = $self->make_object('user', { data => $data->{lead} });
+    $self->{lead} = $self->make_object( 'user', { data => $data->{lead} } );
 
     $self->{roles} = $data->{roles};
 
-    $self->{versions} = [ map {
-        my $v = $self->make_object('projectvers', { data => $_ });
-        $self->{version_hash}->{$v->id} = $self->{version_hash}->{$v->name} = $v;
-        $v;
-    } @{ $data->{versions} } ];
+    $self->{versions} = [ ##
+        map { ##
+            my $v = $self->make_object( 'projectvers', { data => $_ } );
+            $self->{version_hash}->{ $v->id }
+                = $self->{version_hash}->{ $v->name } = $v;
+            $v;
+        } @{ $data->{versions} }
+    ];
 
     foreach my $field ( @_ ) {
         $self->{lazy_loaded}->{$field} = 1;
@@ -138,13 +155,15 @@ Returns the metadata associated with this project.
 sub metadata {
     my $self = shift;
 
-    unless (defined $self->{metadata}) {
-        my ($first_issue) = $self->jira->issues({
-            jql => "project = " . $self->key,
-            maxResults => 1,
-        });
+    unless ( defined $self->{metadata} ) {
+        my ( $first_issue ) = $self->jira->issues(
+            {
+                jql        => "project = " . $self->key,
+                maxResults => 1,
+            }
+        );
         my $issuekey = $first_issue->key;
-        $self->{metadata} = $self->jira->get("/issue/$issuekey/editmeta");
+        $self->{metadata} = $self->jira->get( "/issue/$issuekey/editmeta" );
     }
 
     return $self->{metadata};
@@ -156,7 +175,7 @@ Returns a list of the allowed values for the 'components' field in the project.
 
 =cut
 
-sub allowed_components   { shift->allowed_field_values('components', @_);  }
+sub allowed_components { shift->allowed_field_values( 'components', @_ ); }
 
 =accessor B<allowed_versions>
 
@@ -164,7 +183,7 @@ Returns a list of the allowed values for the 'versions' field in the project.
 
 =cut
 
-sub allowed_versions     { shift->allowed_field_values('versions', @_); }
+sub allowed_versions { shift->allowed_field_values( 'versions', @_ ); }
 
 =accessor B<allowed_fix_versions>
 
@@ -172,7 +191,7 @@ Returns a list of the allowed values for the 'fixVersions' field in the project.
 
 =cut
 
-sub allowed_fix_versions { shift->allowed_field_values('fixVersions', @_); }
+sub allowed_fix_versions { shift->allowed_field_values( 'fixVersions', @_ ); }
 
 =accessor B<allowed_issue_types>
 
@@ -180,7 +199,7 @@ Returns a list of the allowed values for the 'issuetype' field in the project.
 
 =cut
 
-sub allowed_issue_types  { shift->allowed_field_values('issuetype', @_);   }
+sub allowed_issue_types { shift->allowed_field_values( 'issuetype', @_ ); }
 
 =accessor B<allowed_priorities>
 
@@ -188,7 +207,7 @@ Returns a list of the allowed values for the 'priority' field in the project.
 
 =cut
 
-sub allowed_priorities   { shift->allowed_field_values('priority', @_);    }
+sub allowed_priorities { shift->allowed_field_values( 'priority', @_ ); }
 
 =internal_method B<allowed_field_values> FIELD_NAME
 
@@ -200,9 +219,8 @@ sub allowed_field_values {
     my $self = shift;
     my $name = shift;
 
-    my @list = map {
-        $_->{name}
-    } @{ $self->field_metadata($name)->{allowedValues} };
+    my @list = map { $_->{name} }
+        @{ $self->field_metadata( $name )->{allowedValues} };
 
     return @list;
 }
@@ -214,14 +232,13 @@ Boolean indicating whether there is metadata for a given field in the project. R
 =cut
 
 sub field_metadata_exists {
-    my $self = shift;
-    my $name = shift;
+    my $self   = shift;
+    my $name   = shift;
     my $fields = $self->metadata->{fields};
     return 1 if exists $fields->{$name};
-    my $name2 = $self->field_name($name);
-    return (exists $fields->{$name2} ? 1 : 0);
+    my $name2 = $self->field_name( $name );
+    return ( exists $fields->{$name2} ? 1 : 0 );
 }
-
 
 =internal_method B<field_metadata> FIELD_NAME
 
@@ -230,14 +247,14 @@ Looks for metadata under either a field's key or name in the project. Read-only.
 =cut
 
 sub field_metadata {
-    my $self = shift;
-    my $name = shift;
+    my $self   = shift;
+    my $name   = shift;
     my $fields = $self->metadata->{fields};
-    if (exists $fields->{$name}) {
+    if ( exists $fields->{$name} ) {
         return $fields->{$name};
     }
-    my $name2 = $self->field_name($name);
-    if (exists $fields->{$name2}) {
+    my $name2 = $self->field_name( $name );
+    if ( exists $fields->{$name2} ) {
         return $fields->{$name2};
     }
     return;
@@ -253,12 +270,12 @@ sub field_name {
     my $self = shift;
     my $name = shift;
 
-    unless ($self->{field_names}) {
+    unless ( $self->{field_names} ) {
         my $data = $self->metadata->{fields};
 
-        $self->{field_names} = { map {
-            $data->{$_}->{name} => $_
-        } keys %$data };
+        $self->{field_names} = { ##
+            map { $data->{$_}->{name} => $_ } keys %$data
+        };
     }
 
     return $self->{field_names}->{$name};
@@ -270,22 +287,23 @@ This object represents a JIRA project as an object.  It is overloaded so it retu
 
 =cut
 
+#<<<
 use overload
-    '""'   => sub { shift->key },
-    '0+'   => sub { shift->id  },
-    '<=>'  => sub {
-        my($A, $B) = @_;
+    '""'  => sub { shift->key },
+    '0+'  => sub { shift->id },
+    '<=>' => sub {
+        my ( $A, $B ) = @_;
         my $AA = ref $A ? $A->id : $A;
         my $BB = ref $B ? $B->id : $B;
-        $AA <=> $BB
+        $AA <=> $BB;
     },
-    'cmp'  => sub {
-        my($A, $B) = @_;
+    'cmp' => sub {
+        my ( $A, $B ) = @_;
         my $AA = ref $A ? $A->name : $A;
         my $BB = ref $B ? $B->name : $B;
-        $AA cmp $BB
+        $AA cmp $BB;
     };
-
+#>>>
 
 1;
 

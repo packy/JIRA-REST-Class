@@ -8,7 +8,7 @@ use JIRA::REST::Class::Version qw( $VERSION );
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class> that represents the category of an issue's status.
 
-__PACKAGE__->mk_data_ro_accessors(qw/ name colorName id key self /);
+__PACKAGE__->mk_data_ro_accessors( qw/ name colorName id key self / );
 
 1;
 

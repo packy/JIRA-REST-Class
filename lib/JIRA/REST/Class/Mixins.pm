@@ -16,27 +16,28 @@ use Scalar::Util qw( blessed reftype );
 sub jira {
     my $self  = shift;
     my $args  = shift;
-    my $class = ref $self ? ref($self) : $self;
+    my $class = ref $self ? ref( $self ) : $self;
 
-    if (blessed $self) {
+    if ( blessed $self ) {
+
         # if we have an object, return it!
         return $self->{jira} if $self->{jira};
 
-        if (!$args && $self->{args}) {
+        if ( !$args && $self->{args} ) {
             $args = $self->{args};
         }
 
         # if we have arguments, call ourself using
         # the class name with those args, and cache the result
-        if ($args) {
-            $self->{jira}      = $class->jira($args);
+        if ( $args ) {
+            $self->{jira}      = $class->jira( $args );
             $self->{jira_rest} = $self->{jira}->{jira_rest};
             return $self->{jira};
         }
     }
 
     # called with just the class name
-    return JIRA::REST::Class->new($args);
+    return JIRA::REST::Class->new( $args );
 }
 
 #---------------------------------------------------------------------------
@@ -74,24 +75,25 @@ isa_ok($jira->REST_CLIENT, 'REST::Client', 'JIRA::REST::Class->REST_CLIENT');
 sub factory {
     my $self  = shift;
     my $args  = shift;
-    my $class = ref $self ? ref($self) : $self;
+    my $class = ref $self ? ref( $self ) : $self;
 
-    if (blessed $self) {
+    if ( blessed $self ) {
+
         # if we have a factory, return it!
-        if ($self->{factory}) {
+        if ( $self->{factory} ) {
             return $self->{factory};
         }
 
         # if we have arguments, call ourself using
         # the class name with those args, and cache the result
-        if ($args) {
-            $self->{factory} = $class->factory($args);
+        if ( $args ) {
+            $self->{factory} = $class->factory( $args );
             return $self->{factory};
         }
     }
 
     # called with just the class name
-    return JIRA::REST::Class::Factory->new('factory', { args => $args });
+    return JIRA::REST::Class::Factory->new( 'factory', { args => $args } );
 }
 
 #---------------------------------------------------------------------------
@@ -118,11 +120,12 @@ ok(JIRA::REST::Class::Mixins->obj_isa($factory, 'factory'),
 #---------------------------------------------------------------------------
 
 sub JIRA_REST {
-    my $self = shift;
-    my $args = shift;
-    my $class = ref $self ? ref($self) : $self;
+    my $self  = shift;
+    my $args  = shift;
+    my $class = ref $self ? ref( $self ) : $self;
 
-    if (blessed $self) {
+    if ( blessed $self ) {
+
         # method called on a class object
 
         # if we have a copy of the JIRA::REST object, return it!
@@ -130,31 +133,31 @@ sub JIRA_REST {
 
         # if we have arguments, call ourself using
         # the class name with those args, and cache the result
-        return $self->{jira_rest} = $class->JIRA_REST($args)
+        return $self->{jira_rest} = $class->JIRA_REST( $args )
             if $args;
     }
 
     # called with just the class name
 
     if ( _JIRA_REST_version_has_named_parameters() ) {
-        return JIRA::REST->new($args);
+        return JIRA::REST->new( $args );
     }
 
     # still support the old style arguments for JIRA::REST
-    my $jira_rest = JIRA::REST->new($args->{url},
-                                    $args->{username},
-                                    $args->{password},
-                                    $args->{rest_client_config});
+    my $jira_rest = JIRA::REST->new(
+        $args->{url},      $args->{username},
+        $args->{password}, $args->{rest_client_config}
+    );
 
     my $rest = $jira_rest->{rest};
     my $ua   = $rest->getUseragent;
-    $ua->ssl_opts(SSL_verify_mode => 0, verify_hostname => 0)
+    $ua->ssl_opts( SSL_verify_mode => 0, verify_hostname => 0 )
         if $args->{ssl_verify_none};
 
-    unless ($args->{username} && $args->{password}) {
-        if (my $auth = $rest->{_headers}->{Authorization}) {
-            my(undef, $encoded) = split /\s+/, $auth;
-            ($args->{username}, $args->{password}) =
+    unless ( $args->{username} && $args->{password} ) {
+        if ( my $auth = $rest->{_headers}->{Authorization} ) {
+            my ( undef, $encoded ) = split /\s+/, $auth;
+            ( $args->{username}, $args->{password} ) =  #
                 split /:/, decode_base64 $encoded;
         }
     }
@@ -169,71 +172,71 @@ sub _JIRA_REST_version {
         # if VERSION throws an exception
         local $SIG{__DIE__} = undef;
 
-        JIRA::REST->VERSION && JIRA::REST->VERSION($version);
+        JIRA::REST->VERSION && JIRA::REST->VERSION( $version );
     };
 }
 
 sub _JIRA_REST_version_has_named_parameters {
-    state $retval = _JIRA_REST_version(0.017);
+    state $retval = _JIRA_REST_version( 0.017 );
     return $retval;
 }
 
 sub _JIRA_REST_version_has_separate_path {
-    state $retval = _JIRA_REST_version(0.015);
+    state $retval = _JIRA_REST_version( 0.015 );
     return $retval;
 }
 
 sub REST_CLIENT { shift->JIRA_REST->{rest} }
 sub JSON        { shift->JIRA_REST->{json} }
-sub make_object { shift->factory->make_object(@_) }
-sub make_date   { shift->factory->make_date(@_) }
-sub class_for   { shift->factory->get_factory_class(@_) }
+sub make_object { shift->factory->make_object( @_ ) }
+sub make_date   { shift->factory->make_date( @_ ) }
+sub class_for   { shift->factory->get_factory_class( @_ ) }
 
-sub obj_isa  {
-    my ($self, $obj, $type) = @_;
+sub obj_isa {
+    my ( $self, $obj, $type ) = @_;
     return unless blessed $obj;
-    my $class = $self->class_for($type);
+    my $class = $self->class_for( $type );
     $obj->isa( $class );
 }
 
 sub name_for_user {
-    my($self, $user) = @_;
-    return $self->obj_isa($user, 'user') ? $user->name : $user;
+    my ( $self, $user ) = @_;
+    return $self->obj_isa( $user, 'user' ) ? $user->name : $user;
 }
 
 sub key_for_issue {
-    my($self, $issue) = @_;
-    return $self->obj_isa($issue, 'issue') ? $issue->key : $issue;
+    my ( $self, $issue ) = @_;
+    return $self->obj_isa( $issue, 'issue' ) ? $issue->key : $issue;
 }
 
 sub find_link_name_and_direction {
-    my ($self, $link, $dir) = @_;
+    my ( $self, $link, $dir ) = @_;
 
     return unless defined $link;
 
     # determine the link directon, if provided. defaults to inward.
-    $dir = ($dir && $dir =~ /out(?:ward)?/) ? 'outward' : 'inward';
+    $dir = ( $dir && $dir =~ /out(?:ward)?/ ) ? 'outward' : 'inward';
 
     # if we were passed a link type object, return
     # the name and the direction we were given
-    if ( $self->obj_isa($link, 'linktype') ) {
+    if ( $self->obj_isa( $link, 'linktype' ) ) {
         return $link->name, $dir;
     }
 
     # search through the link types
- # work in progress
- #   my @types = $self->jira->link_types;
- #   foreach my $type ( @types ) {
- #       if (lc $link eq lc $type->inward) {
- #           return $type->name, 'inward';
- #       }
- #       if (lc $link eq lc $type->outward) {
- #           return $type->name, 'outward';
- #       }
- #       if (lc $link eq lc $type->name) {
- #           return $type->name, $dir;
- #       }
- #   }
+    # work in progress
+    #   my @types = $self->jira->link_types;
+    #   foreach my $type ( @types ) {
+    #       if (lc $link eq lc $type->inward) {
+    #           return $type->name, 'inward';
+    #       }
+    #       if (lc $link eq lc $type->outward) {
+    #           return $type->name, 'outward';
+    #       }
+    #       if (lc $link eq lc $type->name) {
+    #           return $type->name, $dir;
+    #       }
+    #   }
 
     # we didn't find anything, so just return what we were passed
     return $link, $dir;
@@ -244,18 +247,18 @@ sub find_link_name_and_direction {
 sub dump {
     my $self = shift;
     my $result;
-    if (@_) {
+    if ( @_ ) {
         $result = $self->cosmetic_copy( @_ );
     }
     else {
         $result = $self->cosmetic_copy( $self );
     }
-    return ref($result) ? Dumper($result) : $result;
+    return ref( $result ) ? Dumper( $result ) : $result;
 }
 
 sub cosmetic_copy {
-    shift; # we don't need $self
-    return __cosmetic_copy(@_, 'top');
+    shift;  # we don't need $self
+    return __cosmetic_copy( @_, 'top' );
 }
 
 #---------------------------------------------------------------------------
@@ -290,46 +293,46 @@ is_deeply( $copy, [
 
 #---------------------------------------------------------------------------
 
-
 sub __cosmetic_copy {
     my $thing = shift;
     my $top   = pop;
 
-    if (not ref $thing) {
+    if ( not ref $thing ) {
         return $thing;
     }
 
-    my $hash_copy = sub {};
+    my $hash_copy = sub { };
 
     if ( my $class = blessed $thing ) {
-        if ($class eq 'JSON::PP::Boolean') {
+        if ( $class eq 'JSON::PP::Boolean' ) {
             return $thing ? 'JSON::PP::true' : 'JSON::PP::false';
         }
-        elsif ($class eq 'JSON') {
+        elsif ( $class eq 'JSON' ) {
             return "$thing";
         }
-        elsif ($class eq 'REST::Client') {
+        elsif ( $class eq 'REST::Client' ) {
             return '%s->host(%s)', $class, $thing->getHost;
         }
-        elsif ($class eq 'DateTime') {
+        elsif ( $class eq 'DateTime' ) {
             return "DateTime(  $thing  )";
         }
-        elsif ($top) {
-            if (reftype $thing eq 'ARRAY') {
-                chomp ( my $data = Dumper( __array_copy($thing) ) );
+        elsif ( $top ) {
+            if ( reftype $thing eq 'ARRAY' ) {
+                chomp( my $data = Dumper( __array_copy( $thing ) ) );
                 return "bless( $data => $class )";
             }
-            elsif (reftype $thing eq 'HASH') {
-                chomp ( my $data = Dumper( __hash_copy($thing) ) );
+            elsif ( reftype $thing eq 'HASH' ) {
+                chomp( my $data = Dumper( __hash_copy( $thing ) ) );
                 return "bless( $data => $class )";
             }
-            return Dumper($thing);
+            return Dumper( $thing );
         }
         else {
             my $fallback;
+
             # see if the object has any of these methods
-            foreach my $method (qw/ name key id /) {
-                if ( $thing->can($method) ) {
+            foreach my $method ( qw/ name key id / ) {
+                if ( $thing->can( $method ) ) {
                     my $value = $thing->$method;
 
                     # if the method returned a value, great!
@@ -347,30 +350,27 @@ sub __cosmetic_copy {
         }
     }
 
-    if (ref $thing eq 'SCALAR') {
+    if ( ref $thing eq 'SCALAR' ) {
         return $$thing;
     }
-    elsif (ref $thing eq 'ARRAY') {
-        return __array_copy($thing);
+    elsif ( ref $thing eq 'ARRAY' ) {
+        return __array_copy( $thing );
     }
-    elsif (ref $thing eq 'HASH') {
-        return __hash_copy($thing);
+    elsif ( ref $thing eq 'HASH' ) {
+        return __hash_copy( $thing );
     }
     return $thing;
 }
 
 sub __array_copy {
     my $thing = shift;
-    return [ map { __cosmetic_copy($_) } @{$thing} ];
+    return [ map { __cosmetic_copy( $_ ) } @$thing ];
 }
 
 sub __hash_copy {
     my $thing = shift;
-    return +{
-        map { $_ => __cosmetic_copy($thing->{$_}) } keys %{$thing}
-    };
+    return +{ map { $_ => __cosmetic_copy( $thing->{$_} ) } keys %$thing };
 }
-
 
 ###########################################################################
 #
@@ -396,37 +396,39 @@ sub _get_known_args {
     my @args = @_;
 
     # get the package->name of the sub that called US
-    my $sub = $self->__subname(caller(1));
+    my $sub = $self->__subname( caller( 1 ) );
 
     # if we croak, croak from the perspective of our CALLER's caller
     local $Carp::CarpLevel = $Carp::CarpLevel + 2;
 
     # $in is an arrayref with a single hashref in it
-    if (@$in == 1 && ref $$in[0] && ref $$in[0] eq 'HASH') {
+    if ( @$in == 1 && ref $$in[0] && ref $$in[0] eq 'HASH' ) {
+
         # copy that hashref into $in
-        $in = clone($in->[0]);
+        $in = clone( $in->[0] );
 
         # moving arguments using the semi-magical hash reference slice
         @{$out}{@args} = delete @{$in}{@args};
 
         # if there are leftover keys
-        if (keys %$in) {
-            my $arguments = 'argument' . (keys %$in == 1 ? q{} : q{s});
+        if ( keys %$in ) {
+            my $arguments = 'argument' . ( keys %$in == 1 ? q{} : q{s} );
 
             croak "$sub: unknown $arguments - "
-                . $self->_quoted_list(sort keys %$in);
+                . $self->_quoted_list( sort keys %$in );
         }
     }
     else {
         # if there aren't more arguments than we have names for
-        if (@$in <= @args) {
+        if ( @$in <= @args ) {
+
             # copy arguments positionally
             @{$out}{@args} = @$in;
         }
         else {
             my $got  = scalar @$in;
             my $max  = scalar @args;
-            my $list = $self->_quoted_list(@args);
+            my $list = $self->_quoted_list( @args );
 
             croak "$sub: too many arguments - got $got, max $max ($list)";
         }
@@ -523,18 +525,19 @@ sub _check_required_args {
     my $args = shift;
     my @args = @_;
 
-    while ( my($arg, $err) = splice @args, 0, 2 ) {
-        next if exists  $args->{$arg}
-             && defined $args->{$arg}
-             && length  $args->{$arg};
+    while ( my ( $arg, $err ) = splice @args, 0, 2 ) {
+        next
+            if exists $args->{$arg}
+            && defined $args->{$arg}
+            && length $args->{$arg};
 
         # get the package->name of the sub that called US
-        my $sub = $self->__subname(caller(1));
+        my $sub = $self->__subname( caller( 1 ) );
 
         # croak from the perspective of our CALLER's caller
         local $Carp::CarpLevel = $Carp::CarpLevel + 2;
 
-        croak "$sub: ".$err;
+        croak "$sub: " . $err;
     }
 }
 
@@ -569,10 +572,10 @@ throws_ok( sub { test_missing_req_args() },
 sub _croakmsg {
     my $self = shift;
     my $msg  = shift;
-    my $args = @_ ? q{(}.join(q{, },@_).q{)} : q{};
+    my $args = @_ ? q{(} . join( q{, }, @_ ) . q{)} : q{};
 
     # get the package->name of the sub that called US
-    my $sub = $self->__subname(caller(1));
+    my $sub = $self->__subname( caller( 1 ) );
 
     return join q{ }, "$sub$args:", $msg;
 }
@@ -613,7 +616,7 @@ is( test_croakmsg_args(),
 #
 sub _quoted_list {
     my $self = shift;
-    return q{'} . join(q{', '}, @_) . q{'};
+    return q{'} . join( q{', '}, @_ ) . q{'};
 }
 
 #
@@ -622,8 +625,8 @@ sub _quoted_list {
 #   returns 'Some::Pkg->subname'
 #
 sub __subname {
-    my($self, @callerN) = @_;
-    (my $sub = $callerN[3]) =~ s/(.*)::([^:]+)$/$1->$2/;
+    my ( $self, @callerN ) = @_;
+    ( my $sub = $callerN[3] ) =~ s/(.*)::([^:]+)$/$1->$2/;
     return $sub;
 }
 
