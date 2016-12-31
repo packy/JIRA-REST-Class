@@ -4,11 +4,15 @@ AUTHORDEPS=deps/author-$(shell hostname -s)
 BUILDLIB=$(BASE)/build/lib
 TESTLIB=$(BUILDLIB):$(BASE)/build/t/lib
 
-build: build/Makefile.PL
+build: deps/last_build
 
-build/Makefile.PL: $(FILES) authordeps
+deps/last_build: $(FILES) $(AUTHORDEPS)
 	dzil build --in build --notgz | grep -v 'Skipping: no "our'
-	dzil listdeps --missing | cpanm
+	if ! diff build/META.json deps/META.json 2>/dev/null; then \
+            dzil listdeps --missing | cpanm; \
+            cp build/META.json deps/META.json; \
+        fi
+	touch deps/last_build
 
 author: build
 	cd build && export PERL5LIB=$(BUILDLIB) && \
@@ -24,11 +28,8 @@ vtest: build
 	cd build && export PERL5LIB=$(TESTLIB) && prove -crv t
 
 .PHONY: pod
-pod:
-	dzil build --in build --notgz | grep -v 'Skipping: no "our'
+pod: build
 	rm html/*; scripts/check_pod.pl; open html/Class.html
-
-authordeps: $(AUTHORDEPS)
 
 $(AUTHORDEPS): dist.ini weaver.ini
 	dzil authordeps --missing | cpanm
