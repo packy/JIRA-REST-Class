@@ -29,7 +29,7 @@ The version of the L<JIRA::REST::Class|JIRA::REST::Class> module.
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head2 $SOURCE
 
