@@ -1,0 +1,58 @@
+---
+abstract: 'An OO Class module built atop L<JIRA::REST|JIRA::REST> for dealing with JIRA issues and their data as objects.'
+author:
+  - 'Packy Anderson <packy@cpan.org>'
+build_requires:
+  ExtUtils::MakeMaker: '0'
+  File::Basename: '0'
+  File::Slurp: '0'
+  File::Spec: '0'
+  File::Spec::Functions: '0'
+  Getopt::Long: '0'
+  HTTP::Server::Simple::CGI: '0'
+  IO::Socket::INET: '0'
+  JSON: '0'
+  JSON::PP: '0'
+  Log::Any: '0'
+  Log::Any::Adapter: '0'
+  Module::Load: '0'
+  REST::Client: '0'
+  Test::Deep: '0'
+  Test::Exception: '0'
+  Test::More: '0'
+  perl: v5.10.0
+configure_requires:
+  ExtUtils::MakeMaker: '0'
+  perl: '5.010'
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 6.008, CPAN::Meta::Converter version 2.150010'
+license: artistic_2
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: JIRA-REST-Class
+requires:
+  Carp: '0'
+  Class::Accessor::Fast: '0'
+  Class::Factory::Enhanced: '0'
+  Clone::Any: '0'
+  Contextual::Return: '0'
+  Data::Dumper::Concise: '0'
+  DateTime::Format::Strptime: '0'
+  Exporter: '0'
+  JIRA::REST: '0'
+  MIME::Base64: '0'
+  Readonly: '0'
+  Scalar::Util: '0'
+  Sub::Name: '0'
+  Try::Tiny: '0'
+  parent: '0'
+  perl: v5.10.0
+resources:
+  bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=JIRA-REST-Class
+  homepage: http://blogs.perl.org/users/packy_anderson/2016/12/jira-rest-class.html
+  repository: https://github.com/packy/JIRA-REST-Class.git
+version: '0.05'
+x_contributors:
+  - 'Alexey Melezhik <melezhik@gmail.com>'
+x_serialization_backend: 'YAML::Tiny version 1.69'

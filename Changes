@@ -1,0 +1,39 @@
+0.05      2016-12-31 15:41:31-05:00 America/New_York
+
+     Supportability release - changes to documentation and testing
+
+     Ran code through Perl::Tidy and Perl::Critic
+
+     Change testing code to no look for Log::Any::Proxy unless the tests are
+     being run in a mode that writes to a log.
+
+     Modified a test that is failing on FreeBSD to return more information.
+
+     Cleaned up POD.
+
+0.04      2016-12-24 22:44:46-05:00 America/New_York
+
+     Update a lot of the testing code, and start using Inline::Test.
+
+     Moved to using JIRA::REST::Class::Version as the source for the
+     module's version number.
+
+     Fixed pattern problem that was causing dates to not become
+     DataTime objects.
+
+     Added a JIRA::REST::Class::Issue::Comment object type.
+
+0.03      2016-12-14 23:56:06-05:00 America/New_York
+
+     Fixed the tests that were breaking on other systems (hopefully),
+     added a method to allow uploading of files from data in memory.
+
+0.02      2016-12-06 23:43:16-05:00 America/New_York
+
+     Reworked Issue->add_subtask() to automatically detect the project's
+     subtask type, added a Project->subtaskIssueTypes() method, POD
+     corrections, fixed compile problem with some test cases.
+
+0.01      2016-12-05 02:30:23-05:00 America/New_York
+
+     Initial release to CPAN.
