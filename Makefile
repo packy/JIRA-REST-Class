@@ -20,11 +20,11 @@ author: build
 	RELEASE_TESTING=1 prove xt/release/ 2>&1
 
 test: build
-	./deps.pl build/META.json test missing | cpanm
+	scripts/deps.pl build/META.json test missing | cpanm
 	cd build && export PERL5LIB=$(TESTLIB) && prove -cr t
 
 vtest: build
-	./deps.pl build/META.json test missing | cpanm
+	scripts/deps.pl build/META.json test missing | cpanm
 	cd build && export PERL5LIB=$(TESTLIB) && prove -crv t
 
 .PHONY: pod
