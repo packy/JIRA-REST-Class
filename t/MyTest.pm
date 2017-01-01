@@ -26,8 +26,7 @@ use lib dirname($0).'/../lib'; # the module itself is under here
 
 use TestServer;
 
-my $port = 7657; # port the test server will listen on
-
+my $port = TestServer_get_unused_port(); # port the test server will listen on
 
 BEGIN {
     autoload Carp::Always # so any die() statements produce stack traces
@@ -38,9 +37,11 @@ my @TestServerSubs = qw( TestServer_setup
                          TestServer_log
                          TestServer_pid
                          TestServer_is_running
+                         TestServer_is_listening
                          TestServer_rest
                          TestServer_test
                          TestServer_stop
+                         TestServer_port
                          TestServer_url );
 
 my @MyTestSubs = qw( chomper can_ok_abstract can_ok_mixins
@@ -144,6 +145,17 @@ sub TestServer_is_listening {
         Timeout  => 5,
     );
     return !defined $sock ? 0 : 1;
+}
+
+sub TestServer_get_unused_port {
+    my $sock = IO::Socket::INET->new(
+        Listen    => 1,
+        LocalAddr => 'localhost',
+        Proto     => 'tcp',
+    );
+    my $p = $sock->sockport;
+    $sock->shutdown(2);
+    return $p;
 }
 
 ###########################################################################
