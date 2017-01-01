@@ -184,7 +184,7 @@ sub _JIRA_REST_version { ## no critic (Capitalization)
 
 sub _JIRA_REST_version_has_named_parameters { ## no critic (Capitalization)
     ## no critic (ProhibitMagicNumbers)
-    state $retval = _JIRA_REST_version( 0.017 );
+    state $retval = _JIRA_REST_version( 0.016 );
     ## use critic
     return $retval;
 }
