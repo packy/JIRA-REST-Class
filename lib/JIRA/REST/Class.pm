@@ -760,7 +760,7 @@ sub proxy { return shift->args->{proxy} }
 
 #---------------------------------------------------------------------------
 
-=begin testing parameter_accessors 8
+=begin testing parameter_accessors 7
 
 try{
     my $test = get_test_client();
@@ -807,9 +807,6 @@ try{
 
     is($test->maxResults, 10,
        q{maxResults() was successfully set by previous call});
-
-    is($url, $test->REST_CLIENT->getHost,
-       'REST_CLIENT->getHost() returns expected value');
 };
 
 =end testing
