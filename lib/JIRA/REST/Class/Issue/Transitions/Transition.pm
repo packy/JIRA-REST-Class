@@ -6,11 +6,43 @@ use 5.010;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual state transition a JIRA issue can go through.
 
 __PACKAGE__->mk_ro_accessors( qw/ issue to / );
 __PACKAGE__->mk_data_ro_accessors( qw/ id name hasScreen fields / );
 __PACKAGE__->mk_field_ro_accessors( qw/ summary / );
+
+=accessor B<issue>
+
+The L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object this is a
+transition for.
+
+=accessor B<to>
+
+The status this transition will move the issue to, represented as a
+L<JIRA::REST::Class::Issue::Status|JIRA::REST::Class::Issue::Status> object.
+
+=accessor B<id>
+
+The id of the transition.
+
+=accessor B<>
+
+The name of the transition.
+
+=accessor B<fields>
+
+The fields for the transition.
+
+=accessor B<summary>
+
+The summary for the transition.
+
+=accessor B<hasScreen>
+
+Heck if I know.
+
+=cut
 
 sub init {
     my $self = shift;

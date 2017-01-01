@@ -8,9 +8,22 @@ use Carp;
 
 use JIRA::REST::Class::Version qw( $VERSION );
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.  Currently assumes a state diagram consisting of Open/In Progress/Resolved/Reopened/In QA/Verified/Closed.
 
 __PACKAGE__->mk_contextual_ro_accessors( qw/ transitions / );
+
+=method B<transitions>
+
+Returns an array of
+L<JIRA::REST::Class::Issue::Transitions::Transition|JIRA::REST::Class::Issue::Transitions::Transition>
+objects representing the transitions the issue can currently go through.
+
+=accessor B<issue>
+
+The L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object this is a
+transition for.
+
+=cut
 
 sub init {
     my $self = shift;
@@ -34,7 +47,7 @@ sub _refresh_transitions {
     return;
 }
 
-=internal_method B<find_transition_named>
+=method B<find_transition_named>
 
 Returns the transition object for the named transition provided.
 
