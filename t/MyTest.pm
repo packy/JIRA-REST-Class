@@ -127,6 +127,10 @@ sub TestServer_url {
     return "http://localhost:$port";
 }
 
+sub TestServer_port {
+    return $port;
+}
+
 sub TestServer_is_listening {
     return 0 unless TestServer_is_running();
 

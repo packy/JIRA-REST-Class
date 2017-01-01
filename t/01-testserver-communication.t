@@ -5,7 +5,7 @@ use warnings;
 use File::Basename;
 use lib dirname($0);
 
-use constant TESTCOUNT => 11;
+use constant TESTCOUNT => 12;
 use JSON;
 use Test::More tests => &TESTCOUNT;
 use Try::Tiny;
@@ -20,6 +20,7 @@ my $log = TestServer_log->clone( prefix => "[pid $$] " );
 # testing connection to server via JIRA::REST::Class
 try {
     my $host   = TestServer_url();
+    my $port   = TestServer_port();
     my $user   = 'username';
     my $pass   = 'password';
     my $client = JIRA::REST::Class->new($host, $user, $pass);
@@ -48,6 +49,10 @@ try {
     ok( TestServer_is_running(),
         sprintf("server is running on PID %s",
                 $pid || 'undef' ));
+
+    ok( TestServer_is_listening(),
+        sprintf("server is listening on port %s",
+                $port || 'undef' ));
 
     is( TestServer_test(), '{"GET":"SUCCESS"}',
         'server test URL works' );
