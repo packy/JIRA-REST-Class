@@ -93,11 +93,13 @@ catch {
 
 isa_ok($jira, 'JIRA::REST::Class', 'JIRA::REST::Class->new');
 
+my $needs_url_regexp = qr/'?url'? argument must be defined/i;
+
 throws_ok(
     sub {
         JIRA::REST::Class->new();
     },
-    qr/URL argument must be defined/,
+    $needs_url_regexp,
     'JIRA::REST::Class->new with no parameters throws an exception',
 );
 
@@ -108,7 +110,7 @@ throws_ok(
             password  => 'pass',
         });
     },
-    qr/URL argument must be defined/,
+    $needs_url_regexp,
     'JIRA::REST::Class->new with no url throws an exception',
 );
 
