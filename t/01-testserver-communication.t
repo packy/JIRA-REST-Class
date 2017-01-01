@@ -19,11 +19,11 @@ my $log = TestServer_log->clone( prefix => "[pid $$] " );
 
 # testing connection to server via JIRA::REST::Class
 try {
-    my $host   = TestServer_url();
+    my $url    = TestServer_url();
     my $port   = TestServer_port();
     my $user   = 'username';
     my $pass   = 'password';
-    my $client = JIRA::REST::Class->new($host, $user, $pass);
+    my $client = JIRA::REST::Class->new($url, $user, $pass);
 
     ok( $client, qq{client returned from new()} );
     ok(
@@ -31,8 +31,8 @@ try {
         "client is blessed as JIRA::REST::Class"
     );
 
-    is( $client->url, $host,
-        "client->url returns JIRA url");
+    is( $client->url, $url,
+        "client->url returns JIRA url $url");
 
     is( $client->username, $user,
         "client->username returns JIRA username");
@@ -55,10 +55,10 @@ try {
                 $port || 'undef' ));
 
     is( TestServer_test(), '{"GET":"SUCCESS"}',
-        'server test URL works' );
+        "$url/test reports success" );
 
     is( TestServer_stop(), '{"quit":"SUCCESS"}',
-        'server stop reports success' );
+        "$url/quit reports success" );
 }
 catch {
     my $error = $_;  # Try::Tiny puts the error in $_
