@@ -86,6 +86,8 @@ sub go {
 
 __END__
 
+=for stopwords hasScreen
+
 {{
     require "pod/PodUtil.pm";
     $OUT .= PodUtil::related_classes($plugin);
