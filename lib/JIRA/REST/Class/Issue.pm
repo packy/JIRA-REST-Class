@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an
 # individual JIRA issue as an object.
@@ -1120,7 +1123,7 @@ JIRA::REST::Class::Issue - A helper class for L<JIRA::REST::Class|JIRA::REST::Cl
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 DESCRIPTION
 
@@ -1552,8 +1555,6 @@ specified.
 
 =item * L<JIRA::REST::Class::User|JIRA::REST::Class::User>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
-
 =item * L<JIRA::REST::Class::Worklog|JIRA::REST::Class::Worklog>
 
 =back
@@ -1564,7 +1565,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

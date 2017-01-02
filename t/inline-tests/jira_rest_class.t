@@ -54,11 +54,13 @@ catch {
 
 isa_ok($jira, 'JIRA::REST::Class', 'JIRA::REST::Class->new');
 
+my $needs_url_regexp = qr/'?url'? argument must be defined/i;
+
 throws_ok(
     sub {
         JIRA::REST::Class->new();
     },
-    qr/URL argument must be defined/,
+    $needs_url_regexp,
     'JIRA::REST::Class->new with no parameters throws an exception',
 );
 
@@ -69,7 +71,7 @@ throws_ok(
             password  => 'pass',
         });
     },
-    qr/URL argument must be defined/,
+    $needs_url_regexp,
     'JIRA::REST::Class->new with no url throws an exception',
 );
 
@@ -265,7 +267,7 @@ is( Test::Builder->new->current_test - $::__tc, 17,
 
 
 
-# =begin testing parameter_accessors 8
+# =begin testing parameter_accessors 7
 $::__tc = Test::Builder->new->current_test;
 {
 try{
@@ -313,13 +315,10 @@ try{
 
     is($test->maxResults, 10,
        q{maxResults() was successfully set by previous call});
-
-    is($url, $test->REST_CLIENT->getHost,
-       'REST_CLIENT->getHost() returns expected value');
 };
 }
-is( Test::Builder->new->current_test - $::__tc, 8,
-	'8 tests were run in the section' );
+is( Test::Builder->new->current_test - $::__tc, 7,
+	'7 tests were run in the section' );
 
 
 

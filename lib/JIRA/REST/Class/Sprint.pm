@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the sprint of a JIRA issue as an object (if you're using L<Atlassian GreenHopper|https://www.atlassian.com/software/jira/agile>).
 
@@ -62,7 +65,7 @@ JIRA::REST::Class::Sprint - A helper class for L<JIRA::REST::Class|JIRA::REST::C
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 READ-ONLY ACCESSORS
 
@@ -89,8 +92,6 @@ version 0.05
 =item * L<JIRA::REST::Class|JIRA::REST::Class>
 
 =item * L<JIRA::REST::Class::Abstract|JIRA::REST::Class::Abstract>
-
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
 
 =back
 
@@ -137,7 +138,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

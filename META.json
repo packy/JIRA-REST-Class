@@ -149,7 +149,7 @@
          "web" : "https://github.com/packy/JIRA-REST-Class"
       }
    },
-   "version" : "0.05",
+   "version" : "0.06",
    "x_contributors" : [
       "Alexey Melezhik <melezhik@gmail.com>"
    ],

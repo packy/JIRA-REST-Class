@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 use Readonly;
 
@@ -107,7 +110,7 @@ JIRA::REST::Class::Issue::Worklog::Item - A helper class for L<JIRA::REST::Class
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 READ-ONLY ACCESSORS
 
@@ -167,8 +170,6 @@ L<DateTime|DateTime> object.
 
 =item * L<JIRA::REST::Class::User|JIRA::REST::Class::User>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
-
 =back
 
 =head1 AUTHOR
@@ -177,7 +178,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

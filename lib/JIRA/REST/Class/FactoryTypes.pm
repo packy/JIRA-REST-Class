@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 #ABSTRACT: The module that exports the list of object types in the L<JIRA::REST::Class|JIRA::REST::Class> module to L<JIRA::REST::Class::Factory|JIRA::REST::Class::Factory> and the testing code.
 
@@ -68,7 +71,7 @@ JIRA::REST::Class::FactoryTypes - The module that exports the list of object typ
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 DESCRIPTION
 
@@ -134,8 +137,6 @@ L<JIRA::REST::Class|JIRA::REST::Class> package.
 
 =item * L<JIRA::REST::Class::User|JIRA::REST::Class::User>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
-
 =back
 
 =head1 AUTHOR
@@ -144,7 +145,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

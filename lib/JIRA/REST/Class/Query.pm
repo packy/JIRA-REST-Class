@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA query as an object.  Attempts to return an array of all results from the query.
 
@@ -47,7 +50,7 @@ JIRA::REST::Class::Query - A helper class for L<JIRA::REST::Class|JIRA::REST::Cl
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 METHODS
 
@@ -70,8 +73,6 @@ objects matching the query.
 
 =item * L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
-
 =back
 
 =head1 AUTHOR
@@ -80,7 +81,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

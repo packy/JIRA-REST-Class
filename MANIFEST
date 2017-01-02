@@ -36,7 +36,6 @@ lib/JIRA/REST/Class/Project/Version.pm
 lib/JIRA/REST/Class/Query.pm
 lib/JIRA/REST/Class/Sprint.pm
 lib/JIRA/REST/Class/User.pm
-lib/JIRA/REST/Class/Version.pm
 perlcritic.rc
 scripts/api-raw
 scripts/check_pod.pl
@@ -47,6 +46,7 @@ stopwords.ini
 t/00-report-prereqs.dd
 t/00-report-prereqs.t
 t/01-testserver-communication.t
+t/99-showlog.t
 t/MyTest.pm
 t/inline-tests/jira_rest_class.t
 t/inline-tests/jira_rest_class_mixins.t

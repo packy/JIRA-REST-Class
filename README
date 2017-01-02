@@ -3,7 +3,7 @@ NAME
     with JIRA issues and their data as objects.
 
 VERSION
-    version 0.05
+    version 0.06
 
 SYNOPSIS
       use JIRA::REST::Class;
@@ -368,8 +368,6 @@ RELATED CLASSES
 
     * JIRA::REST::Class::Query
 
-    * JIRA::REST::Class::Version
-
 SEE ALSO
     *   JIRA::REST
 
@@ -404,7 +402,7 @@ CONTRIBUTOR
     Alexey Melezhik <melezhik@gmail.com>
 
 COPYRIGHT AND LICENSE
-    This software is Copyright (c) 2016 by Packy Anderson.
+    This software is Copyright (c) 2017 by Packy Anderson.
 
     This is free software, licensed under:
 

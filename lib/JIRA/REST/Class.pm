@@ -3,7 +3,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: An OO Class module built atop L<JIRA::REST|JIRA::REST> for dealing with JIRA issues and their data as objects.
 
@@ -93,11 +96,13 @@ sub new {
 #pod
 #pod isa_ok($jira, 'JIRA::REST::Class', 'JIRA::REST::Class->new');
 #pod
+#pod my $needs_url_regexp = qr/'?url'? argument must be defined/i;
+#pod
 #pod throws_ok(
 #pod     sub {
 #pod         JIRA::REST::Class->new();
 #pod     },
-#pod     qr/URL argument must be defined/,
+#pod     $needs_url_regexp,
 #pod     'JIRA::REST::Class->new with no parameters throws an exception',
 #pod );
 #pod
@@ -108,7 +113,7 @@ sub new {
 #pod             password  => 'pass',
 #pod         });
 #pod     },
-#pod     qr/URL argument must be defined/,
+#pod     $needs_url_regexp,
 #pod     'JIRA::REST::Class->new with no url throws an exception',
 #pod );
 #pod
@@ -760,7 +765,7 @@ sub proxy { return shift->args->{proxy} }
 
 #---------------------------------------------------------------------------
 
-#pod =begin testing parameter_accessors 8
+#pod =begin testing parameter_accessors 7
 #pod
 #pod try{
 #pod     my $test = get_test_client();
@@ -807,9 +812,6 @@ sub proxy { return shift->args->{proxy} }
 #pod
 #pod     is($test->maxResults, 10,
 #pod        q{maxResults() was successfully set by previous call});
-#pod
-#pod     is($url, $test->REST_CLIENT->getHost,
-#pod        'REST_CLIENT->getHost() returns expected value');
 #pod };
 #pod
 #pod =end testing
@@ -844,7 +846,7 @@ JIRA::REST::Class - An OO Class module built atop L<JIRA::REST|JIRA::REST> for d
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -1255,8 +1257,6 @@ EVERYTHING.
 
 =item * L<JIRA::REST::Class::Query|JIRA::REST::Class::Query>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
-
 =back
 
 =begin test setup 1
@@ -1304,11 +1304,13 @@ catch {
 
 isa_ok($jira, 'JIRA::REST::Class', 'JIRA::REST::Class->new');
 
+my $needs_url_regexp = qr/'?url'? argument must be defined/i;
+
 throws_ok(
     sub {
         JIRA::REST::Class->new();
     },
-    qr/URL argument must be defined/,
+    $needs_url_regexp,
     'JIRA::REST::Class->new with no parameters throws an exception',
 );
 
@@ -1319,7 +1321,7 @@ throws_ok(
             password  => 'pass',
         });
     },
-    qr/URL argument must be defined/,
+    $needs_url_regexp,
     'JIRA::REST::Class->new with no url throws an exception',
 );
 
@@ -1499,7 +1501,7 @@ try {
 
 =end testing
 
-=begin testing parameter_accessors 8
+=begin testing parameter_accessors 7
 
 try{
     my $test = get_test_client();
@@ -1546,9 +1548,6 @@ try{
 
     is($test->maxResults, 10,
        q{maxResults() was successfully set by previous call});
-
-    is($url, $test->REST_CLIENT->getHost,
-       'REST_CLIENT->getHost() returns expected value');
 };
 
 =end testing
@@ -1599,7 +1598,7 @@ Alexey Melezhik <melezhik@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

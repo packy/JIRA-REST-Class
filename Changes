@@ -1,3 +1,15 @@
+0.06      2017-01-02 14:00:38-05:00 America/New_York
+
+     ANOTHER supportability release - changes to documentation and testing
+
+     Backed out the ill-advised plan of setting $VERSION centrally; thus
+     UN-breaking CPAN.
+
+     Configured the test server to run on a randmized port.
+
+     Fixed code so it works with older JIRA::REST versions.
+
+
 0.05      2016-12-31 15:41:31-05:00 America/New_York
 
      Supportability release - changes to documentation and testing

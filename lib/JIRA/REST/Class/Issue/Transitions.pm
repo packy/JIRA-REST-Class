@@ -4,13 +4,29 @@ use strict;
 use warnings;
 use 5.010;
 
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
+
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.  Currently assumes a state diagram consisting of Open/In Progress/Resolved/Reopened/In QA/Verified/Closed.
+
 use Carp;
 
-use JIRA::REST::Class::Version qw( $VERSION );
-
-# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
-
 __PACKAGE__->mk_contextual_ro_accessors( qw/ transitions / );
+
+#pod =method B<transitions>
+#pod
+#pod Returns an array of
+#pod L<JIRA::REST::Class::Issue::Transitions::Transition|JIRA::REST::Class::Issue::Transitions::Transition>
+#pod objects representing the transitions the issue can currently go through.
+#pod
+#pod =accessor B<issue>
+#pod
+#pod The L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object this is a
+#pod transition for.
+#pod
+#pod =cut
 
 sub init {
     my $self = shift;
@@ -34,7 +50,7 @@ sub _refresh_transitions {
     return;
 }
 
-#pod =internal_method B<find_transition_named>
+#pod =method B<find_transition_named>
 #pod
 #pod Returns the transition object for the named transition provided.
 #pod
@@ -216,13 +232,23 @@ __END__
 
 =head1 NAME
 
-JIRA::REST::Class::Issue::Transitions - A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+JIRA::REST::Class::Issue::Transitions - A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.  Currently assumes a state diagram consisting of Open/In Progress/Resolved/Reopened/In QA/Verified/Closed.
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 METHODS
+
+=head2 B<transitions>
+
+Returns an array of
+L<JIRA::REST::Class::Issue::Transitions::Transition|JIRA::REST::Class::Issue::Transitions::Transition>
+objects representing the transitions the issue can currently go through.
+
+=head2 B<find_transition_named>
+
+Returns the transition object for the named transition provided.
 
 =head2 B<block>
 
@@ -267,11 +293,12 @@ This method takes three unnamed parameters:
     of the state it is transitioning to (defaults to an empty subroutine
     reference).
 
-=head1 INTERNAL METHODS
+=head1 READ-ONLY ACCESSORS
 
-=head2 B<find_transition_named>
+=head2 B<issue>
 
-Returns the transition object for the named transition provided.
+The L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object this is a
+transition for.
 
 =head1 RELATED CLASSES
 
@@ -281,9 +308,9 @@ Returns the transition object for the named transition provided.
 
 =item * L<JIRA::REST::Class::Abstract|JIRA::REST::Class::Abstract>
 
-=item * L<JIRA::REST::Class::Issue::Transitions::Transition|JIRA::REST::Class::Issue::Transitions::Transition>
+=item * L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
+=item * L<JIRA::REST::Class::Issue::Transitions::Transition|JIRA::REST::Class::Issue::Transitions::Transition>
 
 =back
 
@@ -304,7 +331,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

@@ -6,7 +6,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 29;
+plan tests => 28;
 
 my @module_files = (
     'JIRA/REST/Class.pm',
@@ -35,8 +35,7 @@ my @module_files = (
     'JIRA/REST/Class/Project/Version.pm',
     'JIRA/REST/Class/Query.pm',
     'JIRA/REST/Class/Sprint.pm',
-    'JIRA/REST/Class/User.pm',
-    'JIRA/REST/Class/Version.pm'
+    'JIRA/REST/Class/User.pm'
 );
 
 

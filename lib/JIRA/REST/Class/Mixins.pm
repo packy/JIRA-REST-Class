@@ -3,7 +3,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: An mixin class for L<JIRA::REST::Class|JIRA::REST::Class> that other objects can inherit methods from.
 
@@ -184,7 +187,7 @@ sub _JIRA_REST_version { ## no critic (Capitalization)
 
 sub _JIRA_REST_version_has_named_parameters { ## no critic (Capitalization)
     ## no critic (ProhibitMagicNumbers)
-    state $retval = _JIRA_REST_version( 0.017 );
+    state $retval = _JIRA_REST_version( 0.016 );
     ## use critic
     return $retval;
 }
@@ -673,7 +676,7 @@ JIRA::REST::Class::Mixins - An mixin class for L<JIRA::REST::Class|JIRA::REST::C
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 METHODS
 
@@ -781,8 +784,6 @@ EVERYTHING.
 =item * L<JIRA::REST::Class::FactoryTypes|JIRA::REST::Class::FactoryTypes>
 
 =item * L<JIRA::REST::Class::Project|JIRA::REST::Class::Project>
-
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
 
 =back
 
@@ -983,7 +984,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 

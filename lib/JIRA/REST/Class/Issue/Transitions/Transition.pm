@@ -4,13 +4,48 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.06';
+our $SOURCE = 'CPAN';
+## $SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
-# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+# ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual state transition a JIRA issue can go through.
 
 __PACKAGE__->mk_ro_accessors( qw/ issue to / );
 __PACKAGE__->mk_data_ro_accessors( qw/ id name hasScreen fields / );
 __PACKAGE__->mk_field_ro_accessors( qw/ summary / );
+
+#pod =accessor B<issue>
+#pod
+#pod The L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object this is a
+#pod transition for.
+#pod
+#pod =accessor B<to>
+#pod
+#pod The status this transition will move the issue to, represented as a
+#pod L<JIRA::REST::Class::Issue::Status|JIRA::REST::Class::Issue::Status> object.
+#pod
+#pod =accessor B<id>
+#pod
+#pod The id of the transition.
+#pod
+#pod =accessor B<>
+#pod
+#pod The name of the transition.
+#pod
+#pod =accessor B<fields>
+#pod
+#pod The fields for the transition.
+#pod
+#pod =accessor B<summary>
+#pod
+#pod The summary for the transition.
+#pod
+#pod =accessor B<hasScreen>
+#pod
+#pod Heck if I know.
+#pod
+#pod =cut
 
 sub init {
     my $self = shift;
@@ -55,21 +90,53 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Packy Anderson Alexey Melezhik
+=for :stopwords Packy Anderson Alexey Melezhik hasScreen
 
 =head1 NAME
 
-JIRA::REST::Class::Issue::Transitions::Transition - A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.
+JIRA::REST::Class::Issue::Transitions::Transition - A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual state transition a JIRA issue can go through.
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 METHODS
 
 =head2 B<go>
 
 Perform the transition represented by this object on the issue.
+
+=head1 READ-ONLY ACCESSORS
+
+=head2 B<issue>
+
+The L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> object this is a
+transition for.
+
+=head2 B<to>
+
+The status this transition will move the issue to, represented as a
+L<JIRA::REST::Class::Issue::Status|JIRA::REST::Class::Issue::Status> object.
+
+=head2 B<id>
+
+The id of the transition.
+
+=head2 B<>
+
+The name of the transition.
+
+=head2 B<fields>
+
+The fields for the transition.
+
+=head2 B<summary>
+
+The summary for the transition.
+
+=head2 B<hasScreen>
+
+Heck if I know.
 
 =head1 RELATED CLASSES
 
@@ -79,9 +146,9 @@ Perform the transition represented by this object on the issue.
 
 =item * L<JIRA::REST::Class::Abstract|JIRA::REST::Class::Abstract>
 
-=item * L<JIRA::REST::Class::Issue::Status|JIRA::REST::Class::Issue::Status>
+=item * L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue>
 
-=item * L<JIRA::REST::Class::Version|JIRA::REST::Class::Version>
+=item * L<JIRA::REST::Class::Issue::Status|JIRA::REST::Class::Issue::Status>
 
 =back
 
@@ -91,7 +158,7 @@ Packy Anderson <packy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Packy Anderson.
+This software is Copyright (c) 2017 by Packy Anderson.
 
 This is free software, licensed under:
 
