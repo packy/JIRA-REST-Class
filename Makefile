@@ -7,7 +7,7 @@ TESTLIB=$(BUILDLIB):$(BASE)/build/t/lib
 build: deps/last_build
 
 deps/last_build: $(FILES) $(AUTHORDEPS)
-	dzil build --in build --notgz | grep -v 'Skipping: no "our'
+	dzil build --in build --notgz
 	if ! diff build/META.json deps/META.json 2>/dev/null; then \
             dzil listdeps --missing | cpanm; \
             cp build/META.json deps/META.json; \

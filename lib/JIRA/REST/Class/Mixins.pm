@@ -3,7 +3,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.05';
+our $SOURCE = 'CPAN';
+$SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: An mixin class for L<JIRA::REST::Class|JIRA::REST::Class> that other objects can inherit methods from.
 

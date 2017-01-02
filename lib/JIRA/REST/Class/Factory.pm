@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.05';
+our $SOURCE = 'CPAN';
+$SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A factory class for building all the other classes in L<JIRA::REST::Class|JIRA::REST::Class>.
 

@@ -4,11 +4,14 @@ use strict;
 use warnings;
 use 5.010;
 
-use Carp;
-
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.05';
+our $SOURCE = 'CPAN';
+$SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the state transitions a JIRA issue can go through.  Currently assumes a state diagram consisting of Open/In Progress/Resolved/Reopened/In QA/Verified/Closed.
+
+use Carp;
 
 __PACKAGE__->mk_contextual_ro_accessors( qw/ transitions / );
 

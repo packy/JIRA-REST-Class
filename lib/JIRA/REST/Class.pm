@@ -3,7 +3,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use JIRA::REST::Class::Version qw( $VERSION );
+our $VERSION = '0.05';
+our $SOURCE = 'CPAN';
+$SOURCE = 'GitHub';  # COMMENT
+# the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: An OO Class module built atop L<JIRA::REST|JIRA::REST> for dealing with JIRA issues and their data as objects.
 
