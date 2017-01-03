@@ -677,7 +677,7 @@ sub rest_api_url_base {
     my $self = shift;
     if ( $self->_JIRA_REST_version_has_separate_path ) {
         ( my $host = $self->REST_CLIENT->getHost ) =~ s{/$}{}xms;
-        my $path = $self->JIRA_REST->{path};
+        my $path = $self->JIRA_REST->{path} // q{/rest/api/latest};
         return $host . $path;
     }
     else {
