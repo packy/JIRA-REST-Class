@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -677,7 +677,7 @@ sub rest_api_url_base {
     my $self = shift;
     if ( $self->_JIRA_REST_version_has_separate_path ) {
         ( my $host = $self->REST_CLIENT->getHost ) =~ s{/$}{}xms;
-        my $path = $self->JIRA_REST->{path};
+        my $path = $self->JIRA_REST->{path} // q{/rest/api/latest};
         return $host . $path;
     }
     else {
@@ -846,7 +846,7 @@ JIRA::REST::Class - An OO Class module built atop L<JIRA::REST|JIRA::REST> for d
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 

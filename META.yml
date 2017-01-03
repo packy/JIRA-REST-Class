@@ -52,7 +52,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=JIRA-REST-Class
   homepage: http://blogs.perl.org/users/packy_anderson/2016/12/jira-rest-class.html
   repository: https://github.com/packy/JIRA-REST-Class.git
-version: '0.06'
+version: '0.07'
 x_contributors:
   - 'Alexey Melezhik <melezhik@gmail.com>'
 x_serialization_backend: 'YAML::Tiny version 1.69'

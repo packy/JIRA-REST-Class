@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -110,7 +110,7 @@ JIRA::REST::Class::Issue::Worklog::Item - A helper class for L<JIRA::REST::Class
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 READ-ONLY ACCESSORS
 
