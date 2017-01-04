@@ -3,7 +3,7 @@ NAME
     with JIRA issues and their data as objects.
 
 VERSION
-    version 0.07
+    version 0.08
 
 SYNOPSIS
       use JIRA::REST::Class;
@@ -16,18 +16,18 @@ SYNOPSIS
       });
 
       # get issue by key
-      my ($issue) = $jira->issues('MYPROJ-101');
+      my ($issue) = $jira->issues( 'MYPROJ-101' );
 
       # get multiple issues by key
-      my @issues = $jira->issues('MYPROJ-101', 'MYPROJ-102', 'MYPROJ-103');
+      my @issues = $jira->issues( 'MYPROJ-101', 'MYPROJ-102', 'MYPROJ-103' );
 
       # get multiple issues through search
       my @issues =
-          $jira->issues({ jql => q/project = "MYPROJ" and status = "open" });
+          $jira->issues({ jql => q/project = "MYPROJ" and status = "open" / });
 
       # get an iterator for a search
       my $search =
-          $jira->iterator({ jql => q/project = "MYPROJ" and status = "open" });
+          $jira->iterator({ jql => q/project = "MYPROJ" and status = "open" / });
 
       if ( $search->issue_count ) {
           printf "Found %d open issues in MYPROJ:\n", $search->issue_count;

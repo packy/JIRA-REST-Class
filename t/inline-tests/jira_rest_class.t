@@ -77,7 +77,7 @@ throws_ok(
 
 throws_ok(
     sub {
-        JIRA::REST::Class->new('https://jira.example.com/');
+        JIRA::REST::Class->new('http://not.a.good.server.com');
     },
     qr/No credentials found/,
     q{JIRA::REST::Class->new with just url tries to find credentials},
@@ -85,8 +85,7 @@ throws_ok(
 
 lives_ok(
     sub {
-        JIRA::REST::Class->new('https://jira.example.com/',
-                               'user', 'pass');
+        JIRA::REST::Class->new(TestServer_url(), 'user', 'pass');
     },
     q{JIRA::REST::Class->new with url, username, and password does't croak!},
 );

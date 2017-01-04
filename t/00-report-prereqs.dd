@@ -26,6 +26,7 @@ do { my $x = {
                                       'Dist::Zilla::Plugin::MakeMaker' => '0',
                                       'Dist::Zilla::Plugin::Manifest' => '0',
                                       'Dist::Zilla::Plugin::MetaJSON' => '0',
+                                      'Dist::Zilla::Plugin::MetaProvides::Package' => '0',
                                       'Dist::Zilla::Plugin::MetaResources' => '0',
                                       'Dist::Zilla::Plugin::MetaTests' => '0',
                                       'Dist::Zilla::Plugin::MetaYAML' => '0',

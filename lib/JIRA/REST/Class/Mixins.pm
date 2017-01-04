@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -676,7 +676,7 @@ JIRA::REST::Class::Mixins - An mixin class for L<JIRA::REST::Class|JIRA::REST::C
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 METHODS
 

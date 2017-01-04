@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -119,7 +119,7 @@ sub new {
 #pod
 #pod throws_ok(
 #pod     sub {
-#pod         JIRA::REST::Class->new('https://jira.example.com/');
+#pod         JIRA::REST::Class->new('http://not.a.good.server.com');
 #pod     },
 #pod     qr/No credentials found/,
 #pod     q{JIRA::REST::Class->new with just url tries to find credentials},
@@ -127,8 +127,7 @@ sub new {
 #pod
 #pod lives_ok(
 #pod     sub {
-#pod         JIRA::REST::Class->new('https://jira.example.com/',
-#pod                                'user', 'pass');
+#pod         JIRA::REST::Class->new(TestServer_url(), 'user', 'pass');
 #pod     },
 #pod     q{JIRA::REST::Class->new with url, username, and password does't croak!},
 #pod );
@@ -846,7 +845,7 @@ JIRA::REST::Class - An OO Class module built atop L<JIRA::REST|JIRA::REST> for d
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 
@@ -860,18 +859,18 @@ version 0.07
   });
 
   # get issue by key
-  my ($issue) = $jira->issues('MYPROJ-101');
+  my ($issue) = $jira->issues( 'MYPROJ-101' );
 
   # get multiple issues by key
-  my @issues = $jira->issues('MYPROJ-101', 'MYPROJ-102', 'MYPROJ-103');
+  my @issues = $jira->issues( 'MYPROJ-101', 'MYPROJ-102', 'MYPROJ-103' );
 
   # get multiple issues through search
   my @issues =
-      $jira->issues({ jql => q/project = "MYPROJ" and status = "open" });
+      $jira->issues({ jql => q/project = "MYPROJ" and status = "open" / });
 
   # get an iterator for a search
   my $search =
-      $jira->iterator({ jql => q/project = "MYPROJ" and status = "open" });
+      $jira->iterator({ jql => q/project = "MYPROJ" and status = "open" / });
 
   if ( $search->issue_count ) {
       printf "Found %d open issues in MYPROJ:\n", $search->issue_count;
@@ -1327,7 +1326,7 @@ throws_ok(
 
 throws_ok(
     sub {
-        JIRA::REST::Class->new('https://jira.example.com/');
+        JIRA::REST::Class->new('http://not.a.good.server.com');
     },
     qr/No credentials found/,
     q{JIRA::REST::Class->new with just url tries to find credentials},
@@ -1335,8 +1334,7 @@ throws_ok(
 
 lives_ok(
     sub {
-        JIRA::REST::Class->new('https://jira.example.com/',
-                               'user', 'pass');
+        JIRA::REST::Class->new(TestServer_url(), 'user', 'pass');
     },
     q{JIRA::REST::Class->new with url, username, and password does't croak!},
 );

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -236,7 +236,7 @@ JIRA::REST::Class::Issue::Transitions - A helper class for L<JIRA::REST::Class|J
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 METHODS
 

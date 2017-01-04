@@ -65,6 +65,7 @@ on 'develop' => sub {
   requires "Dist::Zilla::Plugin::MakeMaker" => "0";
   requires "Dist::Zilla::Plugin::Manifest" => "0";
   requires "Dist::Zilla::Plugin::MetaJSON" => "0";
+  requires "Dist::Zilla::Plugin::MetaProvides::Package" => "0";
   requires "Dist::Zilla::Plugin::MetaResources" => "0";
   requires "Dist::Zilla::Plugin::MetaTests" => "0";
   requires "Dist::Zilla::Plugin::MetaYAML" => "0";
