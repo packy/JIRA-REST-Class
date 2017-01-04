@@ -119,7 +119,7 @@ throws_ok(
 
 throws_ok(
     sub {
-        JIRA::REST::Class->new(TestServer_url());
+        JIRA::REST::Class->new('http://not.a.good.server.com');
     },
     qr/No credentials found/,
     q{JIRA::REST::Class->new with just url tries to find credentials},
