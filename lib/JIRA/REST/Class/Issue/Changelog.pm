@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -51,7 +51,7 @@ JIRA::REST::Class::Issue::Changelog - A helper class for L<JIRA::REST::Class|JIR
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 METHODS
 

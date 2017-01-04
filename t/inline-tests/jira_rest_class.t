@@ -155,6 +155,7 @@ try {
 }
 catch {
     $results = $_;
+    diag($test->REST_CLIENT->getHost);
 };
 
 my $test1_ok = isa_ok( $results, 'HTTP::Response', $test1_name );
