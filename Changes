@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+     Modify testing to not fail with JIRA::REST 0.014 and earlier due to a
+     trailing slash.
+
 0.07      2017-01-02 23:56:48-05:00 America/New_York
 
      Fix a problem I'm seeing with JIRA::REST 0.016. Dammit, I want clean
