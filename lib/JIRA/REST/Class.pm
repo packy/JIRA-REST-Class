@@ -372,9 +372,10 @@ sub data_upload {
 
     # code cribbed from JIRA::REST
     #
+    my $url      = $self->rest_api_url_base . $args->{url};
     my $rest     = $self->REST_CLIENT;
     my $response = $rest->getUseragent()->post(
-        $self->rest_api_url_base . $args->{url},
+        $url,
         %{ $rest->{_headers} },
         'X-Atlassian-Token' => 'nocheck',
         'Content-Type'      => 'form-data',
@@ -423,6 +424,7 @@ try {
 }
 catch {
     $results = $_;
+    diag($test->REST_CLIENT->getHost);
 };
 
 my $test1_ok = isa_ok( $results, 'HTTP::Response', $test1_name );
@@ -682,7 +684,7 @@ sub rest_api_url_base {
     else {
         my ( $base )
             = $self->REST_CLIENT->getHost =~ m{^(.+?rest/api/[^/]+)/?}xms;
-        return $base;
+        return $base // $self->REST_CLIENT->getHost . '/rest/api/latest';
     }
 }
 
