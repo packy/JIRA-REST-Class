@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use 5.010000;
+use 5.010;
 
 use ExtUtils::MakeMaker;
 
@@ -14,7 +14,7 @@ my %WriteMakefileArgs = (
   },
   "DISTNAME" => "JIRA-REST-Class",
   "LICENSE" => "artistic_2",
-  "MIN_PERL_VERSION" => "5.010000",
+  "MIN_PERL_VERSION" => "5.010",
   "NAME" => "JIRA::REST::Class",
   "PREREQ_PM" => {
     "Carp" => 0,
@@ -27,7 +27,7 @@ my %WriteMakefileArgs = (
     "Exporter" => 0,
     "JIRA::REST" => 0,
     "MIME::Base64" => 0,
-    "Readonly" => 0,
+    "Readonly" => "2.04",
     "Scalar::Util" => 0,
     "Sub::Name" => 0,
     "Try::Tiny" => 0,
@@ -44,15 +44,13 @@ my %WriteMakefileArgs = (
     "IO::Socket::INET" => 0,
     "JSON" => 0,
     "JSON::PP" => 0,
-    "Log::Any" => 0,
-    "Log::Any::Adapter" => 0,
     "Module::Load" => 0,
     "REST::Client" => 0,
     "Test::Deep" => 0,
     "Test::Exception" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.09",
+  "VERSION" => "0.10",
   "test" => {
     "TESTS" => "t/*.t t/inline-tests/*.t"
   }
@@ -79,12 +77,10 @@ my %FallbackPrereqs = (
   "JIRA::REST" => 0,
   "JSON" => 0,
   "JSON::PP" => 0,
-  "Log::Any" => 0,
-  "Log::Any::Adapter" => 0,
   "MIME::Base64" => 0,
   "Module::Load" => 0,
   "REST::Client" => 0,
-  "Readonly" => 0,
+  "Readonly" => "2.04",
   "Scalar::Util" => 0,
   "Sub::Name" => 0,
   "Test::Deep" => 0,

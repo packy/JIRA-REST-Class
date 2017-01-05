@@ -3,7 +3,7 @@ NAME
     with JIRA issues and their data as objects.
 
 VERSION
-    version 0.09
+    version 0.10
 
 SYNOPSIS
       use JIRA::REST::Class;

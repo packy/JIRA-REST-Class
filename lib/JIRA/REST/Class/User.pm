@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA user as an object.
 
-use Readonly;
+use Readonly 2.04;
 
 Readonly my @ACCESSORS => qw( active avatarUrls displayName emailAddress key
                               name self timeZone );
@@ -77,7 +77,7 @@ JIRA::REST::Class::User - A helper class for L<JIRA::REST::Class|JIRA::REST::Cla
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 READ-ONLY ACCESSORS
 

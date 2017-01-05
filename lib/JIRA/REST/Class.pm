@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -12,7 +12,7 @@ our $SOURCE = 'CPAN';
 
 use Carp;
 use Clone::Any qw( clone );
-use Readonly;
+use Readonly 2.04;
 
 use JIRA::REST;
 use JIRA::REST::Class::Factory;
@@ -52,7 +52,7 @@ sub new {
 #pod use File::Basename;
 #pod use lib dirname($0).'/..';
 #pod use MyTest;
-#pod use v5.10;
+#pod use 5.010;
 #pod
 #pod TestServer_setup();
 #pod
@@ -847,7 +847,7 @@ JIRA::REST::Class - An OO Class module built atop L<JIRA::REST|JIRA::REST> for d
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
@@ -1265,7 +1265,7 @@ EVERYTHING.
 use File::Basename;
 use lib dirname($0).'/..';
 use MyTest;
-use v5.10;
+use 5.010;
 
 TestServer_setup();
 

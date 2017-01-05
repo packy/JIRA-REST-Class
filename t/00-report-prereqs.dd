@@ -88,12 +88,12 @@ do { my $x = {
                                       'Exporter' => '0',
                                       'JIRA::REST' => '0',
                                       'MIME::Base64' => '0',
-                                      'Readonly' => '0',
+                                      'Readonly' => '2.04',
                                       'Scalar::Util' => '0',
                                       'Sub::Name' => '0',
                                       'Try::Tiny' => '0',
                                       'parent' => '0',
-                                      'perl' => 'v5.10.0'
+                                      'perl' => '5.010'
                                     }
                     },
        'test' => {
@@ -111,14 +111,12 @@ do { my $x = {
                                    'IO::Socket::INET' => '0',
                                    'JSON' => '0',
                                    'JSON::PP' => '0',
-                                   'Log::Any' => '0',
-                                   'Log::Any::Adapter' => '0',
                                    'Module::Load' => '0',
                                    'REST::Client' => '0',
                                    'Test::Deep' => '0',
                                    'Test::Exception' => '0',
                                    'Test::More' => '0',
-                                   'perl' => 'v5.10.0'
+                                   'perl' => '5.010'
                                  }
                  }
      };

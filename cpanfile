@@ -8,12 +8,12 @@ requires "DateTime::Format::Strptime" => "0";
 requires "Exporter" => "0";
 requires "JIRA::REST" => "0";
 requires "MIME::Base64" => "0";
-requires "Readonly" => "0";
+requires "Readonly" => "2.04";
 requires "Scalar::Util" => "0";
 requires "Sub::Name" => "0";
 requires "Try::Tiny" => "0";
 requires "parent" => "0";
-requires "perl" => "v5.10.0";
+requires "perl" => "5.010";
 
 on 'test' => sub {
   requires "ExtUtils::MakeMaker" => "0";
@@ -26,14 +26,12 @@ on 'test' => sub {
   requires "IO::Socket::INET" => "0";
   requires "JSON" => "0";
   requires "JSON::PP" => "0";
-  requires "Log::Any" => "0";
-  requires "Log::Any::Adapter" => "0";
   requires "Module::Load" => "0";
   requires "REST::Client" => "0";
   requires "Test::Deep" => "0";
   requires "Test::Exception" => "0";
   requires "Test::More" => "0";
-  requires "perl" => "v5.10.0";
+  requires "perl" => "5.010";
 };
 
 on 'test' => sub {

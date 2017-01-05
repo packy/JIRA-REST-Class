@@ -1,7 +1,7 @@
 package TestServer::Plugin;
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use Data::Dumper::Concise;
 use JSON;
@@ -44,7 +44,6 @@ sub response {
     $response   .= "Content-Length: ".length($content)."\r\n";
     $response   .= "\n$content";
     print $response;
-    $server->log->info("RESPONSE:\n".$response);
 }
 
 1;

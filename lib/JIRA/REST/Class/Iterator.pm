@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $SOURCE = 'CPAN';
 ## $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.  Wraps L<JIRA::REST|JIRA::REST>'s L<set_search_iterator|JIRA::REST/"set_search_iterator PARAMS"> and L<next_issue|JIRA::REST/next_issue> methods to make them a bit more object-like.
 
-use Readonly;
+use Readonly 2.04;
 
 Readonly my @ACCESSORS => qw( total fetched iterator_args
                               restart_if_lt_total seen_cache );
@@ -153,7 +153,7 @@ JIRA::REST::Class::Iterator - A helper class for L<JIRA::REST::Class|JIRA::REST:
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 METHODS
 

@@ -1,13 +1,13 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 package Pod::Simple::HTML::PACKY;
 use base qw( Pod::Simple::HTML );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 # needs to return a URL string such
 # http://some.other.com/page.html
