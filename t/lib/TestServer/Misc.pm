@@ -2,7 +2,7 @@ package TestServer::Misc;
 use base qw( TestServer::Plugin );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JSON::PP;
 use Data::Dumper::Concise;
@@ -28,7 +28,7 @@ sub test {
     my $method = $cgi->request_method;
     my $path   = $cgi->path_info;
     $class->response($server, { $method => 'SUCCESS' });
-    $server->log->info("successful $method $path request");
+    say "# successful $method $path request";
 }
 
 sub upload {
@@ -42,8 +42,6 @@ sub upload {
     }
     $retval->{$method} = 'SUCCESS';
     $class->response($server, $retval);
-    $server->log->info("upload info for $file: ".
-                       Dumper($cgi->uploadInfo( $file )));
 }
 
 sub configuration_response {

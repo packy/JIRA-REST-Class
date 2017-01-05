@@ -15,7 +15,6 @@ use MyTest;
 use_ok('JIRA::REST::Class');
 
 TestServer_setup();
-my $log = TestServer_log->clone( prefix => "[pid $$] " );
 
 # testing connection to server via JIRA::REST::Class
 try {

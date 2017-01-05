@@ -2,7 +2,7 @@ package MyTest;
 use base qw( Exporter );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use Carp;
 use Clone::Any qw( clone );
@@ -28,13 +28,7 @@ use TestServer;
 
 my $port = TestServer_get_unused_port(); # port the test server will listen on
 
-BEGIN {
-    autoload Carp::Always # so any die() statements produce stack traces
-        if TestServer::logfile() # but only if we're logging
-}
-
 my @TestServerSubs = qw( TestServer_setup
-                         TestServer_log
                          TestServer_pid
                          TestServer_is_running
                          TestServer_is_listening
@@ -67,34 +61,20 @@ my $pid;
 my $quit = 0;
 
 sub TestServer_setup {
-    my $log = TestServer_log();
 
     try {
         # start the server
-        $log->info('starting server and sending to background');
         $pid = TestServer->new($port)->background();
     };
     unless ($pid) { exit } # error or child fell through
-    $log->info("started server on PID ".$pid);
+    say "# started server on PID $pid";
 }
 
 sub TestServer_stop {
-    my $log = TestServer_log();
-
     if ( TestServer_is_listening() ) {
-        $log->info("Quit request processing");
         my $result = TestServer_rest('GET' => '/quit');
         return $result;
     }
-    $log->info("Quit skipped because server is down");
-}
-
-sub TestServer_log {
-    state $log;
-    unless (defined $log) {
-        $log = TestServer->get_logger( prefix => "[pid $$] " );
-    }
-    return $log;
 }
 
 sub TestServer_pid {
@@ -135,7 +115,6 @@ sub TestServer_port {
 sub TestServer_is_listening {
     return 0 unless TestServer_is_running();
 
-    TestServer_log()->info("testing for port $port");
     # cribbed from IO::Socket::PortState
     # I didn't want to add ANOTHER dependency
     my $sock = IO::Socket::INET->new(
@@ -291,7 +270,6 @@ sub validate_expected_fields {
 sub validate_wrapper_method {
     my ($sub, $expected, $name) = @_;
 
-    TestServer_log->info("starting '$name'");
     my $results;
     try {
         $results = $sub->();
@@ -301,7 +279,6 @@ sub validate_wrapper_method {
     };
 
     is_deeply( $results, $expected, $name );
-    TestServer_log->info("finishing '$name'")
 }
 
 1;
