@@ -11,7 +11,7 @@ $SOURCE = 'GitHub';  # COMMENT
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a comment on a JIRA issue as an object.
 
-use Readonly;
+use Readonly 2.04;
 
 # fields that will be turned into JIRA::REST::Class::User objects
 Readonly my @USERS => qw( author updateAuthor );

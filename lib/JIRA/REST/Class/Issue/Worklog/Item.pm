@@ -9,7 +9,7 @@ our $SOURCE = 'CPAN';
 $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
 
-use Readonly;
+use Readonly 2.04;
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents an individual worklog item for a JIRA issue as an object.
 

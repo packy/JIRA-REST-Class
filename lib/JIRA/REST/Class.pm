@@ -12,7 +12,7 @@ $SOURCE = 'GitHub';  # COMMENT
 
 use Carp;
 use Clone::Any qw( clone );
-use Readonly;
+use Readonly 2.04;
 
 use JIRA::REST;
 use JIRA::REST::Class::Factory;

@@ -13,7 +13,7 @@ $SOURCE = 'GitHub';  # COMMENT
 # individual JIRA issue as an object.
 
 use Carp;
-use Readonly;
+use Readonly 2.04;
 use Scalar::Util qw( weaken );
 
 # creating a bunch of read-only accessors

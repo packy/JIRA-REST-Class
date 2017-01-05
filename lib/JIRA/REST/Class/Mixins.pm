@@ -14,7 +14,7 @@ use Carp;
 use Clone::Any qw( clone );
 use Data::Dumper::Concise;
 use MIME::Base64;
-use Readonly;
+use Readonly 2.04;
 use Scalar::Util qw( blessed reftype );
 use Try::Tiny;
 

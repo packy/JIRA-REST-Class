@@ -11,7 +11,7 @@ $SOURCE = 'GitHub';  # COMMENT
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA query as an object.  Allows the user to iterate over the results and retrieve them one by one.  Wraps L<JIRA::REST|JIRA::REST>'s L<set_search_iterator|JIRA::REST/"set_search_iterator PARAMS"> and L<next_issue|JIRA::REST/next_issue> methods to make them a bit more object-like.
 
-use Readonly;
+use Readonly 2.04;
 
 Readonly my @ACCESSORS => qw( total fetched iterator_args
                               restart_if_lt_total seen_cache );

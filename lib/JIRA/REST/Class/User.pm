@@ -11,7 +11,7 @@ $SOURCE = 'GitHub';  # COMMENT
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA user as an object.
 
-use Readonly;
+use Readonly 2.04;
 
 Readonly my @ACCESSORS => qw( active avatarUrls displayName emailAddress key
                               name self timeZone );

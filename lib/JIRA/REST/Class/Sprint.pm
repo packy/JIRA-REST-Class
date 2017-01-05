@@ -11,7 +11,7 @@ $SOURCE = 'GitHub';  # COMMENT
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents the sprint of a JIRA issue as an object (if you're using L<Atlassian GreenHopper|https://www.atlassian.com/software/jira/agile>).
 
-use Readonly;
+use Readonly 2.04;
 
 Readonly my @ACCESSORS => qw( id rapidViewId state name startDate endDate
                               completeDate sequence );
