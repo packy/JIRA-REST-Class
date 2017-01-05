@@ -52,7 +52,7 @@ sub new {
 use File::Basename;
 use lib dirname($0).'/..';
 use MyTest;
-use v5.10;
+use 5.010;
 
 TestServer_setup();
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use lib $ENV{HOME}.'/git/JIRA-REST-Class/lib';
 use lib $ENV{HOME}.'/git/JIRA-REST/lib';

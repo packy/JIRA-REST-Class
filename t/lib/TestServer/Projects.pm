@@ -2,7 +2,7 @@ package TestServer::Projects;
 use base qw( TestServer::Plugin );
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 use JSON;
 
