@@ -8,7 +8,7 @@ build: deps/last_build
 
 deps/last_build: $(FILES) $(AUTHORDEPS)
 	dzil build --in build --notgz
-	if ! diff build/META.json deps/META.json 2>/dev/null; then \
+	if ! diff -q build/META.json deps/META.json 2>/dev/null; then \
             dzil listdeps --missing | cpanm; \
             cp build/META.json deps/META.json; \
         fi
