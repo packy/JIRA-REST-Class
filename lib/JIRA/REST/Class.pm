@@ -154,7 +154,7 @@ The return value is an array of L<JIRA::REST::Class::Issue|JIRA::REST::Class::Is
 sub issues {
     my ( $self, @args ) = @_;
     if ( @args == 1 && ref $args[0] eq 'HASH' ) {
-        return $self->query( shift )->issues;
+        return $self->query( $args[0] )->issues;
     }
     else {
         my $jql = sprintf 'key in (%s)', join q{,} => @args;
