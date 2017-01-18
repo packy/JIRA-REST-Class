@@ -26,7 +26,7 @@ sub init {
     $self->SUPER::init( @_ );
 
     my $data = $self->data;
-    $data =~ s{ $GREENHOPPER_SPRINT [ ^ \[ ]+ \[ }{}x;
+    $data =~ s{ $GREENHOPPER_SPRINT [^ \[ ]+ \[ }{}x;
     $data =~ s{\]$}{}x;
     my @fields = split /,/, $data;
     foreach my $field ( @fields ) {
