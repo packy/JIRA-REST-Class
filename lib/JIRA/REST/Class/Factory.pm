@@ -63,16 +63,20 @@ sub make_object {
 
 Make it easy to get L<DateTime|DateTime> objects from the factory. Parses
 JIRA date strings, which are in a format that can be parsed by the
-L<DateTime::Format::Strptime|DateTime::Format::Strptime> pattern
-C<%FT%T.%N%z>
+L<DateTime::Format::Strptime|DateTime::Format::Strptime> patterns
+C<%FT%T.%N%z> or C<%F>
 
 =cut
 
 sub make_date {
     my ( $self, $date ) = @_;
     return unless $date;
-    my $pattern = '%FT%T.%N%z';
-    state $parser = DateTime::Format::Strptime->new( pattern => $pattern );
+    my $pattern = ( $date =~ m/\dt\d/ ) ? '%FT%T.%N%z' : '%F';
+
+    my $parser = DateTime::Format::Strptime->new(
+        pattern => $pattern,
+        on_error => 'croak',
+    );
     return (
         $parser->parse_datetime( $date )
             or
