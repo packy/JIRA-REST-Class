@@ -38,6 +38,7 @@ sub new {
         jira_rest => $class->JIRA_REST( clone( $args ) ),
         factory   => $class->factory( clone( $args ) ),
         args      => clone( $args ),
+        userobj   => undef,
     }, $class;
 }
 
@@ -727,13 +728,42 @@ L<Config::Identity|Config::Identity> file.
 
 =cut
 
-sub username { return shift->args->{username} }
+sub username {
+    my $self = shift;
+
+    unless ( defined $self->args->{username} ) {
+        $self->args->{username} = $self->user_object->name;
+    }
+
+    return $self->args->{username};
+}
+
+=accessor B<user_object>
+
+An accessor that returns the user used to connect to the JIRA server as a
+L<JIRA::REST::Class::User|JIRA::REST::Class::User> object, even if the username
+was read from a C<.netrc> or L<Config::Identity|Config::Identity> file.  Works
+by calling C</rest/api/latest/myself>.
+
+=cut
+
+sub user_object {
+    my $self = shift;
+
+    unless ( defined $self->{userobj} ) {
+        my $data = $self->get( '/myself' );
+        $self->{userobj} = $self->make_object( 'user', { data => $data } );
+    }
+
+    return $self->{userobj};
+}
 
 =accessor B<password>
 
-An accessor that returns the password used to connect to the JIRA server,
-even if the password was read from a C<.netrc> or
-L<Config::Identity|Config::Identity> file.
+An accessor that returns the password used to connect to the JIRA server.
+Currently only works if the password was passed into the class constructor.
+Work is being done to return the password when the password was read from a
+C<.netrc> or L<Config::Identity|Config::Identity> file.
 
 =cut
 
@@ -766,9 +796,11 @@ sub proxy { return shift->args->{proxy} }
 
 #---------------------------------------------------------------------------
 
-=begin testing parameter_accessors 7
+=begin testing parameter_accessors 15
 
-try{
+try {
+    print "#\n# Checking parameter accessors\n#\n";
+
     my $test = get_test_client();
     my $url  = TestServer_url();
 
@@ -813,6 +845,17 @@ try{
 
     is($test->maxResults, 10,
        q{maxResults() was successfully set by previous call});
+
+    print "# testing user_object() accessor\n";
+    my $userobj = $test->user_object();
+
+    validate_expected_fields( $userobj, {
+        key => 'packy',
+        name => 'packy',
+        displayName => "Packy Anderson",
+        emailAddress => 'packy\@cpan.org',
+    });
+
 };
 
 =end testing
