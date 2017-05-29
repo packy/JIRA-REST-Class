@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $SOURCE = 'CPAN';
 $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -760,14 +760,29 @@ sub user_object {
 
 =accessor B<password>
 
-An accessor that returns the password used to connect to the JIRA server.
-Currently only works if the password was passed into the class constructor.
-Work is being done to return the password when the password was read from a
-C<.netrc> or L<Config::Identity|Config::Identity> file.
+An accessor that returns the password used to connect to the JIRA server,
+even if the username was read from a C<.netrc> or
+L<Config::Identity|Config::Identity> file.
 
 =cut
 
-sub password { return shift->args->{password} }
+sub password {
+    my $self = shift;
+
+    unless ( $self->args->{password} ) {
+
+        # we don't have the password cached, so get it from
+        # the Authorization header we're sending to JIRA
+
+        my $rest = $self->JIRA_REST->{rest};
+        if ( my $auth = $rest->{_headers}->{Authorization} ) {
+            my ( undef, $encoded ) = split /\s+/, $auth;
+            ( undef, $args->{password} ) = split /:/, decode_base64 $encoded;
+        }
+    }
+
+    return $self->args->{password};
+}
 
 =accessor B<rest_client_config>
 

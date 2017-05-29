@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $SOURCE = 'CPAN';
 $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
@@ -158,14 +158,6 @@ sub JIRA_REST { ## no critic (Capitalization)
     my $ua   = $rest->getUseragent;
     $ua->ssl_opts( SSL_verify_mode => 0, verify_hostname => 0 )
         if $args->{ssl_verify_none};
-
-    unless ( $args->{username} && $args->{password} ) {
-        if ( my $auth = $rest->{_headers}->{Authorization} ) {
-            my ( undef, $encoded ) = split /\s+/, $auth;
-            ( $args->{username}, $args->{password} ) =  #
-                split /:/, decode_base64 $encoded;
-        }
-    }
 
     return $jira_rest;
 }
