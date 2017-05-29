@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.11      2017-05-29 08:40:13-04:00 America/New_York
+
     Add support for user_object() that calls /rest/api/latest/myself
 
     Changes to use Win32::Process on Windows for testing.
