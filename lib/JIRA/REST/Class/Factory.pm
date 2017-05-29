@@ -79,7 +79,6 @@ sub make_date {
     );
     return (
         $parser->parse_datetime( $date )
-            or
             confess qq{Unable to parse date "$date" using pattern "$pattern"}
     );
 }
