@@ -743,7 +743,7 @@ sub username {
 An accessor that returns the user used to connect to the JIRA server as a
 L<JIRA::REST::Class::User|JIRA::REST::Class::User> object, even if the username
 was read from a C<.netrc> or L<Config::Identity|Config::Identity> file.  Works
-by calling C</rest/api/latest/myself>.
+by making the JIRA REST API call L</rest/api/latest/myself|https://docs.atlassian.com/jira/REST/cloud/#api/2/myself>.
 
 =cut
 
