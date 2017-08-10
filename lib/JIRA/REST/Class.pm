@@ -777,7 +777,8 @@ sub password {
         my $rest = $self->JIRA_REST->{rest};
         if ( my $auth = $rest->{_headers}->{Authorization} ) {
             my ( undef, $encoded ) = split /\s+/, $auth;
-            ( undef, $args->{password} ) = split /:/, decode_base64 $encoded;
+            ( undef, $self->args->{password} ) =
+              split /:/, decode_base64 $encoded;
         }
     }
 
