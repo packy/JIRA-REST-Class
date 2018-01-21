@@ -12,9 +12,4 @@ install:
 
 #script: "export PERL5LIB=$PWD/lib && sparrow plg run jira-rest-class-smoke --param jira_user=$jira_user --param jira_password=$jira_password"
 script:
-    - export PERL5LIB=$PWD/lib
-    - dzil build --in build --notgz
-    - cd build
-    - AUTHOR_TESTING=1 prove xt/author/ 2>&1
-    - RELEASE_TESTING=1 prove xt/release/ 2>&1
-    - prove -cr t
+    - export PERL5LIB=$PWD/lib && dzil build --in build --notgz && cd build && AUTHOR_TESTING=1 prove xt/author/ 2>&1 && RELEASE_TESTING=1 prove xt/release/ 2>&1 && prove -cr t
