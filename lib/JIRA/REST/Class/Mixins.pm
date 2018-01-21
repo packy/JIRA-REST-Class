@@ -145,6 +145,8 @@ sub JIRA_REST { ## no critic (Capitalization)
     # called with just the class name
 
     if ( _JIRA_REST_version_has_named_parameters() ) {
+        delete $args->{ no_cache };
+        delete $args->{ no_is_issue_type };
         return JIRA::REST->new( $args );
     }
 
