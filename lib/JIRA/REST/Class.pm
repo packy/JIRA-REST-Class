@@ -40,11 +40,11 @@ sub new {
     );
 
     my $cache_key = q{};
-    unless ( $args{no_cache} ) {
-        $cache_key  = $args{url}      if exists $args{url};
-        $cache_key .= $args{username} if exists $args{username};
-        if ( exists $instance_cache{$cache_key} ) {
-            return $instance_cache{$cache_key};
+    unless ( $args->{no_cache} ) {
+        $cache_key  = $args->{url}      if exists $args->{url};
+        $cache_key .= $args->{username} if exists $args->{username};
+        if ( exists $instance_cache->{$cache_key} ) {
+            return $instance_cache->{$cache_key};
         }
     }
 
@@ -55,8 +55,8 @@ sub new {
         userobj   => undef,
     }, $class;
 
-    unless ( $args{no_cache} ) {
-        $instance_cache{$cache_key} = $self;
+    unless ( $args->{no_cache} ) {
+        $instance_cache->{$cache_key} = $self;
     }
 
     return $self;
