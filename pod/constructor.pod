@@ -3,7 +3,7 @@
 
 =head2 B<new> I<HASHREF>
 
-=head2 B<new> I<URL>, I<USERNAME>, I<PASSWORD>, I<REST_CLIENT_CONFIG>, I<ANONYMOUS>, I<PROXY>, I<SSL_VERIFY_NONE>
+=head2 B<new> I<URL>, I<USERNAME>, I<PASSWORD>, I<REST_CLIENT_CONFIG>, I<ANONYMOUS>, I<PROXY>, I<SSL_VERIFY_NONE>, I<NO_CACHE>, I<NO_IS_ISSUE_TYPE>
 
 The constructor can take its arguments from a single hash reference or from
 a list of positional parameters. The first form is preferred because it lets
@@ -79,5 +79,27 @@ that don't pass L<LWP::UserAgent|LWP::UserAgent>'s verification methods.
 Tells the module that you want to connect to the specified JIRA server with
 no username or password.  This way you can access public JIRA servers
 without needing to authenticate.
+
+=item * B<no_cache>
+
+By default, JIRA::REST::Class uses a cache so when you call C<new> with the
+same url and username parameters, you'll get the same object each time. If this
+behavior isn't desired for any reason, pass the C<no_cache> argument with a
+true value and you will get a new object that isn't from a cache.
+
+=item * B<no_is_issue_type>
+
+By default, the L<JIRA::REST::Class::Issue|JIRA::REST::Class::Issue> class
+creates a series of C<is_{issue_type}> accessors like C<is_bug>, C<is_task>,
+C<is_feature>, etc. based on the issue types defined for your JIRA instance.
+However, doing this requires making an additional REST API call when the first
+instance of a JIRA::REST::Class::Issue object is created, and, while it only
+happens once, it causes a noticible 0.5 second delay when starting scripts that
+use this module.
+
+If startup performance is a concern for you, pass the C<no_is_issue_type>
+argument with a true value and these accessors won't be created. You will still
+be able to use the C<issuetype> accessor, which returns the issue type as a
+L<JIRA::REST::Class::Issue::Type|JIRA::REST::Class::Issue::Type> object.
 
 =back
