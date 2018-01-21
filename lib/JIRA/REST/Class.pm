@@ -36,7 +36,7 @@ sub new {
     my $args = $class->_get_known_args(
         \@arglist,
         qw/ url username password rest_client_config
-            proxy ssl_verify_none anonymous no_cache /
+            proxy ssl_verify_none anonymous no_cache no_is_issue_type /
     );
 
     my $cache_key = q{};
