@@ -104,7 +104,7 @@ sub init {
 
     # if no_is_issue_type was passed to the constructor with a true value,
     # don't define any is_{issue_type} methods.
-    unless ( $jira->{args}->{no_is_issue_type} || defined &is_bug ) {
+    unless ( $jira->no_is_issue_type || defined &is_bug ) {
 
         # if we haven't defined booleans to determine whether or not this
         # issue is a particular type, define those methods now

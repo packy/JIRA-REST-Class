@@ -830,6 +830,22 @@ An accessor that returns the C<proxy> parameter passed to this object's construc
 
 sub proxy { return shift->args->{proxy} }
 
+=accessor B<no_cache>
+
+An accessor that returns the C<no_cache> parameter passed to this object's constructor.
+
+=cut
+
+sub no_cache { return shift->args->{no_cache} }
+
+=accessor B<no_is_issue_type>
+
+An accessor that returns the C<no_is_issue_type> parameter passed to this object's constructor.
+
+=cut
+
+sub no_is_issue_type { return shift->args->{no_is_issue_type} }
+
 #---------------------------------------------------------------------------
 
 =begin testing parameter_accessors 15
@@ -841,26 +857,32 @@ try {
     my $url  = TestServer_url();
 
     my $args = {
-        url       => $url,
-        username  => 'username',
-        password  => 'password',
-        proxy     => undef,
-        anonymous => undef,
+        url                => $url,
+        username           => 'username',
+        password           => 'password',
+        proxy              => undef,
+        anonymous          => undef,
         rest_client_config => undef,
-        ssl_verify_none => undef,
+        ssl_verify_none    => undef,
+        no_cache           => undef,
+        no_is_issue_type   => undef,
     };
 
     # the args accessor will have keys for ALL the possible arguments,
     # whether they were passed in or not.
 
     cmp_deeply( $test,
-                methods( args      => { %$args, },
-                         url       => $args->{url},
-                         username  => $args->{username},
-                         password  => $args->{password},
-                         proxy     => $args->{proxy},
-                         anonymous => $args->{anonymous},
-                         rest_client_config => $args->{rest_client_config} ),
+                methods(
+                  args               => { %$args, },
+                  url                => $args->{url},
+                  username           => $args->{username},
+                  password           => $args->{password},
+                  proxy              => $args->{proxy},
+                  anonymous          => $args->{anonymous},
+                  rest_client_config => $args->{rest_client_config},
+                  no_cache           => $args->{no_cache},
+                  no_is_issue_type   => $args->{no_is_issue_type},
+                ),
                 q{All accessors for parameters passed }.
                 q{into the constructor okay});
 
