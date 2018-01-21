@@ -7,8 +7,14 @@ install:
     - cpanm --notest -q Pod::Elemental::Transformer::List
     - "(dzil authordeps          --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest)"
     - "(dzil listdeps   --author --missing | grep -vP '[^\\w:]' | cpanm --quiet --notest )"
-    - cpanm --notest -q Sparrow
-    - sparrow plg install jira-rest-class-smoke 
+#    - cpanm --notest -q Sparrow
+#    - sparrow plg install jira-rest-class-smoke
 
-script: "export PERL5LIB=$PWD/lib && sparrow plg run jira-rest-class-smoke --param jira_user=$jira_user --param jira_password=$jira_password"
-
+#script: "export PERL5LIB=$PWD/lib && sparrow plg run jira-rest-class-smoke --param jira_user=$jira_user --param jira_password=$jira_password"
+script:
+    - export PERL5LIB=$PWD/lib
+    - dzil build --in build --notgz
+    - cd build
+    - AUTHOR_TESTING=1 prove xt/author/ 2>&1
+    - RELEASE_TESTING=1 prove xt/release/ 2>&1
+    - prove -cr t
