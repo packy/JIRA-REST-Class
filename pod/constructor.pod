@@ -94,7 +94,7 @@ creates a series of C<is_{issue_type}> accessors like C<is_bug>, C<is_task>,
 C<is_feature>, etc. based on the issue types defined for your JIRA instance.
 However, doing this requires making an additional REST API call when the first
 instance of a JIRA::REST::Class::Issue object is created, and, while it only
-happens once, it causes a noticible 0.5 second delay when starting scripts that
+happens once, it causes a noticeable 0.5 second delay when starting scripts that
 use this module.
 
 If startup performance is a concern for you, pass the C<no_is_issue_type>
