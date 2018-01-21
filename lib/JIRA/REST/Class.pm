@@ -24,6 +24,11 @@ use parent qw(JIRA::REST::Class::Mixins);
 Readonly my $DEFAULT_MAXRESULTS => 50;
 
 #---------------------------------------------------------------------------
+# Package Variables
+
+my $instance_cache = {};
+
+#---------------------------------------------------------------------------
 
 sub new {
     my ( $class, @arglist ) = @_;
@@ -31,15 +36,30 @@ sub new {
     my $args = $class->_get_known_args(
         \@arglist,
         qw/ url username password rest_client_config
-            proxy ssl_verify_none anonymous /
+            proxy ssl_verify_none anonymous no_cache /
     );
 
-    return bless {
+    my $cache_key = q{};
+    unless ( $args{no_cache} ) {
+        $cache_key  = $args{url}      if exists $args{url};
+        $cache_key .= $args{username} if exists $args{username};
+        if ( exists $instance_cache{$cache_key} ) {
+            return $instance_cache{$cache_key};
+        }
+    }
+
+    my $self = bless {
         jira_rest => $class->JIRA_REST( clone( $args ) ),
         factory   => $class->factory( clone( $args ) ),
         args      => clone( $args ),
         userobj   => undef,
     }, $class;
+
+    unless ( $args{no_cache} ) {
+        $instance_cache{$cache_key} = $self;
+    }
+
+    return $self;
 }
 
 #---------------------------------------------------------------------------
