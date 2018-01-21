@@ -41,8 +41,8 @@ sub new {
 
     my $cache_key = q{};
     unless ( $args->{no_cache} ) {
-        $cache_key  = $args->{url}      if exists $args->{url};
-        $cache_key .= $args->{username} if exists $args->{username};
+        $cache_key  = $args->{url}      if defined $args->{url};
+        $cache_key .= $args->{username} if defined $args->{username};
         if ( exists $instance_cache->{$cache_key} ) {
             return $instance_cache->{$cache_key};
         }
