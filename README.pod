@@ -36,9 +36,21 @@ Atlassian's official JIRA REST API Reference.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016 by Packy Anderson
+Copyright (C) 2016-2018 by Packy Anderson
 
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
+This program is free software; you can redistribute it and/or
+modify it under the terms of either:
+
+=over 4
+
+=item * the L<GNU General Public License|https://www.gnu.org/licenses/#GPL>
+as published by the Free Software Foundation; either
+L<version 1|https://www.gnu.org/licenses/old-licenses/gpl-1.0.html>,
+or (at your option) any later version, or
+
+=item * the L<Artistic License version 2.0|http://www.perlfoundation.org/artistic_license_2_0>,
+or (at your option) any later version.
+
+=back
 
 =cut
