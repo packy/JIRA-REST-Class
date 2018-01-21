@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 our $SOURCE = 'CPAN';
 $SOURCE = 'GitHub';  # COMMENT
 # the line above will be commented out by Dist::Zilla
