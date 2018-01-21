@@ -1,7 +1,7 @@
 language: "perl"
 
 perl:
-  - "5.20"
+  - "5.22"
 
 install:
     - cpanm --notest -q Pod::Elemental::Transformer::List
