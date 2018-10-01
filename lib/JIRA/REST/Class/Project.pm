@@ -11,6 +11,7 @@ $SOURCE = 'GitHub';  # COMMENT
 
 # ABSTRACT: A helper class for L<JIRA::REST::Class|JIRA::REST::Class> that represents a JIRA project as an object.
 
+use Carp;
 use Readonly 2.04;
 
 Readonly my @DATA => qw( avatarUrls expand id key name projectTypeKey self );
@@ -238,6 +239,84 @@ Returns a list of the allowed values for the 'priority' field in the project.
 
 sub allowed_priorities {
     return shift->allowed_field_values( 'priority', @_ );
+}
+
+=method B<add_issue>
+
+Adds an issue to this project.
+
+=cut
+
+sub add_issue {
+    my ( $self, @args ) = @_;
+
+    my $fields;
+    if ( @args == 1 && ref $args[0] && ref $args[0] eq 'HASH' ) {
+        $fields = $args[0];
+    }
+    else { ## backward compatibility
+        $fields = $args[2] // {};
+
+        $fields->{summary}     //= shift @args;
+        $fields->{description} //= shift @args;
+    }
+
+    my $issuetype = $self->_get_issue_type( $fields );
+
+    my $data = {
+        fields => {
+            project   => { key => $self->key },
+            issuetype => { id  => $issuetype->id },
+        }
+    };
+
+    if ( $fields ) {
+        foreach my $field ( keys %$fields ) {
+            next
+                if $field eq 'project'
+                || $field eq 'parent'
+                || $field eq 'issuetype';
+            $data->{fields}->{$field} = $fields->{$field};
+        }
+    }
+
+    my $result = $self->jira->post( '/issue', $data );
+    my $url = '/issue/' . $result->{id};
+
+    return $self->factory->make_object(
+        'issue',
+        {
+            data => $self->jira->get( $url )
+        }
+    );
+}
+
+sub _get_issue_type {
+    my ( $self, $fields ) = @_;
+
+    # let's set this once in case we need to throw an exception
+    local $Carp::CarpLevel = $Carp::CarpLevel + 2;
+
+    if ( exists $fields->{issuetype} && defined $fields->{issuetype} ) {
+        my $type = $fields->{issuetype};
+
+        if ( $self->obj_isa( $type, 'issuetype' ) ) {
+            # we were passed an issue type object
+            return $type;
+        }
+
+        my ( $issuetype ) = grep { ##
+            $_->id eq $type || $_->name eq $type
+        } $self->issueTypes;
+        return $issuetype if defined $issuetype;
+
+        if ( !defined $issuetype ) {
+            confess 'add_issue() called with a value that does not '
+                . "correspond to a known issue type: '$type'";
+        }
+    }
+
+    confess 'add_issue() called without specifying an issue type';
 }
 
 =internal_method B<allowed_field_values> FIELD_NAME
